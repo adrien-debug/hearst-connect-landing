@@ -1,0 +1,13 @@
+/* Satoshi Variable — served locally for /hub route */
+@font-face {
+  font-family: 'Satoshi Variable';
+  src: url('/fonts/Satoshi-Variable.woff2') format('woff2');
+  font-weight: 300 900;
+  font-display: swap;
+}
+
+/* Override font on hub route */
+.hub-font-scope,
+.hub-font-scope * {
+  font-family: 'Satoshi Variable', Inter, -apple-system, sans-serif;
+}

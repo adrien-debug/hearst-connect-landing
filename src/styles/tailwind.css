@@ -1,0 +1,27 @@
+@import 'tailwindcss';
+@import '../generated/dashboard-vars.css';
+
+@theme {
+  --font-sans: var(--font-sans, 'Inter', sans-serif);
+}
+
+/* Click ripple animation */
+.click-ripple {
+  position: fixed;
+  width: 20px;
+  height: 20px;
+  border-radius: 50%;
+  background: var(--dashboard-accent, #A7FB90);
+  opacity: 0.5;
+  transform: translate(-50%, -50%) scale(0);
+  pointer-events: none;
+  z-index: 9999;
+  animation: ripple-out 0.5s ease-out forwards;
+}
+
+@keyframes ripple-out {
+  to {
+    transform: translate(-50%, -50%) scale(4);
+    opacity: 0;
+  }
+}
