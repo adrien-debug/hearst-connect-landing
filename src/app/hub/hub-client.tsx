@@ -7,7 +7,7 @@ import { useEffect, useRef, type RefObject } from 'react';
 const HUB_LOGIN_HREF = '/login?callbackUrl=/dashboard';
 
 const HUB_MAILTO_SALES =
-  'mailto:hello@hearst.ai?subject=' + encodeURIComponent('HUB — Sales inquiry');
+  'mailto:hello@hearstvault.com?subject=' + encodeURIComponent('Hearst investor inquiry');
 
 /** Scroll-driven fade + parallax for `.hub-chapter` nodes (reliable vs CSS view timelines). */
 function updateHubChapterStyles(scope: HTMLElement): void {
@@ -30,7 +30,7 @@ function updateHubChapterStyles(scope: HTMLElement): void {
     const opacity = Math.max(0, Math.min(1, 1 - dist / falloff));
     const ty = (center - midY) * -0.11;
     let tyClamped = Math.max(-44, Math.min(44, ty));
-    /* Final CTA: never translate upward — negative ty clips the top under section overflow */
+    /* Final CTA: never translate upward; negative ty clips the top under section overflow */
     if (inFinalCta) {
       tyClamped = Math.max(0, tyClamped);
     }
@@ -133,47 +133,41 @@ function useHubCarouselWheelScroll(trackRef: RefObject<HTMLElement | null>): voi
 const FEATURE_PILLARS = [
   {
     id: 'feature-unified',
-    title: 'Unified Command Center',
-    desc: 'Manage every service, every agent, every workflow from a single intelligent dashboard.',
+    title: 'Real infrastructure',
+    desc: 'USDC exposure to industrial Bitcoin mining: real hashrate, real operations, institutional controls.',
   },
   {
     id: 'feature-agents',
-    title: 'Specialized AI Agents',
-    desc: 'Each integration comes with a dedicated agent trained on its API — no generic prompts, real domain expertise.',
+    title: 'Transparent reporting',
+    desc: 'Monthly distributions, on-chain proof of reserves, and third-party audits. No black boxes.',
   },
   {
     id: 'feature-orchestration',
-    title: 'Cross-Service Orchestration',
-    desc: 'Chain actions across platforms: a Stripe payment triggers a HubSpot update, a Slack notification, and a Notion log — automatically.',
+    title: 'Institutional controls',
+    desc: 'Multi-signature governance, audited contracts, and custody built for serious allocators.',
   },
 ] as const;
 
+/** Top ~14 crypto by market cap (typical ranking). Icons: spothq/cryptocurrency-icons via jsDelivr. */
+const CRYPTO_ICON_BASE =
+  'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@0.18.1/128/color';
+
 const ICONS = [
-  { name: 'Gmail', src: 'https://cdn.simpleicons.org/gmail' },
-  { name: 'Google Drive', src: 'https://cdn.simpleicons.org/googledrive' },
-  { name: 'Notion', src: 'https://cdn.simpleicons.org/notion' },
-  { name: 'HubSpot', src: 'https://cdn.simpleicons.org/hubspot' },
-  { name: 'Jira', src: 'https://cdn.simpleicons.org/jira' },
-  { name: 'GitHub', src: 'https://cdn.simpleicons.org/github' },
-  { name: 'Zapier', src: 'https://cdn.simpleicons.org/zapier' },
-  { name: 'Stripe', src: 'https://cdn.simpleicons.org/stripe' },
-  { name: 'Figma', src: 'https://cdn.simpleicons.org/figma' },
-  { name: 'Linear', src: 'https://cdn.simpleicons.org/linear' },
-  { name: 'Airtable', src: 'https://cdn.simpleicons.org/airtable' },
-  { name: 'Asana', src: 'https://cdn.simpleicons.org/asana' },
-  { name: 'Dropbox', src: 'https://cdn.simpleicons.org/dropbox' },
-  { name: 'Zoom', src: 'https://cdn.simpleicons.org/zoom' },
-  { name: 'Discord', src: 'https://cdn.simpleicons.org/discord' },
-  { name: 'Shopify', src: 'https://cdn.simpleicons.org/shopify' },
-  { name: 'Intercom', src: 'https://cdn.simpleicons.org/intercom' },
-  { name: 'Webflow', src: 'https://cdn.simpleicons.org/webflow' },
-  { name: 'Zendesk', src: 'https://cdn.simpleicons.org/zendesk' },
-  { name: 'Atlassian', src: 'https://cdn.simpleicons.org/atlassian' },
-  { name: 'Trello', src: 'https://cdn.simpleicons.org/trello' },
-  { name: 'Vercel', src: 'https://cdn.simpleicons.org/vercel' },
-  { name: 'Supabase', src: 'https://cdn.simpleicons.org/supabase' },
-  { name: 'OpenAI', src: 'https://cdn.simpleicons.org/openai' },
-];
+  { name: 'Bitcoin', src: `${CRYPTO_ICON_BASE}/btc.png` },
+  { name: 'Ethereum', src: `${CRYPTO_ICON_BASE}/eth.png` },
+  { name: 'Tether', src: `${CRYPTO_ICON_BASE}/usdt.png` },
+  { name: 'BNB', src: `${CRYPTO_ICON_BASE}/bnb.png` },
+  { name: 'Solana', src: `${CRYPTO_ICON_BASE}/sol.png` },
+  { name: 'XRP', src: `${CRYPTO_ICON_BASE}/xrp.png` },
+  { name: 'USDC', src: `${CRYPTO_ICON_BASE}/usdc.png` },
+  { name: 'Cardano', src: `${CRYPTO_ICON_BASE}/ada.png` },
+  { name: 'Avalanche', src: `${CRYPTO_ICON_BASE}/avax.png` },
+  { name: 'Dogecoin', src: `${CRYPTO_ICON_BASE}/doge.png` },
+  { name: 'TRON', src: `${CRYPTO_ICON_BASE}/trx.png` },
+  { name: 'Chainlink', src: `${CRYPTO_ICON_BASE}/link.png` },
+  { name: 'Polygon', src: `${CRYPTO_ICON_BASE}/matic.png` },
+  { name: 'Polkadot', src: `${CRYPTO_ICON_BASE}/dot.png` },
+] as const;
 
 export default function HubPageClient() {
   const hubCarouselWrapRef = useRef<HTMLDivElement>(null);
@@ -326,12 +320,14 @@ export default function HubPageClient() {
       <section id="welcome" className="center" lang="en">
         <img src="/logos/hearst-connect.svg" alt="Hearst Connect" className="welcome-logo" />
         <h1 className="welcome-title hub-chapter">
-          One platform. 200+ services.
+          Onchain access to industrial Bitcoin
           <br />
-          <span className="text-accent">Zero friction.</span>
+          mining cash flows
+          <br />
+          <span className="text-accent">USDC vaults, Base, transparent reporting</span>
         </h1>
         <a href="#beforeyougo" className="welcome-btn hub-chapter">
-          Request Early Access
+          View offering
         </a>
       </section>
 
@@ -340,8 +336,9 @@ export default function HubPageClient() {
         <div className="hub-section-lead hub-chapter">
           <h2>
             <span className="typewriter">
-              <span className="hub-lead-accent">HUB</span> is your AI orchestrator, connecting 200+
-              services through specialized agents built for every workflow.
+              <span className="hub-lead-accent">Hearst</span> offers qualified investors direct
+              exposure to industrial mining cash flows. USDC vaults backed by regulated infrastructure
+              and clear reporting.
             </span>
           </h2>
         </div>
@@ -364,7 +361,7 @@ export default function HubPageClient() {
       </section>
 
       {/* Features */}
-      <section id="features-section" aria-label="Platform — three pillars" lang="en">
+      <section id="features-section" aria-label="Why Hearst, three pillars" lang="en">
         <div id="features">
           <div className="features-text">
             {FEATURE_PILLARS.map(feature => (
@@ -380,7 +377,7 @@ export default function HubPageClient() {
           </div>
           <div className="features-tablet">
             <div className="tablet-mockup">
-              <img src="/platform-screenshot.svg" alt="HUB Platform" />
+              <img src="/platform-screenshot.svg" alt="Hearst vault strategies preview" />
             </div>
           </div>
         </div>
@@ -388,12 +385,10 @@ export default function HubPageClient() {
 
       {/* Solutions */}
       <section id="developers" className="theme-light">
-        <div className="hub-section-head hub-chapter" lang="fr">
-          <h2>Des verticales pensées pour la vitesse d’exécution</h2>
+        <div className="hub-section-head hub-chapter" lang="en">
+          <h2>Investment strategies</h2>
           <p className="intro">
-            Packs d’agents, workflows et intégrations pré-réglés pour l’hôtellerie, l’immobilier et
-            le marketing. Survolez les bords du bandeau ou faites défiler la molette au-dessus pour
-            parcourir les fiches.
+            Two vault profiles. Pick the risk and return fit. Hover the strip edges or scroll to browse.
           </p>
         </div>
 
@@ -402,27 +397,27 @@ export default function HubPageClient() {
           ref={hubCarouselWrapRef}
           role="region"
           lang="en"
-          aria-label="Industry solutions — hover near edges or scroll wheel to move horizontally"
+          aria-label="Vault strategies. Hover near edges or scroll wheel to move horizontally"
         >
           <div className="carousel hub-carousel-track" ref={hubCarouselTrackRef}>
             {[
               {
                 img: '/platform-screenshot.svg',
-                caption: 'Hospitality & Travel',
-                title: 'Hospitality & Travel',
-                desc: 'Automate guest communications, sync booking engines, manage revenue across OTAs, and orchestrate operations from front desk to housekeeping — all from one hub.',
+                caption: 'Flagship, medium high risk',
+                title: 'Hearst Prime Yield',
+                desc: 'Target near 12%. $250K min, monthly distributions, 3Y lock. Diversified mining income with volatility protection.',
               },
               {
                 img: '/platform-screenshot.svg',
-                caption: 'Real Estate & Property',
-                title: 'Real Estate & Property',
-                desc: 'Streamline listings, automate tenant workflows, sync CRM pipelines, and generate market reports with agents that understand your portfolio inside out.',
+                caption: 'Advanced, medium high risk',
+                title: 'Hearst Growth',
+                desc: 'Target 16% to 22%. $250K min, monthly, 3Y lock. BTC forward mining plus spot upside with USDC buffer.',
               },
               {
                 img: '/platform-screenshot.svg',
-                caption: 'Marketing & Agencies',
-                title: 'Marketing & Agencies',
-                desc: 'Orchestrate campaigns across channels, automate client reporting, manage content calendars, and let AI agents handle the busywork while you focus on strategy.',
+                caption: 'Yield mechanics',
+                title: 'How yield is generated',
+                desc: 'USDC deployed into industrial mining; BTC rewards converted via OTC; net yield monthly. Auditable end to end.',
               },
             ].map(dev => (
               <div key={dev.title} className="developer">
@@ -432,10 +427,7 @@ export default function HubPageClient() {
                 </figure>
                 <h3>{dev.title}</h3>
                 <p>{dev.desc}</p>
-                <a href="#beforeyougo">
-                  Explore{' '}
-                  {dev.title.includes(' & ') ? dev.title.split(' & ')[0] : dev.title.split(' ')[0]}
-                </a>
+                <a href="#beforeyougo">View offering</a>
               </div>
             ))}
           </div>
@@ -446,39 +438,39 @@ export default function HubPageClient() {
       <section id="who" className="center" lang="en">
         <div className="hub-chapter">
           <h3>
-            For teams
+            Qualified investors
             <br />
-            <span>Automate the stack you already use</span>
+            <span>Onchain access with institutional minimums</span>
           </h3>
           <a href="#beforeyougo" className="hub-cta-primary">
-            Get Started
+            View offering
           </a>
         </div>
         <div className="hub-chapter">
           <h3>
-            For enterprises
+            Institutions
             <br />
-            <span>Deploy HUB across your organization</span>
+            <span>Due diligence, reporting, and custody aligned to your mandate</span>
           </h3>
           <a href={HUB_MAILTO_SALES} className="hub-cta-secondary">
-            Contact Sales
+            Contact
           </a>
         </div>
       </section>
 
-      {/* Before You Go — outer card: scroll-driven scale; inner: hub-chapter parallax (no transform fight) */}
+      {/* Before You Go: outer card scroll-driven scale; inner hub-chapter parallax */}
       <section id="beforeyougo" lang="en">
         <div className="card dark hub-final-cta-card">
           <div className="hub-chapter hub-final-cta-content">
             <p>
-              <span className="typewriter">Join the next wave of intelligent operations.</span>
+              <span className="typewriter">Ready to allocate?</span>
             </p>
             <div className="buttons">
               <a href="#beforeyougo" className="hub-cta-primary">
-                Request Early Access
+                View offering
               </a>
               <a href={HUB_MAILTO_SALES} className="hub-cta-secondary">
-                Contact Sales
+                Contact
               </a>
             </div>
           </div>
@@ -489,10 +481,16 @@ export default function HubPageClient() {
         <div className="hub-footer-accent" aria-hidden />
         <div className="hub-footer-inner">
           <div className="hub-footer-brand">
-            <img src="/logo.svg" alt="HUB" className="hub-footer-logo" width={120} height={32} />
+            <img
+              src="/logos/hearst-connect.svg"
+              alt="Hearst Connect"
+              className="hub-footer-logo"
+              width={120}
+              height={32}
+            />
             <p className="hub-footer-tagline" lang="en">
-              One platform for agents, integrations, and operations — built for teams that move
-              fast.
+              Onchain access to industrial Bitcoin mining cash flows. Institutional controls,
+              transparent reporting.
             </p>
           </div>
           <div className="hub-footer-grid">
@@ -522,16 +520,16 @@ export default function HubPageClient() {
                   </Link>
                 </li>
                 <li>
-                  <a href="#beforeyougo">Accès anticipé</a>
+                  <a href="#beforeyougo">Offre</a>
                 </li>
               </ul>
             </div>
           </div>
         </div>
         <div className="hub-footer-bottom">
-          <span className="hub-footer-copy">© {new Date().getFullYear()} Hearst — HUB</span>
-          <a href="mailto:hello@hearst.ai" className="hub-footer-mail">
-            hello@hearst.ai
+          <span className="hub-footer-copy">© {new Date().getFullYear()} Hearst</span>
+          <a href="mailto:hello@hearstvault.com" className="hub-footer-mail">
+            hello@hearstvault.com
           </a>
         </div>
       </footer>

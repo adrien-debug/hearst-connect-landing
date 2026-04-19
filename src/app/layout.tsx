@@ -13,13 +13,13 @@ const inter = Inter({
 
 export const metadata: Metadata = {
   metadataBase: new URL('https://hub.hearst.app'),
-  title: 'HEARST Hub',
-  description: 'The integration hub for AI-powered workflows.',
+  title: 'Hearst',
+  description: 'Onchain access to industrial Bitcoin mining cash flows.',
   openGraph: {
     type: 'website',
-    siteName: 'HEARST Hub',
-    title: 'HEARST Hub',
-    description: 'The integration hub for AI-powered workflows.',
+    siteName: 'Hearst',
+    title: 'Hearst',
+    description: 'Onchain access to industrial Bitcoin mining cash flows.',
   },
 };
 

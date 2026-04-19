@@ -2,29 +2,29 @@ import type { Metadata } from 'next';
 import HubPageClient from './hub-client';
 
 export const metadata: Metadata = {
-  title: 'HUB by Hearst | AI Orchestrator for 200+ Services',
+  title: 'Hearst Connect | Real yield from Bitcoin mining',
   description:
-    'Connect your entire stack through specialized AI agents. One platform, 200+ integrations, zero friction.',
+    'Onchain access to industrial Bitcoin mining cash flows—USDC vaults on Base, institutional controls, transparent reporting.',
   openGraph: {
-    title: 'HUB by Hearst | AI Orchestrator for 200+ Services',
+    title: 'Hearst Connect | Real yield from Bitcoin mining',
     description:
-      'Connect your entire stack through specialized AI agents. One platform, 200+ integrations, zero friction.',
-    siteName: 'HUB',
+      'Onchain access to industrial Bitcoin mining cash flows—USDC vaults on Base, institutional controls, transparent reporting.',
+    siteName: 'Hearst',
     url: '/hub',
     images: [
       {
         url: '/platform-screenshot.png',
         width: 1024,
         height: 657,
-        alt: 'HUB platform — orchestration dashboard preview',
+        alt: 'Hearst vault strategies preview',
       },
     ],
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'HUB by Hearst | AI Orchestrator for 200+ Services',
+    title: 'Hearst Connect | Real yield from Bitcoin mining',
     description:
-      'Connect your entire stack through specialized AI agents. One platform, 200+ integrations, zero friction.',
+      'Onchain access to industrial Bitcoin mining cash flows—USDC vaults on Base, institutional controls, transparent reporting.',
     images: ['/platform-screenshot.png'],
   },
 };
