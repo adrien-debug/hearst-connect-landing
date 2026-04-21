@@ -1,10 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useCallback, useEffect, useRef, type RefObject } from 'react';
-
-/** Post-auth destination for users coming from the HUB landing (SaaS dashboard). */
-const HUB_LOGIN_HREF = '/login?callbackUrl=/dashboard';
+import { useEffect, useRef } from 'react';
 
 const HUB_MAILTO_SALES =
   'mailto:hello@hearstvault.com?subject=' + encodeURIComponent('Hearst investor inquiry');
@@ -39,155 +36,6 @@ function updateHubChapterStyles(scope: HTMLElement): void {
   });
 }
 
-function useHubCarouselHoverScroll(
-  wrapRef: RefObject<HTMLElement | null>,
-  trackRef: RefObject<HTMLElement | null>,
-): void {
-  useEffect(() => {
-    const wrap = wrapRef.current;
-    const track = trackRef.current;
-    if (!wrap || !track) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    let dir = 0;
-    let raf = 0;
-    let speedPx = 0;
-
-    const clearHints = (): void => {
-      wrap.classList.remove('hub-carousel-wrap--hint-left', 'hub-carousel-wrap--hint-right');
-    };
-
-    const tick = (): void => {
-      if (dir !== 0 && speedPx > 0) {
-        track.scrollLeft += dir * speedPx;
-        raf = window.requestAnimationFrame(tick);
-      }
-    };
-
-    const stop = (): void => {
-      dir = 0;
-      speedPx = 0;
-      clearHints();
-      window.cancelAnimationFrame(raf);
-      raf = 0;
-    };
-
-    const onMove = (e: PointerEvent): void => {
-      const r = wrap.getBoundingClientRect();
-      const p = r.width > 0 ? (e.clientX - r.left) / r.width : 0.5;
-      const edge = 0.26;
-      const nextDir = p > 1 - edge ? 1 : p < edge ? -1 : 0;
-
-      clearHints();
-      if (nextDir === 1) wrap.classList.add('hub-carousel-wrap--hint-right');
-      else if (nextDir === -1) wrap.classList.add('hub-carousel-wrap--hint-left');
-
-      if (nextDir === 0) {
-        stop();
-        return;
-      }
-
-      const intensity = nextDir === 1 ? (p - (1 - edge)) / edge : (edge - p) / edge;
-      const nextSpeed = Math.max(0.9, Math.min(8, intensity * 8.5));
-
-      if (nextDir !== dir || Math.abs(nextSpeed - speedPx) > 0.2) {
-        dir = nextDir;
-        speedPx = nextSpeed;
-        window.cancelAnimationFrame(raf);
-        raf = 0;
-        raf = window.requestAnimationFrame(tick);
-      }
-    };
-
-    wrap.addEventListener('pointermove', onMove);
-    wrap.addEventListener('pointerleave', stop);
-    wrap.addEventListener('pointercancel', stop);
-    return () => {
-      wrap.removeEventListener('pointermove', onMove);
-      wrap.removeEventListener('pointerleave', stop);
-      wrap.removeEventListener('pointercancel', stop);
-      stop();
-    };
-  }, [wrapRef, trackRef]);
-}
-
-/** Vertical wheel → horizontal scroll; relâche le scroll page aux extrémités du carrousel. */
-function useHubCarouselWheelScroll(trackRef: RefObject<HTMLElement | null>): void {
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    const onWheel = (e: WheelEvent): void => {
-      if (el.scrollWidth <= el.clientWidth) return;
-      if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      const sl = el.scrollLeft;
-      if (e.deltaY > 0 && sl >= maxScroll - 1) return;
-      if (e.deltaY < 0 && sl <= 1) return;
-      e.preventDefault();
-      el.scrollLeft = Math.max(0, Math.min(maxScroll, sl + e.deltaY));
-    };
-
-    el.addEventListener('wheel', onWheel, { passive: false });
-    return () => el.removeEventListener('wheel', onWheel);
-  }, [trackRef]);
-}
-
-function scrollHubCarouselStep(track: HTMLElement, direction: -1 | 1): void {
-  const items = track.querySelectorAll<HTMLElement>('.developer');
-  if (!items.length) return;
-  const gap = parseFloat(getComputedStyle(track).gap || '0') || 0;
-  const step = items[0].getBoundingClientRect().width + gap;
-  track.scrollBy({ left: direction * step, behavior: 'smooth' });
-}
-
-/** Drag-to-scroll (mouse + touch). Momentum disabled so snap/scroll stays predictable. */
-function useHubCarouselDrag(trackRef: RefObject<HTMLElement | null>): void {
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-
-    let isDown = false;
-    let startX = 0;
-    let scrollStart = 0;
-
-    const onDown = (e: PointerEvent) => {
-      if (e.pointerType === 'mouse' && e.button !== 0) return;
-      isDown = true;
-      startX = e.clientX;
-      scrollStart = el.scrollLeft;
-      el.setPointerCapture(e.pointerId);
-      el.style.cursor = 'grabbing';
-      el.style.scrollSnapType = 'none';
-    };
-
-    const onMove = (e: PointerEvent) => {
-      if (!isDown) return;
-      const dx = e.clientX - startX;
-      el.scrollLeft = scrollStart - dx;
-    };
-
-    const onUp = () => {
-      if (!isDown) return;
-      isDown = false;
-      el.style.cursor = '';
-      el.style.scrollSnapType = '';
-    };
-
-    el.addEventListener('pointerdown', onDown);
-    el.addEventListener('pointermove', onMove);
-    el.addEventListener('pointerup', onUp);
-    el.addEventListener('pointercancel', onUp);
-
-    return () => {
-      el.removeEventListener('pointerdown', onDown);
-      el.removeEventListener('pointermove', onMove);
-      el.removeEventListener('pointerup', onUp);
-      el.removeEventListener('pointercancel', onUp);
-    };
-  }, [trackRef]);
-}
 
 const FEATURE_PILLARS = [
   {
@@ -250,20 +98,40 @@ const ICONS = [
 ] as const;
 
 export default function HubPageClient() {
-  const hubCarouselWrapRef = useRef<HTMLDivElement>(null);
-  const hubCarouselTrackRef = useRef<HTMLDivElement>(null);
-  useHubCarouselHoverScroll(hubCarouselWrapRef, hubCarouselTrackRef);
-  useHubCarouselWheelScroll(hubCarouselTrackRef);
-  useHubCarouselDrag(hubCarouselTrackRef);
+  const strategyTrackRef = useRef<HTMLDivElement>(null);
 
-  const carouselPrev = useCallback(() => {
-    const el = hubCarouselTrackRef.current;
-    if (el) scrollHubCarouselStep(el, -1);
-  }, []);
+  useEffect(() => {
+    const track = strategyTrackRef.current;
+    if (!track) return;
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
 
-  const carouselNext = useCallback(() => {
-    const el = hubCarouselTrackRef.current;
-    if (el) scrollHubCarouselStep(el, 1);
+    let raf = 0;
+    let speed = 0.4;
+    let paused = false;
+
+    const tick = (): void => {
+      if (!paused && track.scrollWidth > track.clientWidth) {
+        track.scrollLeft += speed;
+        if (track.scrollLeft >= track.scrollWidth - track.clientWidth - 1) {
+          track.scrollLeft = 0;
+        }
+      }
+      raf = requestAnimationFrame(tick);
+    };
+
+    raf = requestAnimationFrame(tick);
+
+    const onEnter = () => { paused = true; };
+    const onLeave = () => { paused = false; };
+
+    track.addEventListener('pointerenter', onEnter);
+    track.addEventListener('pointerleave', onLeave);
+
+    return () => {
+      cancelAnimationFrame(raf);
+      track.removeEventListener('pointerenter', onEnter);
+      track.removeEventListener('pointerleave', onLeave);
+    };
   }, []);
 
   useEffect(() => {
@@ -401,7 +269,7 @@ export default function HubPageClient() {
             </ul>
           </nav>
 
-          <Link href="/launch-app" className="login-btn" prefetch>
+          <Link href="/app" className="login-btn" prefetch>
             <span>Launch App</span>
           </Link>
         </header>
@@ -429,7 +297,7 @@ export default function HubPageClient() {
             alignItems: 'center',
           }}
         >
-          <Link href="/launch-app" className="welcome-btn hub-chapter">
+          <Link href="/app" className="welcome-btn hub-chapter">
             Launch App
           </Link>
           <a href="#beforeyougo" className="hub-cta-secondary hub-chapter">
@@ -497,53 +365,28 @@ export default function HubPageClient() {
         <div className="hub-section-head" lang="en">
           <h2>Investment strategies</h2>
           <p className="intro">
-            Two vault profiles. Pick the risk and return fit. Use the arrows, drag the strip, or scroll
-            horizontally (trackpad / wheel) to browse.
+            Two vault profiles. Pick the risk and return fit.
           </p>
         </div>
 
         <div
-          className="hub-carousel-wrap"
-          ref={hubCarouselWrapRef}
+          className="hub-strategy-strip"
+          ref={strategyTrackRef}
           role="region"
           lang="en"
-          aria-label="Vault strategies carousel"
+          aria-label="Vault strategies"
         >
-          <div className="carousel hub-carousel-track" ref={hubCarouselTrackRef}>
-            {INVESTMENT_STRATEGY_SLIDES.map(dev => (
-              <div key={dev.title} className="developer">
-                <figure>
-                  <img src={dev.img} alt="" draggable={false} />
-                  <figcaption className="carousel-caption">{dev.caption}</figcaption>
-                </figure>
-                <h3>{dev.title}</h3>
-                <p>{dev.desc}</p>
-                <a href="#beforeyougo">View offering</a>
-              </div>
-            ))}
-          </div>
-          <div className="hub-carousel-controls" role="group" aria-label="Carousel navigation">
-            <button
-              type="button"
-              className="hub-carousel-nav-btn"
-              aria-label="Previous slide"
-              onClick={carouselPrev}
-            >
-              <span className="material-symbols-outlined" aria-hidden>
-                chevron_left
-              </span>
-            </button>
-            <button
-              type="button"
-              className="hub-carousel-nav-btn"
-              aria-label="Next slide"
-              onClick={carouselNext}
-            >
-              <span className="material-symbols-outlined" aria-hidden>
-                chevron_right
-              </span>
-            </button>
-          </div>
+          {[...INVESTMENT_STRATEGY_SLIDES, ...INVESTMENT_STRATEGY_SLIDES].map((slide, i) => (
+            <article key={`${slide.title}-${i}`} className="hub-strategy-slide">
+              <figure>
+                <img src={slide.img} alt="" draggable={false} />
+                <figcaption className="hub-strategy-caption">{slide.caption}</figcaption>
+              </figure>
+              <h3>{slide.title}</h3>
+              <p>{slide.desc}</p>
+              <a href="#beforeyougo">View offering</a>
+            </article>
+          ))}
         </div>
       </section>
 
@@ -579,7 +422,7 @@ export default function HubPageClient() {
               <span className="typewriter">Ready to allocate?</span>
             </p>
             <div className="buttons">
-              <Link href="/launch-app" className="hub-cta-primary">
+              <Link href="/app" className="hub-cta-primary">
                 Launch App
               </Link>
               <a href={HUB_MAILTO_SALES} className="hub-cta-secondary">
@@ -628,8 +471,8 @@ export default function HubPageClient() {
               <p className="hub-footer-heading">Accès</p>
               <ul className="hub-footer-links">
                 <li>
-                  <Link href={HUB_LOGIN_HREF} prefetch>
-                    Connexion
+                  <Link href="/app" prefetch>
+                    Launch App
                   </Link>
                 </li>
                 <li>

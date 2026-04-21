@@ -43,9 +43,20 @@ const nextConfig = {
         destination: '/',
         permanent: true,
       },
+      {
+        source: '/launch-app',
+        destination: '/app',
+        permanent: true,
+      },
     ];
   },
   webpack(config) {
+    // Silence MetaMask SDK warning about react-native-async-storage (browser-only)
+    config.resolve.fallback = {
+      ...config.resolve.fallback,
+      '@react-native-async-storage/async-storage': false,
+    };
+
     config.module.rules.forEach((rule) => {
       if (!rule.oneOf) return;
       rule.oneOf.forEach((r) => {
