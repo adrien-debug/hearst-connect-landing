@@ -25,3 +25,9 @@
     opacity: 0;
   }
 }
+
+/* Kill RainbowKit portals that leak outside our custom button */
+[data-rk] [role="dialog"],
+[data-rk] > div:not(.hub-font-scope) {
+  z-index: 2147483647;
+}

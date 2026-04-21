@@ -190,6 +190,9 @@ export function Canvas() {
         color: 'var(--dashboard-text-primary)',
         fontFamily: FONT,
         WebkitFontSmoothing: 'antialiased',
+        zIndex: 1,
+        isolation: 'isolate',
+        overflow: 'hidden',
       }}
     >
       <Header />
@@ -870,76 +873,80 @@ function TemporalFlow({
           />
         </div>
 
-        {/* Accumulated — left of NOW */}
-        <div
-          className="absolute z-30 select-none"
-          style={{
-            right: `${100 - nowPct + 3}%`,
-            top: `calc(50% + ${vaultStackOffsetPx}px)`,
-            transform: 'translateY(-50%)',
-            textAlign: 'right',
-            pointerEvents: 'none',
-          }}
-        >
+        {/* Accumulated — left of NOW (only with active position) */}
+        {hasPosition && (
           <div
+            className="absolute z-30 select-none"
             style={{
-              fontFamily: MONO,
-              fontSize: '9px',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase' as const,
-              color: 'var(--dashboard-text-ghost)',
-              marginBottom: '4px',
+              right: `${100 - nowPct + 3}%`,
+              top: `calc(50% + ${vaultStackOffsetPx}px)`,
+              transform: 'translateY(-50%)',
+              textAlign: 'right',
+              pointerEvents: 'none',
             }}
           >
-            Accumulated
+            <div
+              style={{
+                fontFamily: MONO,
+                fontSize: '9px',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase' as const,
+                color: 'var(--dashboard-text-ghost)',
+                marginBottom: '4px',
+              }}
+            >
+              Accumulated
+            </div>
+            <div
+              ref={claimableTimelineRef}
+              style={{
+                fontFamily: MONO,
+                fontSize: '14px',
+                fontWeight: 500,
+                color: 'var(--dashboard-text-secondary)',
+              }}
+            >
+              +{fmtUsd(claimableNum)}
+            </div>
           </div>
-          <div
-            ref={claimableTimelineRef}
-            style={{
-              fontFamily: MONO,
-              fontSize: '14px',
-              fontWeight: 500,
-              color: hasPosition ? 'var(--dashboard-text-secondary)' : 'var(--dashboard-text-ghost)',
-            }}
-          >
-            {hasPosition ? `+${fmtUsd(claimableNum)}` : '$0.00'}
-          </div>
-        </div>
+        )}
 
-        {/* Projected — right of NOW */}
-        <div
-          className="absolute z-30 select-none"
-          style={{
-            left: `${nowPct + 3}%`,
-            top: `calc(50% + ${vaultStackOffsetPx}px)`,
-            transform: 'translateY(-50%)',
-            textAlign: 'left',
-            pointerEvents: 'none',
-          }}
-        >
+        {/* Projected — right of NOW (only with active position) */}
+        {hasPosition && (
           <div
+            className="absolute z-30 select-none"
             style={{
-              fontFamily: MONO,
-              fontSize: '9px',
-              letterSpacing: '0.1em',
-              textTransform: 'uppercase' as const,
-              color: 'var(--dashboard-text-ghost)',
-              marginBottom: '4px',
+              left: `${nowPct + 3}%`,
+              top: `calc(50% + ${vaultStackOffsetPx}px)`,
+              transform: 'translateY(-50%)',
+              textAlign: 'left',
+              pointerEvents: 'none',
             }}
           >
-            Projected
+            <div
+              style={{
+                fontFamily: MONO,
+                fontSize: '9px',
+                letterSpacing: '0.1em',
+                textTransform: 'uppercase' as const,
+                color: 'var(--dashboard-text-ghost)',
+                marginBottom: '4px',
+              }}
+            >
+              Projected
+            </div>
+            <div
+              style={{
+                fontFamily: MONO,
+                fontSize: '14px',
+                fontWeight: 500,
+                color: 'var(--dashboard-text-muted)',
+              }}
+            >
+              +{fmtUsd(projectedMonthly)}/mo
+            </div>
           </div>
-          <div
-            style={{
-              fontFamily: MONO,
-              fontSize: '14px',
-              fontWeight: 500,
-              color: hasPosition ? 'var(--dashboard-text-muted)' : 'var(--dashboard-text-ghost)',
-            }}
-          >
-            {hasPosition ? `+${fmtUsd(projectedMonthly)}/mo` : '—'}
-          </div>
-        </div>
+        )}
 
         {/* Bottom axis */}
         <div
@@ -1032,6 +1039,8 @@ function NowActions({
       </ConnectButton.Custom>
     )
   }
+
+  if (!hasPosition) return null
 
   const depositLabel = depositFlow.isApproving
     ? 'Approving…'

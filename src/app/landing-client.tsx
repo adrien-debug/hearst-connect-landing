@@ -2,9 +2,7 @@
 
 import Link from 'next/link';
 import { useEffect, useRef } from 'react';
-
-const HUB_MAILTO_SALES =
-  'mailto:hello@hearstvault.com?subject=' + encodeURIComponent('Hearst investor inquiry');
+import { NAV_LINKS, CTA_LINKS, HUB_MAILTO_SALES, HEARST_EMAIL } from '@/config/navigation';
 
 /** Scroll-driven fade + parallax for `.hub-chapter` nodes (reliable vs CSS view timelines). */
 function updateHubChapterStyles(scope: HTMLElement): void {
@@ -254,23 +252,16 @@ export default function HubPageClient() {
 
           <nav id="hub-site-nav" aria-label="Navigation principale" lang="fr">
             <ul>
-              <li>
-                <a href="#intro">Intégrations</a>
-              </li>
-              <li>
-                <a href="#feature-unified">Plateforme</a>
-              </li>
-              <li>
-                <a href="#developers">Solutions</a>
-              </li>
-              <li>
-                <a href="#who">Contact</a>
-              </li>
+              {NAV_LINKS.map(link => (
+                <li key={link.href}>
+                  <a href={link.href}>{link.label}</a>
+                </li>
+              ))}
             </ul>
           </nav>
 
-          <Link href="/app" className="login-btn" prefetch>
-            <span>Launch App</span>
+          <Link href={CTA_LINKS.launchApp.href} className="login-btn" prefetch>
+            <span>{CTA_LINKS.launchApp.label}</span>
           </Link>
         </header>
       </div>
@@ -297,11 +288,11 @@ export default function HubPageClient() {
             alignItems: 'center',
           }}
         >
-          <Link href="/app" className="welcome-btn hub-chapter">
-            Launch App
+          <Link href={CTA_LINKS.launchApp.href} className="welcome-btn hub-chapter">
+            {CTA_LINKS.launchApp.label}
           </Link>
-          <a href="#beforeyougo" className="hub-cta-secondary hub-chapter">
-            View offering
+          <a href={CTA_LINKS.viewOffering.href} className="hub-cta-secondary hub-chapter">
+            {CTA_LINKS.viewOffering.label}
           </a>
         </div>
       </section>
@@ -384,7 +375,7 @@ export default function HubPageClient() {
               </figure>
               <h3>{slide.title}</h3>
               <p>{slide.desc}</p>
-              <a href="#beforeyougo">View offering</a>
+              <a href={CTA_LINKS.viewOffering.href}>{CTA_LINKS.viewOffering.label}</a>
             </article>
           ))}
         </div>
@@ -398,8 +389,8 @@ export default function HubPageClient() {
             <br />
             <span>Onchain access with institutional minimums</span>
           </h3>
-          <a href="#beforeyougo" className="hub-cta-primary">
-            View offering
+          <a href={CTA_LINKS.viewOffering.href} className="hub-cta-primary">
+            {CTA_LINKS.viewOffering.label}
           </a>
         </div>
         <div>
@@ -408,8 +399,8 @@ export default function HubPageClient() {
             <br />
             <span>Due diligence, reporting, and custody aligned to your mandate</span>
           </h3>
-          <a href={HUB_MAILTO_SALES} className="hub-cta-secondary">
-            Contact Sales
+          <a href={CTA_LINKS.contactSales.href} className="hub-cta-secondary">
+            {CTA_LINKS.contactSales.label}
           </a>
         </div>
       </section>
@@ -422,11 +413,11 @@ export default function HubPageClient() {
               <span className="typewriter">Ready to allocate?</span>
             </p>
             <div className="buttons">
-              <Link href="/app" className="hub-cta-primary">
-                Launch App
+              <Link href={CTA_LINKS.launchApp.href} className="hub-cta-primary">
+                {CTA_LINKS.launchApp.label}
               </Link>
-              <a href={HUB_MAILTO_SALES} className="hub-cta-secondary">
-                Contact Sales
+              <a href={CTA_LINKS.contactSales.href} className="hub-cta-secondary">
+                {CTA_LINKS.contactSales.label}
               </a>
             </div>
           </div>
@@ -453,30 +444,23 @@ export default function HubPageClient() {
             <div className="hub-footer-col">
               <p className="hub-footer-heading">Produit</p>
               <ul className="hub-footer-links">
-                <li>
-                  <a href="#intro">Intégrations</a>
-                </li>
-                <li>
-                  <a href="#feature-unified">Plateforme</a>
-                </li>
-                <li>
-                  <a href="#developers">Solutions</a>
-                </li>
-                <li>
-                  <a href="#who">Contact</a>
-                </li>
+                {NAV_LINKS.map(link => (
+                  <li key={link.href}>
+                    <a href={link.href}>{link.label}</a>
+                  </li>
+                ))}
               </ul>
             </div>
             <div className="hub-footer-col">
               <p className="hub-footer-heading">Accès</p>
               <ul className="hub-footer-links">
                 <li>
-                  <Link href="/app" prefetch>
-                    Launch App
+                  <Link href={CTA_LINKS.launchApp.href} prefetch>
+                    {CTA_LINKS.launchApp.label}
                   </Link>
                 </li>
                 <li>
-                  <a href="#beforeyougo">Offre</a>
+                  <a href={CTA_LINKS.viewOffering.href}>Offre</a>
                 </li>
               </ul>
             </div>
@@ -484,8 +468,8 @@ export default function HubPageClient() {
         </div>
         <div className="hub-footer-bottom">
           <span className="hub-footer-copy">© {new Date().getFullYear()} Hearst</span>
-          <a href="mailto:hello@hearstvault.com" className="hub-footer-mail">
-            hello@hearstvault.com
+          <a href={`mailto:${HEARST_EMAIL}`} className="hub-footer-mail">
+            {HEARST_EMAIL}
           </a>
         </div>
       </footer>
