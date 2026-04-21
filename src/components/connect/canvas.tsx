@@ -200,6 +200,9 @@ export function Canvas() {
         <Ledger
           hasPosition={hasPosition}
           isConnected={isConnected}
+          vaults={vaults}
+          selectedVaultId={selectedVaultId}
+          onSelectVault={setSelectedVaultId}
           selectedVault={selectedVault}
           aggregate={agg}
           claimableLedgerRef={claimableLedgerRef}
@@ -218,6 +221,36 @@ export function Canvas() {
         />
       </main>
     </div>
+  )
+}
+
+// ─── Shared button primitive ─────────────────────────────────────────────
+
+function ConnectBtn({ label, onClick }: { label: string; onClick: () => void }) {
+  const [hovered, setHovered] = useState(false)
+  return (
+    <button
+      onClick={onClick}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      style={{
+        fontFamily: MONO,
+        fontSize: '11px',
+        letterSpacing: '0.04em',
+        color: hovered ? 'var(--dashboard-text-primary)' : 'var(--dashboard-text-secondary)',
+        background: 'none',
+        border: `1px solid ${hovered ? 'var(--dashboard-accent)' : 'var(--dashboard-border)'}`,
+        borderRadius: '4px',
+        padding: '6px 12px',
+        cursor: 'pointer',
+        transition: 'border-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease',
+        boxShadow: hovered
+          ? '0 0 10px rgba(167,251,144,0.18), 0 0 2px rgba(167,251,144,0.12)'
+          : 'none',
+      }}
+    >
+      {label}
+    </button>
   )
 }
 
@@ -265,62 +298,8 @@ function Header() {
       <ConnectButton.Custom>
         {({ account, openAccountModal, openConnectModal, mounted }) => {
           if (!mounted) return null
-          if (!account) {
-            return (
-              <button
-                onClick={openConnectModal}
-                style={{
-                  fontFamily: MONO,
-                  fontSize: '11px',
-                  letterSpacing: '0.04em',
-                  color: 'var(--dashboard-text-secondary)',
-                  background: 'none',
-                  border: '1px solid var(--dashboard-border)',
-                  borderRadius: '4px',
-                  padding: '6px 12px',
-                  cursor: 'pointer',
-                  transition: 'all 0.15s ease',
-                }}
-                onMouseEnter={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--dashboard-accent)'
-                  e.currentTarget.style.color = 'var(--dashboard-text-primary)'
-                }}
-                onMouseLeave={(e) => {
-                  e.currentTarget.style.borderColor = 'var(--dashboard-border)'
-                  e.currentTarget.style.color = 'var(--dashboard-text-secondary)'
-                }}
-              >
-                Connect Wallet
-              </button>
-            )
-          }
-          return (
-            <button
-              onClick={openAccountModal}
-              style={{
-                fontFamily: MONO,
-                fontSize: '11px',
-                letterSpacing: '0.04em',
-                color: 'var(--dashboard-text-secondary)',
-                background: 'none',
-                border: '1px solid var(--dashboard-border)',
-                borderRadius: '4px',
-                padding: '6px 12px',
-                cursor: 'pointer',
-                transition: 'all 0.15s ease',
-              }}
-              onMouseEnter={(e) => {
-                e.currentTarget.style.borderColor = 'var(--dashboard-accent)'
-                e.currentTarget.style.color = 'var(--dashboard-text-primary)'
-              }}
-              onMouseLeave={(e) => {
-                e.currentTarget.style.borderColor = 'var(--dashboard-border)'
-                e.currentTarget.style.color = 'var(--dashboard-text-secondary)'
-              }}
-            >
-              {account.displayName}
-            </button>
-          )
+          if (!account) return <ConnectBtn label="Connect Wallet" onClick={openConnectModal} />
+          return <ConnectBtn label={account.displayName} onClick={openAccountModal} />
         }}
       </ConnectButton.Custom>
     </header>
@@ -332,6 +311,9 @@ function Header() {
 function Ledger({
   hasPosition,
   isConnected,
+  vaults,
+  selectedVaultId,
+  onSelectVault,
   selectedVault,
   aggregate,
   claimableLedgerRef,
@@ -339,6 +321,9 @@ function Ledger({
 }: {
   hasPosition: boolean
   isConnected: boolean
+  vaults: VaultLine[]
+  selectedVaultId: string | null
+  onSelectVault: (id: string | null) => void
   selectedVault: VaultLine | null
   aggregate: ReturnType<typeof aggregateVaults>
   claimableLedgerRef: RefObject<HTMLSpanElement | null>
@@ -346,7 +331,7 @@ function Ledger({
 }) {
   return (
     <aside
-      className="flex flex-col justify-between shrink-0"
+      className="flex flex-col shrink-0"
       style={{
         width: '380px',
         padding: '36px clamp(1.25rem, 3vw, 2rem) 28px',
@@ -356,6 +341,9 @@ function Ledger({
       {hasPosition
         ? (
           <LedgerActive
+            vaults={vaults}
+            selectedVaultId={selectedVaultId}
+            onSelectVault={onSelectVault}
             selectedVault={selectedVault}
             aggregate={aggregate}
             claimableLedgerRef={claimableLedgerRef}
@@ -407,84 +395,197 @@ function LedgerZero({ isConnected }: { isConnected: boolean }) {
 }
 
 function LedgerActive({
+  vaults,
+  selectedVaultId,
+  onSelectVault,
   selectedVault,
   aggregate,
   claimableLedgerRef,
   currentValueWholeRef,
 }: {
+  vaults: VaultLine[]
+  selectedVaultId: string | null
+  onSelectVault: (id: string | null) => void
   selectedVault: VaultLine | null
   aggregate: ReturnType<typeof aggregateVaults>
   claimableLedgerRef: RefObject<HTMLSpanElement | null>
   currentValueWholeRef: RefObject<HTMLSpanElement | null>
 }) {
+  const [vaultListOpen, setVaultListOpen] = useState(false)
   const { claim, isClaiming } = useRewards()
   const { totalDeposits } = useVaultData()
   const tvl = parseFloat(totalDeposits) || 0
 
-  const deposited = selectedVault ? selectedVault.deposited : aggregate.totalDeposited
-  const claimableNum = selectedVault ? selectedVault.claimable : aggregate.totalClaimable
-  const apr = selectedVault ? selectedVault.apr : aggregate.avgApr
+  const activeVault = selectedVault ?? (vaults.length === 1 ? vaults[0] : null)
+  const deposited = activeVault ? activeVault.deposited : aggregate.totalDeposited
+  const claimableNum = activeVault ? activeVault.claimable : aggregate.totalClaimable
+  const apr = activeVault ? activeVault.apr : aggregate.avgApr
   const currentValue = deposited + claimableNum
-  const locked = selectedVault ? !selectedVault.canWithdraw : aggregate.anyLocked
+  const locked = activeVault ? !activeVault.canWithdraw : aggregate.anyLocked
   const lockStatus = locked ? 'Locked' : 'Unlocked'
-  const lockTs = selectedVault ? selectedVault.lockedUntil : 0
+  const lockTs = activeVault?.lockedUntil ?? 0
   const nextUnlock = lockTs > 0
     ? new Date(lockTs * 1000).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' })
     : '—'
 
-  return (
-    <>
-      <div>
-        <Label>{selectedVault ? selectedVault.name : 'All Vaults'}</Label>
-        <BigNumber value={currentValue} wholeRef={currentValueWholeRef} />
+  const multiVault = vaults.length > 1
+  const vaultLabel = activeVault ? activeVault.name : 'All Vaults'
 
-        <div style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
-          <Row label="Deposited" value={fmtUsd(deposited)} />
-          <div className="flex items-baseline justify-between">
-            <span style={{ fontFamily: FONT, fontSize: '0.8rem', fontWeight: 500, color: 'var(--dashboard-text-muted)' }}>
-              Claimable
-            </span>
-            <span style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
-              <span
-                ref={claimableLedgerRef}
-                style={{ fontFamily: MONO, fontSize: '13px', fontWeight: 500, color: 'var(--dashboard-accent)', letterSpacing: '0.02em' }}
-              >
-                {fmtUsd(claimableNum)}
-              </span>
-              {claimableNum > 0 && (
-                <button
-                  onClick={() => claim()}
-                  disabled={isClaiming}
-                  style={{
-                    fontFamily: FONT,
-                    fontSize: '0.7rem',
-                    fontWeight: 600,
-                    color: isClaiming ? 'var(--dashboard-text-ghost)' : 'var(--dashboard-accent)',
-                    background: 'none',
-                    border: 'none',
-                    borderBottom: '1px solid var(--dashboard-accent)',
-                    padding: 0,
-                    cursor: isClaiming ? 'default' : 'pointer',
-                    opacity: isClaiming ? 0.5 : 0.8,
-                    transition: 'opacity 0.15s ease',
-                  }}
-                  onMouseEnter={(e) => { if (!isClaiming) e.currentTarget.style.opacity = '1' }}
-                  onMouseLeave={(e) => { if (!isClaiming) e.currentTarget.style.opacity = '0.8' }}
-                >
-                  {isClaiming ? 'Claiming…' : 'Claim'}
-                </button>
-              )}
-            </span>
-          </div>
-          <Row label="APR" value={`${apr.toFixed(1)}%`} />
-          <Sep />
-          <Row label="Status" value={lockStatus} />
-          <Row label="Next Unlock" value={nextUnlock} />
-          <Sep />
-          <Row label="Vault TVL" value={fmtUsd(tvl)} />
+  // vault picker — inline, only when multi-vault
+  if (vaultListOpen && multiVault) {
+    return (
+      <div style={{ display: 'flex', flexDirection: 'column', gap: '0' }}>
+        <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '24px' }}>
+          <span style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.14em', textTransform: 'uppercase' as const, color: 'var(--dashboard-text-ghost)' }}>
+            Select Vault
+          </span>
+          <button
+            onClick={() => setVaultListOpen(false)}
+            style={{ fontFamily: MONO, fontSize: '9px', letterSpacing: '0.1em', color: 'var(--dashboard-text-ghost)', background: 'none', border: 'none', cursor: 'pointer', padding: 0 }}
+          >
+            ✕
+          </button>
         </div>
+
+        {/* All Vaults aggregate option */}
+        <button
+          onClick={() => { onSelectVault(null); setVaultListOpen(false) }}
+          style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            justifyContent: 'space-between',
+            padding: '12px 0',
+            borderBottom: '1px solid var(--dashboard-border)',
+            background: 'none',
+            border: 'none',
+            borderBottom: '1px solid var(--dashboard-border)',
+            cursor: 'pointer',
+            width: '100%',
+            opacity: selectedVaultId === null ? 1 : 0.5,
+            transition: 'opacity 0.15s ease',
+          }}
+          onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
+          onMouseLeave={(e) => { e.currentTarget.style.opacity = selectedVaultId === null ? '1' : '0.5' }}
+        >
+          <span style={{ fontFamily: FONT, fontSize: '0.8rem', fontWeight: 600, color: 'var(--dashboard-text-primary)' }}>
+            All Vaults
+          </span>
+          <span style={{ fontFamily: MONO, fontSize: '12px', color: 'var(--dashboard-text-secondary)' }}>
+            {fmtUsd(aggregate.totalDeposited)}
+          </span>
+        </button>
+
+        {vaults.map((v) => (
+          <button
+            key={v.id}
+            onClick={() => { onSelectVault(v.id); setVaultListOpen(false) }}
+            style={{
+              display: 'flex',
+              alignItems: 'baseline',
+              justifyContent: 'space-between',
+              padding: '12px 0',
+              borderBottom: '1px solid var(--dashboard-border)',
+              background: 'none',
+              border: 'none',
+              borderBottom: '1px solid var(--dashboard-border)',
+              cursor: 'pointer',
+              width: '100%',
+              opacity: selectedVaultId === v.id ? 1 : 0.5,
+              transition: 'opacity 0.15s ease',
+            }}
+            onMouseEnter={(e) => { e.currentTarget.style.opacity = '1' }}
+            onMouseLeave={(e) => { e.currentTarget.style.opacity = selectedVaultId === v.id ? '1' : '0.5' }}
+          >
+            <span style={{ fontFamily: FONT, fontSize: '0.8rem', fontWeight: 500, color: 'var(--dashboard-text-primary)' }}>
+              {v.name}
+            </span>
+            <span style={{ fontFamily: MONO, fontSize: '12px', color: 'var(--dashboard-text-secondary)' }}>
+              {fmtUsd(v.deposited)}
+            </span>
+          </button>
+        ))}
       </div>
-    </>
+    )
+  }
+
+  return (
+    <div>
+      {/* Vault label — clickable only if multi-vault */}
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', marginBottom: '8px' }}>
+        <div
+          onClick={multiVault ? () => setVaultListOpen(true) : undefined}
+          style={{
+            fontFamily: MONO,
+            fontSize: '9px',
+            letterSpacing: '0.14em',
+            textTransform: 'uppercase' as const,
+            color: 'var(--dashboard-text-ghost)',
+            cursor: multiVault ? 'pointer' : 'default',
+            display: 'flex',
+            alignItems: 'center',
+            gap: '6px',
+          }}
+        >
+          {vaultLabel}
+          {multiVault && (
+            <span style={{ fontSize: '8px', opacity: 0.6 }}>▾</span>
+          )}
+        </div>
+        {multiVault && (
+          <span style={{ fontFamily: MONO, fontSize: '8px', letterSpacing: '0.08em', color: 'var(--dashboard-text-ghost)', opacity: 0.5 }}>
+            {vaults.length} vaults
+          </span>
+        )}
+      </div>
+
+      <BigNumber value={currentValue} wholeRef={currentValueWholeRef} />
+
+      <div style={{ marginTop: '28px', display: 'flex', flexDirection: 'column', gap: '16px' }}>
+        <Row label="Deposited" value={fmtUsd(deposited)} />
+        <div className="flex items-baseline justify-between">
+          <span style={{ fontFamily: FONT, fontSize: '0.8rem', fontWeight: 500, color: 'var(--dashboard-text-muted)' }}>
+            Claimable
+          </span>
+          <span style={{ display: 'flex', alignItems: 'baseline', gap: '8px' }}>
+            <span
+              ref={claimableLedgerRef}
+              style={{ fontFamily: MONO, fontSize: '13px', fontWeight: 500, color: 'var(--dashboard-accent)', letterSpacing: '0.02em' }}
+            >
+              {fmtUsd(claimableNum)}
+            </span>
+            {claimableNum > 0 && (
+              <button
+                onClick={() => claim()}
+                disabled={isClaiming}
+                style={{
+                  fontFamily: FONT,
+                  fontSize: '0.7rem',
+                  fontWeight: 600,
+                  color: isClaiming ? 'var(--dashboard-text-ghost)' : 'var(--dashboard-accent)',
+                  background: 'none',
+                  border: 'none',
+                  borderBottom: '1px solid var(--dashboard-accent)',
+                  padding: 0,
+                  cursor: isClaiming ? 'default' : 'pointer',
+                  opacity: isClaiming ? 0.5 : 0.8,
+                  transition: 'opacity 0.15s ease',
+                }}
+                onMouseEnter={(e) => { if (!isClaiming) e.currentTarget.style.opacity = '1' }}
+                onMouseLeave={(e) => { if (!isClaiming) e.currentTarget.style.opacity = '0.8' }}
+              >
+                {isClaiming ? 'Claiming…' : 'Claim'}
+              </button>
+            )}
+          </span>
+        </div>
+        <Row label="APR" value={`${apr.toFixed(1)}%`} />
+        <Sep />
+        <Row label="Status" value={lockStatus} />
+        <Row label="Next Unlock" value={nextUnlock} />
+        <Sep />
+        <Row label="Vault TVL" value={fmtUsd(tvl)} />
+      </div>
+    </div>
   )
 }
 
@@ -1019,34 +1120,17 @@ function NowActions({
   onCancelWithdraw: () => void
   vaultName?: string
 }) {
+  const [mounted, setMounted] = useState(false)
+  useEffect(() => { setMounted(true) }, [])
+
+  if (!mounted) return null
+
   if (!isConnected) {
     return (
       <ConnectButton.Custom>
-        {({ openConnectModal, mounted }) => {
-          if (!mounted) return null
-          return (
-            <button
-              onClick={openConnectModal}
-              style={{
-                fontFamily: FONT,
-                fontSize: '0.85rem',
-                fontWeight: 600,
-                letterSpacing: '0.02em',
-                padding: '6px 0',
-                background: 'none',
-                border: 'none',
-                cursor: 'pointer',
-                color: 'var(--dashboard-text-secondary)',
-                transition: 'color 0.15s ease',
-                whiteSpace: 'nowrap',
-              }}
-              onMouseEnter={(e) => { e.currentTarget.style.color = 'var(--dashboard-text-primary)' }}
-              onMouseLeave={(e) => { e.currentTarget.style.color = 'var(--dashboard-text-secondary)' }}
-            >
-              Connect Wallet →
-            </button>
-          )
-        }}
+        {({ openConnectModal }) => (
+          <ConnectBtn label="Connect Wallet →" onClick={openConnectModal} />
+        )}
       </ConnectButton.Custom>
     )
   }

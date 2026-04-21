@@ -59,12 +59,15 @@ export function useDeposit() {
   const approve = useCallback(
     (amount: string) => {
       setPhase('approving')
-      writeApprove({
-        address: USDC_ADDRESS,
-        abi: ERC20_ABI,
-        functionName: 'approve',
-        args: [VAULT_ADDRESS, parseUnits(amount, USDC_DECIMALS)],
-      })
+      writeApprove(
+        {
+          address: USDC_ADDRESS,
+          abi: ERC20_ABI,
+          functionName: 'approve',
+          args: [VAULT_ADDRESS, parseUnits(amount, USDC_DECIMALS)],
+        },
+        { onError: () => {} },
+      )
     },
     [writeApprove],
   )
@@ -72,12 +75,15 @@ export function useDeposit() {
   const deposit = useCallback(
     (amount: string) => {
       setPhase('depositing')
-      writeDeposit({
-        address: VAULT_ADDRESS,
-        abi: EPOCH_VAULT_ABI,
-        functionName: 'deposit',
-        args: [parseUnits(amount, USDC_DECIMALS)],
-      })
+      writeDeposit(
+        {
+          address: VAULT_ADDRESS,
+          abi: EPOCH_VAULT_ABI,
+          functionName: 'deposit',
+          args: [parseUnits(amount, USDC_DECIMALS)],
+        },
+        { onError: () => {} },
+      )
     },
     [writeDeposit],
   )

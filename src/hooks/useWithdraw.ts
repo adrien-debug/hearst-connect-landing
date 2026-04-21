@@ -19,12 +19,15 @@ export function useWithdraw() {
 
   const withdraw = (amount: string) => {
     if (!amount || amount === '0') return
-    writeContract({
-      address: VAULT_ADDRESS,
-      abi: EPOCH_VAULT_ABI,
-      functionName: 'withdraw',
-      args: [parseUnits(amount, USDC_DECIMALS)],
-    })
+    writeContract(
+      {
+        address: VAULT_ADDRESS,
+        abi: EPOCH_VAULT_ABI,
+        functionName: 'withdraw',
+        args: [parseUnits(amount, USDC_DECIMALS)],
+      },
+      { onError: () => {} },
+    )
   }
 
   return {

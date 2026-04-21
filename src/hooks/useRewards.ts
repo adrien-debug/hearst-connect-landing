@@ -31,11 +31,14 @@ export function useRewards() {
     useWaitForTransactionReceipt({ hash: txHash })
 
   const claim = () => {
-    writeContract({
-      address: VAULT_ADDRESS,
-      abi: EPOCH_VAULT_ABI,
-      functionName: 'claimRewards',
-    })
+    writeContract(
+      {
+        address: VAULT_ADDRESS,
+        abi: EPOCH_VAULT_ABI,
+        functionName: 'claimRewards',
+      },
+      { onError: () => {} },
+    )
   }
 
   return {

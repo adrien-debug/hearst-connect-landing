@@ -1,4 +1,4 @@
-export const FONT = "var(--font-sans, 'Satoshi Variable', Inter, -apple-system, sans-serif)"
+export const FONT = "'Satoshi Variable', Inter, -apple-system, sans-serif"
 export const MONO = "var(--font-mono, 'IBM Plex Mono', ui-monospace, monospace)"
 
 export const VAULT_LINE_SPACING = 20
