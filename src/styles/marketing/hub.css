@@ -1076,7 +1076,6 @@
 	@supports selector(:has(a)) {
 		html:has(.hub-font-scope) {
 			scroll-padding-top: var(--hub-header-offset);
-			scroll-snap-type: y proximity;
 		}
 	}
 
@@ -1280,9 +1279,92 @@
   --dashboard-text-secondary: #5A5F68;
   --dashboard-text-accent: color-mix(in srgb, var(--dashboard-accent) 42%, var(--dashboard-text-primary) 58%);
   --dashboard-border: rgba(0,0,0,0.08);
+  --dashboard-overlay-04: rgba(0,0,0,0.04);
+  --dashboard-overlay-06: rgba(0,0,0,0.06);
+  --dashboard-overlay-08: rgba(0,0,0,0.08);
   --dashboard-overlay-10: rgba(0,0,0,0.06);
+  --dashboard-overlay-12: rgba(0,0,0,0.1);
   background-color: var(--dashboard-page);
   color: var(--dashboard-text-primary);
+}
+
+/* Liens / accents lisibles sur fond clair (évite vert #A7FB90 pur sur blanc) */
+#intro.theme-light .hub-lead-accent {
+  color: var(--dashboard-text-accent);
+}
+
+#intro.theme-light .typewriter::after {
+  color: var(--dashboard-text-accent);
+}
+
+#developers.theme-light .developer > a {
+  color: var(--dashboard-text-accent);
+}
+
+#developers.theme-light .developer > a:hover,
+#developers.theme-light .developer > a:focus-visible {
+  color: var(--dashboard-text-primary);
+}
+
+/* Carrousel Investment strategies : snap doux ; geste horizontal tactile natif */
+#developers .hub-carousel-wrap .hub-carousel-track.carousel {
+  scroll-snap-type: x proximity;
+  touch-action: pan-x pinch-zoom;
+  -webkit-user-drag: none;
+}
+
+#developers .hub-carousel-wrap .hub-carousel-track.carousel img {
+  -webkit-user-drag: none;
+  user-select: none;
+}
+
+/* Boutons natifs expérimentaux (::scroll-button) : masqués — navigation en React (.hub-carousel-controls) */
+#developers .hub-carousel-wrap .hub-carousel-track.carousel::scroll-button(left),
+#developers .hub-carousel-wrap .hub-carousel-track.carousel::scroll-button(right) {
+  display: none;
+}
+
+/* Contrôles carrousel (alignés au centre, sous la piste) */
+#developers .hub-carousel-controls {
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  justify-content: center;
+  gap: var(--hub-space-md);
+  margin-top: var(--hub-space-md);
+  padding-inline: 3rem;
+}
+
+#developers .hub-carousel-nav-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2.75rem;
+  height: 2.75rem;
+  padding: 0;
+  border-radius: 999px;
+  border: 1px solid var(--dashboard-border);
+  background: var(--dashboard-surface);
+  color: var(--dashboard-text-primary);
+  cursor: pointer;
+  box-shadow: 0 2px 10px var(--dashboard-overlay-08);
+  transition: background 0.15s ease, border-color 0.15s ease, color 0.15s ease;
+}
+
+#developers .hub-carousel-nav-btn:hover,
+#developers .hub-carousel-nav-btn:focus-visible {
+  background: var(--dashboard-overlay-08);
+  border-color: var(--dashboard-border-mid);
+  color: var(--dashboard-text-primary);
+  outline: none;
+}
+
+#developers .hub-carousel-nav-btn:focus-visible {
+  box-shadow: 0 0 0 2px var(--dashboard-page), 0 0 0 4px var(--dashboard-accent);
+}
+
+#developers .hub-carousel-nav-btn .material-symbols-outlined {
+  font-size: 1.5rem;
 }
 
 /* Refactored inline styles */

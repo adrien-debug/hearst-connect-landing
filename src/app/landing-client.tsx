@@ -1,7 +1,7 @@
 'use client';
 
 import Link from 'next/link';
-import { useEffect, useRef, type RefObject } from 'react';
+import { useCallback, useEffect, useRef, type RefObject } from 'react';
 
 /** Post-auth destination for users coming from the HUB landing (SaaS dashboard). */
 const HUB_LOGIN_HREF = '/login?callbackUrl=/dashboard';
@@ -111,7 +111,7 @@ function useHubCarouselHoverScroll(
   }, [wrapRef, trackRef]);
 }
 
-/** Vertical wheel → horizontal scroll when pointer is over the track (trackpad / mouse). */
+/** Vertical wheel → horizontal scroll; relâche le scroll page aux extrémités du carrousel. */
 function useHubCarouselWheelScroll(trackRef: RefObject<HTMLElement | null>): void {
   useEffect(() => {
     const el = trackRef.current;
@@ -121,8 +121,12 @@ function useHubCarouselWheelScroll(trackRef: RefObject<HTMLElement | null>): voi
     const onWheel = (e: WheelEvent): void => {
       if (el.scrollWidth <= el.clientWidth) return;
       if (Math.abs(e.deltaX) >= Math.abs(e.deltaY)) return;
+      const maxScroll = el.scrollWidth - el.clientWidth;
+      const sl = el.scrollLeft;
+      if (e.deltaY > 0 && sl >= maxScroll - 1) return;
+      if (e.deltaY < 0 && sl <= 1) return;
       e.preventDefault();
-      el.scrollLeft += e.deltaY;
+      el.scrollLeft = Math.max(0, Math.min(maxScroll, sl + e.deltaY));
     };
 
     el.addEventListener('wheel', onWheel, { passive: false });
@@ -130,43 +134,15 @@ function useHubCarouselWheelScroll(trackRef: RefObject<HTMLElement | null>): voi
   }, [trackRef]);
 }
 
-/** Auto-scroll carousel every ~5s, pausing on hover / touch / focus. */
-function useHubCarouselAutoScroll(trackRef: RefObject<HTMLElement | null>): void {
-  useEffect(() => {
-    const el = trackRef.current;
-    if (!el) return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-
-    let paused = false;
-    const pause = () => { paused = true; };
-    const resume = () => { paused = false; };
-
-    const iv = window.setInterval(() => {
-      if (paused || el.scrollWidth <= el.clientWidth) return;
-      const items = el.querySelectorAll<HTMLElement>('.developer');
-      if (!items.length) return;
-      const itemW = items[0].offsetWidth + parseFloat(getComputedStyle(el).gap || '0');
-      const maxScroll = el.scrollWidth - el.clientWidth;
-      const next = el.scrollLeft + itemW;
-      el.scrollTo({ left: next > maxScroll ? 0 : next, behavior: 'smooth' });
-    }, 5000);
-
-    el.addEventListener('pointerenter', pause);
-    el.addEventListener('pointerleave', resume);
-    el.addEventListener('focusin', pause);
-    el.addEventListener('focusout', resume);
-
-    return () => {
-      clearInterval(iv);
-      el.removeEventListener('pointerenter', pause);
-      el.removeEventListener('pointerleave', resume);
-      el.removeEventListener('focusin', pause);
-      el.removeEventListener('focusout', resume);
-    };
-  }, [trackRef]);
+function scrollHubCarouselStep(track: HTMLElement, direction: -1 | 1): void {
+  const items = track.querySelectorAll<HTMLElement>('.developer');
+  if (!items.length) return;
+  const gap = parseFloat(getComputedStyle(track).gap || '0') || 0;
+  const step = items[0].getBoundingClientRect().width + gap;
+  track.scrollBy({ left: direction * step, behavior: 'smooth' });
 }
 
-/** Drag-to-scroll with momentum (mouse + touch). */
+/** Drag-to-scroll (mouse + touch). Momentum disabled so snap/scroll stays predictable. */
 function useHubCarouselDrag(trackRef: RefObject<HTMLElement | null>): void {
   useEffect(() => {
     const el = trackRef.current;
@@ -175,19 +151,12 @@ function useHubCarouselDrag(trackRef: RefObject<HTMLElement | null>): void {
     let isDown = false;
     let startX = 0;
     let scrollStart = 0;
-    let velX = 0;
-    let lastX = 0;
-    let lastT = 0;
-    let momentumRaf = 0;
 
     const onDown = (e: PointerEvent) => {
+      if (e.pointerType === 'mouse' && e.button !== 0) return;
       isDown = true;
       startX = e.clientX;
       scrollStart = el.scrollLeft;
-      velX = 0;
-      lastX = e.clientX;
-      lastT = Date.now();
-      cancelAnimationFrame(momentumRaf);
       el.setPointerCapture(e.pointerId);
       el.style.cursor = 'grabbing';
       el.style.scrollSnapType = 'none';
@@ -197,31 +166,13 @@ function useHubCarouselDrag(trackRef: RefObject<HTMLElement | null>): void {
       if (!isDown) return;
       const dx = e.clientX - startX;
       el.scrollLeft = scrollStart - dx;
-      const now = Date.now();
-      const dt = now - lastT;
-      if (dt > 0) {
-        velX = (e.clientX - lastX) / dt;
-        lastX = e.clientX;
-        lastT = now;
-      }
     };
 
     const onUp = () => {
       if (!isDown) return;
       isDown = false;
       el.style.cursor = '';
-
-      const decay = 0.95;
-      const applyMomentum = () => {
-        if (Math.abs(velX) < 0.01) {
-          el.style.scrollSnapType = '';
-          return;
-        }
-        el.scrollLeft -= velX * 16;
-        velX *= decay;
-        momentumRaf = requestAnimationFrame(applyMomentum);
-      };
-      momentumRaf = requestAnimationFrame(applyMomentum);
+      el.style.scrollSnapType = '';
     };
 
     el.addEventListener('pointerdown', onDown);
@@ -234,7 +185,6 @@ function useHubCarouselDrag(trackRef: RefObject<HTMLElement | null>): void {
       el.removeEventListener('pointermove', onMove);
       el.removeEventListener('pointerup', onUp);
       el.removeEventListener('pointercancel', onUp);
-      cancelAnimationFrame(momentumRaf);
     };
   }, [trackRef]);
 }
@@ -254,6 +204,27 @@ const FEATURE_PILLARS = [
     id: 'feature-orchestration',
     title: 'Institutional controls',
     desc: 'Multi-signature governance, audited contracts, and custody built for serious allocators.',
+  },
+] as const;
+
+const INVESTMENT_STRATEGY_SLIDES = [
+  {
+    img: '/platform-screenshot.svg',
+    caption: 'Flagship — stable income',
+    title: 'Hearst Prime Yield',
+    desc: 'Target ~12% annual yield. $250K min, monthly USDC distributions, 3-year lock. Diversified mining income with volatility hedging for predictable returns.',
+  },
+  {
+    img: '/platform-screenshot.svg',
+    caption: 'Growth — BTC upside',
+    title: 'Hearst Growth',
+    desc: 'Target 16–22% annual yield. $250K min, monthly distributions, 3-year lock. Forward BTC mining exposure plus spot price upside with USDC buffer.',
+  },
+  {
+    img: '/platform-screenshot.svg',
+    caption: 'Yield mechanics',
+    title: 'How yield is generated',
+    desc: 'USDC is deployed into industrial mining operations. BTC rewards are converted via OTC desks. Net yield is distributed monthly, auditable end to end.',
   },
 ] as const;
 
@@ -283,8 +254,17 @@ export default function HubPageClient() {
   const hubCarouselTrackRef = useRef<HTMLDivElement>(null);
   useHubCarouselHoverScroll(hubCarouselWrapRef, hubCarouselTrackRef);
   useHubCarouselWheelScroll(hubCarouselTrackRef);
-  useHubCarouselAutoScroll(hubCarouselTrackRef);
   useHubCarouselDrag(hubCarouselTrackRef);
+
+  const carouselPrev = useCallback(() => {
+    const el = hubCarouselTrackRef.current;
+    if (el) scrollHubCarouselStep(el, -1);
+  }, []);
+
+  const carouselNext = useCallback(() => {
+    const el = hubCarouselTrackRef.current;
+    if (el) scrollHubCarouselStep(el, 1);
+  }, []);
 
   useEffect(() => {
     const nav = document.getElementById('hub-site-nav');
@@ -460,7 +440,7 @@ export default function HubPageClient() {
 
       {/* Intro */}
       <section id="intro" className="theme-light" lang="en">
-        <div className="hub-section-lead hub-chapter">
+        <div className="hub-section-lead">
           <h2>
             <span className="typewriter">
               <span className="hub-lead-accent">Hearst</span> offers qualified investors direct
@@ -497,7 +477,7 @@ export default function HubPageClient() {
               <article
                 key={feature.id}
                 id={feature.id}
-                className="feature-block feature-pillar hub-chapter"
+                className="feature-block feature-pillar"
               >
                 <h3>{feature.title}</h3>
                 <p>{feature.desc}</p>
@@ -514,10 +494,11 @@ export default function HubPageClient() {
 
       {/* Solutions */}
       <section id="developers" className="theme-light">
-        <div className="hub-section-head hub-chapter" lang="en">
+        <div className="hub-section-head" lang="en">
           <h2>Investment strategies</h2>
           <p className="intro">
-            Two vault profiles. Pick the risk and return fit. Hover the strip edges or scroll to browse.
+            Two vault profiles. Pick the risk and return fit. Use the arrows, drag the strip, or scroll
+            horizontally (trackpad / wheel) to browse.
           </p>
         </div>
 
@@ -526,32 +507,13 @@ export default function HubPageClient() {
           ref={hubCarouselWrapRef}
           role="region"
           lang="en"
-          aria-label="Vault strategies. Hover near edges or scroll wheel to move horizontally"
+          aria-label="Vault strategies carousel"
         >
           <div className="carousel hub-carousel-track" ref={hubCarouselTrackRef}>
-            {[
-              {
-                img: '/platform-screenshot.svg',
-                caption: 'Flagship — stable income',
-                title: 'Hearst Prime Yield',
-                desc: 'Target ~12% annual yield. $250K min, monthly USDC distributions, 3-year lock. Diversified mining income with volatility hedging for predictable returns.',
-              },
-              {
-                img: '/platform-screenshot.svg',
-                caption: 'Growth — BTC upside',
-                title: 'Hearst Growth',
-                desc: 'Target 16–22% annual yield. $250K min, monthly distributions, 3-year lock. Forward BTC mining exposure plus spot price upside with USDC buffer.',
-              },
-              {
-                img: '/platform-screenshot.svg',
-                caption: 'Yield mechanics',
-                title: 'How yield is generated',
-                desc: 'USDC is deployed into industrial mining operations. BTC rewards are converted via OTC desks. Net yield is distributed monthly, auditable end to end.',
-              },
-            ].map(dev => (
+            {INVESTMENT_STRATEGY_SLIDES.map(dev => (
               <div key={dev.title} className="developer">
                 <figure>
-                  <img src={dev.img} alt={dev.title} />
+                  <img src={dev.img} alt="" draggable={false} />
                   <figcaption className="carousel-caption">{dev.caption}</figcaption>
                 </figure>
                 <h3>{dev.title}</h3>
@@ -560,12 +522,34 @@ export default function HubPageClient() {
               </div>
             ))}
           </div>
+          <div className="hub-carousel-controls" role="group" aria-label="Carousel navigation">
+            <button
+              type="button"
+              className="hub-carousel-nav-btn"
+              aria-label="Previous slide"
+              onClick={carouselPrev}
+            >
+              <span className="material-symbols-outlined" aria-hidden>
+                chevron_left
+              </span>
+            </button>
+            <button
+              type="button"
+              className="hub-carousel-nav-btn"
+              aria-label="Next slide"
+              onClick={carouselNext}
+            >
+              <span className="material-symbols-outlined" aria-hidden>
+                chevron_right
+              </span>
+            </button>
+          </div>
         </div>
       </section>
 
       {/* Who */}
       <section id="who" className="center" lang="en">
-        <div className="hub-chapter">
+        <div>
           <h3>
             Qualified investors
             <br />
@@ -575,7 +559,7 @@ export default function HubPageClient() {
             View offering
           </a>
         </div>
-        <div className="hub-chapter">
+        <div>
           <h3>
             Institutions
             <br />
