@@ -51,7 +51,7 @@ src/
 │       ├── page.tsx            # Vault interface (server, force-dynamic)
 │       └── app-client.tsx      # Vault interface (client)
 ├── components/
-│   ├── connect/                # Vault UI (Canvas, providers)
+│   ├── connect/                # Vault UI (Canvas, providers) — timeline uses stacked spacing + contrast floors for dark UI
 │   ├── layout/                 # Analytics scripts
 │   └── ui/                     # Click ripple
 ├── config/
