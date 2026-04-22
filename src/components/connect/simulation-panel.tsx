@@ -181,7 +181,7 @@ export function SimulationPanel() {
                 color: TOKENS.colors.textPrimary,
                 marginTop: TOKENS.spacing[2],
               }}>
-                {formatPercent(active.annualApr * 100)} APR
+                {formatPercent(active.annualApr * 100)} APY
               </div>
             </div>
             <div style={{
@@ -249,7 +249,7 @@ export function SimulationPanel() {
                 compact={compact}
               />
               <MetricTile
-                label="Total"
+                label="Total Value"
                 value={fmtUsd(active.totalValue)}
                 detail="Capital + yield"
                 compact={compact}

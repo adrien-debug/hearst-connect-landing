@@ -7,7 +7,15 @@ import { TOKENS, fmtUsdCompact, fmtUsd, LINE_HEIGHT, VALUE_LETTER_SPACING } from
 import type { VaultLine, Aggregate, ActiveVault } from './data'
 import { fitValue, type SmartFitMode, useSmartFit, useShellPadding } from './smart-fit'
 
-export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Aggregate }) {
+export function PortfolioSummary({
+  vaults,
+  agg,
+  onVaultSelect,
+}: {
+  vaults: VaultLine[]
+  agg: Aggregate
+  onVaultSelect?: (vaultId: string) => void
+}) {
   const { mode } = useSmartFit({
     tightHeight: 740,
     limitHeight: 660,
@@ -90,19 +98,19 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
             limit: TOKENS.spacing[3],
           }),
         }}>
-          {/* Net Value — Primary */}
+          {/* Position Value — Primary */}
           <CockpitGauge
-            label="Net Value"
+            label="Position Value"
             value={fmtUsd(portfolioValue)}
             valueCompact={fmtUsdCompact(portfolioValue)}
             subtext={`${activeVaults.length} position${activeVaults.length !== 1 ? 's' : ''}`}
             mode={mode}
             primary
           />
-          
-          {/* Yield Earned — Accent */}
+
+          {/* Accrued Yield — Accent */}
           <CockpitGauge
-            label="Yield Earned"
+            label="Accrued Yield"
             value={`+${fmtUsd(agg.totalClaimable)}`}
             valueCompact={`+${fmtUsdCompact(agg.totalClaimable)}`}
             subtext={`${agg.avgApr.toFixed(1)}% avg APY`}
@@ -175,7 +183,7 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
                 borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
               }}>
                 <MiniStat label="Avg Progress" value={`${Math.round(activeVaults.reduce((sum, v) => sum + v.progress, 0) / (activeVaults.length || 1))}%`} />
-                <MiniStat label="Total Yield" value={`+${fmtUsdCompact(agg.totalClaimable)}`} accent />
+                <MiniStat label="Accrued Yield" value={`+${fmtUsdCompact(agg.totalClaimable)}`} accent />
               </div>
             </div>
 

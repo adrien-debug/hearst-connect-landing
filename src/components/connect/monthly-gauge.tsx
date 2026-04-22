@@ -30,7 +30,7 @@ export function MonthlyGauge({ deposited, apr, label, mode = 'normal' }: Monthly
   const showFirstMetric = mode !== 'limit'
   const showLabels = mode === 'normal'
 
-  const monthLabel = label ?? `Monthly Yield · ${apr.toFixed(1)}% APR`
+  const monthLabel = label ?? `Monthly Yield · ${apr.toFixed(1)}% APY`
 
   return (
     <div>

@@ -58,3 +58,42 @@
     --hc-sidebar-w: 272px;
   }
 }
+
+/* Connect scrollbar — minimal, dark, elegant */
+.connect-scope ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.connect-scope ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.connect-scope ::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.15);
+  border-radius: 3px;
+}
+
+.connect-scope ::-webkit-scrollbar-thumb:hover {
+  background: rgba(255, 255, 255, 0.25);
+}
+
+.connect-scope ::-webkit-scrollbar-corner {
+  background: transparent;
+}
+
+/* Firefox support */
+.connect-scope {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+}
+
+/* Hide scrollbar utility (still functional) */
+.connect-scope .hide-scrollbar {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.connect-scope .hide-scrollbar::-webkit-scrollbar {
+  display: none;
+}

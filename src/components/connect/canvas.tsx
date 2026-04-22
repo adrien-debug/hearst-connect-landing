@@ -169,6 +169,7 @@ export function Canvas() {
               agg={agg}
               isSimulation={isSimulation}
               onBack={() => handleSelect(null)}
+              onVaultSelect={handleSelect}
             />
           </div>
         </section>
@@ -225,17 +226,19 @@ function MainPanel({
   agg,
   isSimulation,
   onBack,
+  onVaultSelect,
 }: {
   vaults: VaultLine[]
   selected: VaultLine | null
   agg: Aggregate
   isSimulation: boolean
   onBack: () => void
+  onVaultSelect: (vaultId: string) => void
 }) {
   if (isSimulation) return <SimulationPanel />
   if (selected) {
     if (selected.type === 'available') return <SubscribePanel vault={selected} />
     return <VaultDetailPanel vault={selected} onBack={onBack} />
   }
-  return <PortfolioSummary vaults={vaults} agg={agg} />
+  return <PortfolioSummary vaults={vaults} agg={agg} onVaultSelect={onVaultSelect} />
 }
