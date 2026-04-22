@@ -17,6 +17,12 @@ function resolveMode(width: number, height: number, options: SmartFitOptions): S
   const availableWidth = Math.max(0, width - (options.reserveWidth ?? 0))
   const availableHeight = Math.max(0, height - (options.reserveHeight ?? 0))
 
+  /** Under 1280px viewport, compress layout (Cinematic OS — no document scroll) */
+  if (width < 1280) {
+    if (availableHeight <= options.limitHeight) return 'limit'
+    return 'tight'
+  }
+
   const isLimit =
     availableHeight <= options.limitHeight ||
     (options.limitWidth !== undefined && availableWidth <= options.limitWidth)

@@ -1,5 +1,8 @@
 'use client'
 
+import { Label } from '@/components/ui/label'
+import { EmptyState } from './empty-state'
+import { CompressedMetricsStrip } from './compressed-metrics-strip'
 import { TOKENS, fmtUsdCompact } from './constants'
 import type { VaultLine, Aggregate, ActiveVault } from './data'
 import { fitValue, type SmartFitMode, useSmartFit } from './smart-fit'
@@ -11,7 +14,7 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
     tightWidth: 940,
     limitWidth: 820,
     reserveHeight: 64,
-    reserveWidth: 360,
+    reserveWidth: 280,
   })
   const activeVaults = vaults.filter((v): v is ActiveVault => v.type === 'active')
   const maturedByDate = activeVaults
@@ -37,53 +40,41 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
     tight: TOKENS.spacing[4],
     limit: TOKENS.spacing[3],
   })
-  const heroValueSize = fitValue(mode, {
-    normal: TOKENS.fontSizes.xxxl,
-    tight: TOKENS.fontSizes.xxxl,
-    limit: TOKENS.fontSizes.xxl,
-  })
-
   return (
     <div
       className="flex-1"
       style={{
         display: 'flex',
         flexDirection: 'column',
-        background: TOKENS.colors.white,
+        background: TOKENS.colors.bgPage,
         overflow: 'hidden',
         fontFamily: TOKENS.fonts.sans,
         height: '100%',
+        color: TOKENS.colors.textPrimary,
       }}
     >
-      <div style={{
+      <div
+        style={{
         padding: `${shellPadding} ${shellPadding}`,
-        borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+        borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
         flexShrink: 0,
-        background: TOKENS.colors.bgSurface,
-      }}>
-        <Label>Portfolio</Label>
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: fitValue(mode, {
-            normal: '1.35fr 0.9fr',
-            tight: '1.28fr 0.9fr',
-            limit: '1.12fr 0.82fr',
-          }),
-          gap: shellGap,
-          alignItems: 'end',
-        }}>
-          <div>
-            <div style={{
-              fontSize: heroValueSize,
-              fontWeight: TOKENS.fontWeights.black,
-              letterSpacing: TOKENS.letterSpacing.tight,
-              lineHeight: 0.95,
-              color: TOKENS.colors.black,
-            }}>
-              {fmtUsdCompact(portfolioValue)}
-            </div>
-          </div>
-          <HeroMetric mode={mode} label="Available Yield" value={fmtUsdCompact(agg.totalClaimable)} secondary={`${activeVaults.length} active positions`} />
+        background: TOKENS.colors.bgApp,
+      }}
+      >
+        <Label id="port-overview" tone="scene" variant="text">
+          Portfolio
+        </Label>
+        <div style={{ marginTop: shellGap }}>
+          <CompressedMetricsStrip
+            mode={mode}
+            items={[
+              { id: 'net', label: 'Net position', value: fmtUsdCompact(portfolioValue) },
+              { id: 'yield', label: 'Available yield', value: fmtUsdCompact(agg.totalClaimable), accent: true },
+              ...(mode === 'normal'
+                ? [{ id: 'pos', label: 'Active', value: String(activeVaults.length) }]
+                : []),
+            ]}
+          />
         </div>
       </div>
 
@@ -97,7 +88,9 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
         overflow: 'hidden',
       }}>
         <div style={{ flexShrink: 0 }}>
-          <Label>Resource Allocation</Label>
+          <Label id="alloc" tone="scene" variant="text">
+            Resource allocation
+          </Label>
           <AllocationDonut mode={mode} vaults={activeVaults} total={agg.totalDeposited} />
         </div>
 
@@ -112,11 +105,15 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
           flexShrink: 0,
         }}>
           <div>
-            <Label>Yield by Position</Label>
+            <Label id="ychart" tone="scene" variant="text">
+              Yield by position
+            </Label>
             <YieldChart mode={mode} vaults={activeVaults} />
           </div>
           <div>
-            <Label>Next Distribution Window</Label>
+            <Label id="maturity" tone="scene" variant="text">
+              Next distribution
+            </Label>
             <MaturityPanel
               mode={mode}
               nextMaturity={nextMaturity}
@@ -144,15 +141,34 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
             display: 'grid',
             gridTemplateColumns: '2.2fr 1.1fr 1.1fr 1fr 1fr',
             paddingBottom: TOKENS.spacing[2],
-            borderBottom: `${TOKENS.borders.thick} solid ${TOKENS.colors.black}`,
+            borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
             flexShrink: 0,
-          }}>
-            {['Position', 'Principal', 'Current Value', 'Yield', 'Maturity'].map(h => (
-              <span key={h} style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, letterSpacing: TOKENS.letterSpacing.display, textTransform: 'uppercase', color: TOKENS.colors.textGhost }}>{h}</span>
+          }}
+          >
+            {['Position', 'Principal', 'Current', 'Yield', 'Maturity'].map((h) => (
+              <span
+                key={h}
+                style={{
+                  fontSize: TOKENS.fontSizes.micro,
+                  fontWeight: TOKENS.fontWeights.bold,
+                  letterSpacing: TOKENS.letterSpacing.display,
+                  textTransform: 'uppercase' as const,
+                  color: TOKENS.colors.textGhost,
+                }}
+              >
+                {h}
+              </span>
             ))}
           </div>
           <div style={{ flex: 1, overflowY: 'auto' }} className="hide-scrollbar">
-            {activeVaults.map(v => <VaultRow key={v.id} mode={mode} vault={v} />)}
+            {activeVaults.length === 0 ? (
+              <EmptyState
+                title="No open positions"
+                description="When you deploy capital, positions will show here with live principal, yield, and maturity context."
+              />
+            ) : (
+              activeVaults.map((v) => <VaultRow key={v.id} mode={mode} vault={v} />)
+            )}
           </div>
         </div>
       </div>
@@ -173,77 +189,23 @@ function VaultRow({ vault: v, mode }: { vault: ActiveVault; mode: SmartFitMode }
       })} 0`,
       borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
       alignItems: 'center',
-    }}>
+    }}
+    >
       <div>
-        <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.black, textTransform: 'uppercase' }}>{v.name}</div>
+        <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.black, textTransform: 'uppercase' as const, color: TOKENS.colors.textPrimary }}>{v.name}</div>
         <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>
           {mode === 'limit' ? `${v.apr}% APY` : v.strategy}
         </div>
       </div>
       <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>{fmtUsdCompact(principal)}</div>
-      <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.black }}>{fmtUsdCompact(v.deposited)}</div>
+      <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.black, color: TOKENS.colors.textPrimary }}>{fmtUsdCompact(v.deposited)}</div>
       <div>
         <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.black, color: TOKENS.colors.accent }}>{fmtUsdCompact(v.claimable)}</div>
         {mode !== 'limit' && (
           <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>{v.apr}% APY</div>
         )}
       </div>
-      <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.bold }}>{v.maturity}</div>
-    </div>
-  )
-}
-
-function Label({ children, style = {} }: { children: React.ReactNode, style?: React.CSSProperties }) {
-  return (
-    <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, letterSpacing: TOKENS.letterSpacing.display, textTransform: 'uppercase', color: TOKENS.colors.textSecondary, marginBottom: TOKENS.spacing[2], ...style }}>
-      {children}
-    </div>
-  )
-}
-
-function HeroMetric({
-  mode,
-  label,
-  value,
-  secondary,
-}: {
-  mode: SmartFitMode
-  label: string
-  value: string
-  secondary: string
-}) {
-  return (
-    <div style={{
-      paddingLeft: fitValue(mode, {
-        normal: TOKENS.spacing[4],
-        tight: TOKENS.spacing[3],
-        limit: TOKENS.spacing[3],
-      }),
-      borderLeft: `${TOKENS.borders.thin} solid ${TOKENS.colors.gray200}`,
-    }}>
-      <Label>{label}</Label>
-      <div style={{
-        fontSize: fitValue(mode, {
-          normal: TOKENS.fontSizes.lg,
-          tight: TOKENS.fontSizes.md,
-          limit: TOKENS.fontSizes.md,
-        }),
-        fontWeight: TOKENS.fontWeights.black,
-        letterSpacing: '-0.03em',
-        color: TOKENS.colors.black,
-        marginBottom: TOKENS.spacing[2],
-      }}>
-        {value}
-      </div>
-      <div style={{
-        fontSize: TOKENS.fontSizes.xs,
-        fontWeight: TOKENS.fontWeights.medium,
-        color: TOKENS.colors.textSecondary,
-        letterSpacing: TOKENS.letterSpacing.display,
-        textTransform: 'uppercase',
-      }}>
-        {secondary}
-      </div>
+      <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textPrimary }}>{v.maturity}</div>
     </div>
   )
 }
@@ -261,15 +223,15 @@ function YieldChart({ vaults, mode }: { vaults: ActiveVault[]; mode: SmartFitMod
   const rightPad = 16
   const topPad = 12
   const bottomPad = 28
-  const palette = [TOKENS.colors.accent, TOKENS.colors.black, TOKENS.colors.gray500]
+  const palette = [TOKENS.colors.accent, 'rgba(255,255,255,0.5)', 'rgba(255,255,255,0.28)']
 
   const xFor = (index: number) => leftPad + ((chartWidth - leftPad - rightPad) / (points.length - 1)) * index
   const yFor = (value: number) => topPad + (chartHeight - topPad - bottomPad) * (1 - value / maxValue)
 
   return (
     <div style={{
-      border: `${TOKENS.borders.thin} solid ${TOKENS.colors.gray200}`,
-      background: TOKENS.colors.bgSurface,
+      background: 'rgba(0,0,0,0.2)',
+      boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
       padding: fitValue(mode, {
         normal: TOKENS.spacing[4],
         tight: TOKENS.spacing[3],
@@ -285,9 +247,9 @@ function YieldChart({ vaults, mode }: { vaults: ActiveVault[]; mode: SmartFitMod
       minHeight: '100%',
     }}>
       <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ width: '100%', height: fitValue(mode, {
-        normal: '148px',
-        tight: '132px',
-        limit: '116px',
+            normal: '148px',
+            tight: '120px',
+            limit: '104px',
       }), display: 'block' }} aria-hidden="true">
         {[0, 1, 2].map(index => (
           <line
@@ -296,7 +258,7 @@ function YieldChart({ vaults, mode }: { vaults: ActiveVault[]; mode: SmartFitMod
             y1={topPad}
             x2={xFor(index)}
             y2={chartHeight - bottomPad}
-            stroke={TOKENS.colors.gray200}
+            stroke="rgba(255,255,255,0.08)"
             strokeWidth="1"
           />
         ))}
@@ -305,7 +267,7 @@ function YieldChart({ vaults, mode }: { vaults: ActiveVault[]; mode: SmartFitMod
           y1={chartHeight - bottomPad}
           x2={chartWidth - rightPad}
           y2={chartHeight - bottomPad}
-          stroke={TOKENS.colors.black}
+          stroke="rgba(255,255,255,0.35)"
           strokeWidth="1.5"
         />
 
@@ -401,13 +363,13 @@ function MaturityPanel({
 
   return (
     <div style={{
-      border: `${TOKENS.borders.thin} solid ${TOKENS.colors.gray200}`,
       padding: fitValue(mode, {
         normal: TOKENS.spacing[4],
         tight: TOKENS.spacing[3],
         limit: TOKENS.spacing[3],
       }),
-      background: TOKENS.colors.bgSurface,
+      background: 'rgba(0,0,0,0.2)',
+      boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
       minHeight: '100%',
       display: 'flex',
       flexDirection: 'column',
@@ -422,7 +384,7 @@ function MaturityPanel({
           }),
           fontWeight: TOKENS.fontWeights.black,
           letterSpacing: '-0.03em',
-          color: TOKENS.colors.black,
+          color: TOKENS.colors.textPrimary,
           marginBottom: TOKENS.spacing[2],
         }}>
           {nextMaturity}
@@ -452,7 +414,7 @@ function MaturityPanel({
             <span style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, letterSpacing: TOKENS.letterSpacing.display, textTransform: 'uppercase', color: TOKENS.colors.textSecondary }}>
               Portfolio Progress
             </span>
-            <span style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.black }}>
+            <span style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textPrimary }}>
               {avgProgress.toFixed(0)}%
             </span>
           </div>
@@ -489,7 +451,7 @@ function StatCell({
         fontSize: TOKENS.fontSizes.xs,
         fontWeight: TOKENS.fontWeights.bold,
         letterSpacing: TOKENS.letterSpacing.display,
-        textTransform: 'uppercase',
+        textTransform: 'uppercase' as const,
         color: TOKENS.colors.textSecondary,
         marginBottom: TOKENS.spacing[2],
       }}>
@@ -498,7 +460,7 @@ function StatCell({
       <div style={{
         fontSize: TOKENS.fontSizes.md,
         fontWeight: TOKENS.fontWeights.black,
-        color: accent ? TOKENS.colors.accent : TOKENS.colors.black,
+        color: accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
       }}>
         {value}
       </div>
@@ -507,7 +469,7 @@ function StatCell({
 }
 
 function AllocationDonut({ vaults, total, mode }: { vaults: ActiveVault[]; total: number; mode: SmartFitMode }) {
-  const palette = [TOKENS.colors.accent, TOKENS.colors.black, TOKENS.colors.gray500]
+  const palette = [TOKENS.colors.accent, 'rgba(255,255,255,0.5)', 'rgba(255,255,255,0.28)']
   const size = fitValue(mode, {
     normal: 144,
     tight: 128,
@@ -524,12 +486,12 @@ function AllocationDonut({ vaults, total, mode }: { vaults: ActiveVault[]; total
 
   return (
     <div style={{
-      border: `${TOKENS.borders.thin} solid ${TOKENS.colors.gray200}`,
-      background: TOKENS.colors.bgSurface,
+      background: 'rgba(0,0,0,0.2)',
+      boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
       padding: fitValue(mode, {
         normal: TOKENS.spacing[4],
-        tight: TOKENS.spacing[3],
-        limit: TOKENS.spacing[3],
+        tight: TOKENS.spacing[2],
+        limit: TOKENS.spacing[2],
       }),
       display: 'grid',
       gridTemplateColumns: fitValue(mode, {
@@ -539,8 +501,8 @@ function AllocationDonut({ vaults, total, mode }: { vaults: ActiveVault[]; total
       }),
       gap: fitValue(mode, {
         normal: TOKENS.spacing[4],
-        tight: TOKENS.spacing[3],
-        limit: TOKENS.spacing[3],
+        tight: TOKENS.spacing[2],
+        limit: TOKENS.spacing[2],
       }),
       alignItems: 'center',
     }}>
@@ -551,7 +513,7 @@ function AllocationDonut({ vaults, total, mode }: { vaults: ActiveVault[]; total
             cy={size / 2}
             r={radius}
             fill="none"
-            stroke={TOKENS.colors.gray200}
+            stroke="rgba(255,255,255,0.1)"
             strokeWidth={strokeWidth}
           />
           {vaults.map((vault, index) => {
@@ -600,7 +562,7 @@ function AllocationDonut({ vaults, total, mode }: { vaults: ActiveVault[]; total
               limit: TOKENS.fontSizes.sm,
             }),
             fontWeight: TOKENS.fontWeights.black,
-            color: TOKENS.colors.black,
+            color: TOKENS.colors.textPrimary,
           }}>
             {fmtUsdCompact(total)}
           </div>

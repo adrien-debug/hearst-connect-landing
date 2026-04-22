@@ -1910,7 +1910,7 @@ a.welcome-btn:focus-visible {
 
 .hub-font-scope .hub-footer-heading {
   margin: 0 0 var(--hub-space-xs);
-  font-size: var(--dashboard-text-dense-xs, 0.625rem);
+  font-size: var(--dashboard-text-dense-xs);
   font-weight: 800;
   letter-spacing: 0.14em;
   text-transform: uppercase;

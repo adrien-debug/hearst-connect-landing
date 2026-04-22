@@ -1,0 +1,30 @@
+/**
+ * Cinematic OS dashboard tokens — mirror of `src/components/connect/constants.ts` (TOKENS).
+ * Import once from the connect shell (e.g. `canvas.tsx`).
+ */
+.connect-scope {
+  --hc-bg-app: #050505;
+  --hc-bg-page: #0a0a0a;
+  --hc-bg-sidebar: #050505;
+  --hc-accent: #a7fb90;
+  --hc-text-primary: rgba(255, 255, 255, 0.92);
+  --hc-text-secondary: rgba(255, 255, 255, 0.55);
+  --hc-text-ghost: rgba(255, 255, 255, 0.35);
+  --hc-border-subtle: rgba(255, 255, 255, 0.08);
+  --hc-space-2: 8px;
+  --hc-space-3: 12px;
+  --hc-space-4: 16px;
+  --hc-space-6: 24px;
+  --hc-space-8: 32px;
+  --hc-font-title: 24px;
+  --hc-font-body: 14px;
+  --hc-font-caption: 11px;
+  --hc-sidebar-w: 280px;
+  color-scheme: dark;
+}
+
+@media (max-width: 1279px) {
+  .connect-scope {
+    --hc-sidebar-w: 272px;
+  }
+}

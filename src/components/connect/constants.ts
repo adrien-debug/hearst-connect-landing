@@ -1,57 +1,70 @@
+/** Cinematic Financial OS — source of truth for connect scope. Keep `dashboard-vars.css` in sync. */
+export const SIDEBAR_WIDTH_PX = 280
+
 export const TOKENS = {
   colors: {
     white: '#FFFFFF',
     black: '#000000',
+    /** App shell / deep void */
+    bgApp: '#050505',
+    /** Main scene */
+    bgPage: '#0A0A0A',
+    /** Sidebar column */
+    bgSidebar: '#050505',
+    /** Subtle lift (modals, hover) */
+    bgSurface: '#0A0A0A',
+    /** Legacy aliases — map to scene */
     gray50: '#F8F9FA',
-    gray100: '#F1F3F5',
-    gray200: '#E9ECEF',
-    gray500: '#ADB5BD',
-    gray700: '#495057',
-    accent: '#a7fb90', // Citrus
-    accentDim: 'rgba(167, 251, 144, 0.05)', // Encore plus subtil
-    accentGlow: 'rgba(167, 251, 144, 0.15)', // Diffusion large
-    bgPage: '#FFFFFF',
-    bgSidebar: '#000000',
-    bgSurface: '#F9F9FB', 
-    textPrimary: '#000000',
-    textSecondary: '#52525B',
-    textGhost: '#D4D4D8', // Plus clair pour moins de dureté
-    textOnDark: '#FFFFFF',
-    borderMain: 'rgba(0, 0, 0, 0.04)', // Presque invisible
-    borderSubtle: '#F4F4F7',
-    sidebarTextPrimary: '#FFFFFF',
-    sidebarTextGhost: 'rgba(255, 255, 255, 0.25)',
-    surfaceHover: '#F4F4F7',
-    surfaceActive: '#E4E4E7',
-    danger: '#FF453A',
+    gray100: '#0A0A0A',
+    gray200: 'rgba(255,255,255,0.08)',
+    gray500: 'rgba(255,255,255,0.45)',
+    gray700: 'rgba(255,255,255,0.72)',
+    accent: '#A7FB90',
+    accentDim: 'rgba(167, 251, 144, 0.05)',
+    accentGlow: 'rgba(167, 251, 144, 0.12)',
+    textPrimary: 'rgba(255,255,255,0.92)',
+    textSecondary: 'rgba(255,255,255,0.55)',
+    textGhost: 'rgba(255,255,255,0.35)',
+    textOnDark: 'rgba(255,255,255,0.92)',
+    borderMain: 'rgba(255,255,255,0.06)',
+    borderSubtle: 'rgba(255,255,255,0.08)',
+    sidebarTextPrimary: 'rgba(255,255,255,0.92)',
+    sidebarTextGhost: 'rgba(255,255,255,0.35)',
+    surfaceHover: 'rgba(255,255,255,0.04)',
+    surfaceActive: 'rgba(255,255,255,0.08)',
+    danger: '#EF4444',
   },
   fonts: {
     sans: "'Satoshi Variable', Inter, -apple-system, sans-serif",
-    mono: "'Satoshi Variable', Inter, -apple-system, sans-serif", // Satoshi partout
+    mono: "'IBM Plex Mono', 'SF Mono', ui-monospace, monospace",
   },
   fontSizes: {
+    /** Caption / register */
+    micro: '11px',
     xs: '12px',
+    /** Body */
     sm: '14px',
     md: '16px',
+    /** Title / section */
     lg: '20px',
     xl: '24px',
     xxl: '40px',
-    xxxl: '56px',
-    display: 'clamp(48px, 5vw, 64px)',
-    figure: 'clamp(36px, 5vh, 64px)',
+    xxxl: '48px',
+    display: 'clamp(32px, 4vw, 48px)',
+    figure: 'clamp(28px, 4vh, 44px)',
   },
   fontWeights: {
     regular: 400,
     medium: 500,
     semibold: 600,
     bold: 700,
-    black: 900,
+    black: 800,
   },
   letterSpacing: {
     tight: '-0.06em',
     normal: '0',
     wide: '0.12em',
-    display: '0.3em',
+    display: '0.2em',
   },
   spacing: {
     0: '0px',
@@ -71,8 +84,8 @@ export const TOKENS = {
     none: 'none',
     thin: '1px',
     thick: '2px',
-    heavy: '12px',
-  }
+    heavy: '6px',
+  },
 }
 
 export const FONT = TOKENS.fonts.sans

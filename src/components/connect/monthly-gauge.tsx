@@ -18,13 +18,13 @@ export function MonthlyGauge({ deposited, apr, label, mode = 'normal' }: Monthly
   const nowPct = Math.max(2, Math.min(97, progress * 100))
   const rowGap = fitValue(mode, {
     normal: TOKENS.spacing[2],
-    tight: '4px',
-    limit: '0px',
+    tight: TOKENS.spacing[2],
+    limit: TOKENS.spacing[0],
   })
   const badgePadding = fitValue(mode, {
     normal: `2px ${TOKENS.spacing[2]}`,
-    tight: '2px 6px',
-    limit: '2px 4px',
+    tight: `2px ${TOKENS.spacing[2]}`,
+    limit: `2px ${TOKENS.spacing[2]}`,
   })
   const showSummary = mode !== 'limit'
   const showFirstMetric = mode !== 'limit'

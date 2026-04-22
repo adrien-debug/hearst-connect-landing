@@ -4,7 +4,7 @@ export const dynamic = 'force-dynamic'
 
 export const metadata = {
   title: 'Connect | Hearst',
-  description: 'Institutional DeFi vault interface.',
+  description: 'Cinematic portfolio OS — positions, subscription flow, and projections.',
 }
 
 export default function AppPage() {
