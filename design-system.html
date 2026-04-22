@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Hearst Connect - Client vs Admin Analytics</title>
+  <title>Hearst Connect — Cinematic OS design reference</title>
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
   <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
@@ -17,37 +17,37 @@
   </style>
   <style>
     :root {
+      /* Cinematic Financial OS — align with src/components/connect/constants.ts */
       --color-white: #FFFFFF;
       --color-black: #000000;
-      --color-gray-50: #F8F9FA;
-      --color-gray-100: #F1F3F5;
-      --color-gray-200: #E9ECEF;
-      --color-gray-500: #ADB5BD;
-      --color-gray-700: #495057;
+      --color-bg-app: #050505;
+      --color-bg-page: #0A0A0A;
+      --color-bg-sidebar: #050505;
+      --color-gray-200: rgba(255, 255, 255, 0.08);
+      --color-gray-500: rgba(255, 255, 255, 0.45);
+      --color-gray-700: rgba(255, 255, 255, 0.72);
       --color-accent: #A7FB90;
 
-      --color-bg-page: var(--color-white);
-      --color-bg-surface: var(--color-gray-50);
-      --color-bg-sidebar: var(--color-black);
-      --color-text-primary: var(--color-black);
-      --color-text-secondary: var(--color-gray-700);
-      --color-text-ghost: var(--color-gray-500);
-      --color-text-on-dark: var(--color-white);
-      --color-border-main: var(--color-black);
-      --color-border-subtle: var(--color-gray-200);
+      --color-text-primary: rgba(255, 255, 255, 0.92);
+      --color-text-secondary: rgba(255, 255, 255, 0.55);
+      --color-text-ghost: rgba(255, 255, 255, 0.35);
+      --color-text-on-dark: rgba(255, 255, 255, 0.92);
+      --color-border-subtle: rgba(255, 255, 255, 0.08);
 
       --font-sans: 'Satoshi Variable', Inter, -apple-system, sans-serif;
       --font-mono: 'IBM Plex Mono', monospace;
 
+      /* Hiérarchie 24 / 14 / 11 + display */
+      --fs-caption: 11px;
       --fs-xs: 12px;
       --fs-sm: 14px;
       --fs-md: 16px;
       --fs-lg: 20px;
       --fs-xl: 24px;
       --fs-2xl: 40px;
-      --fs-3xl: 56px;
-      --fs-display: clamp(48px, 5vw, 64px);
-      --fs-figure: clamp(36px, 5vh, 64px);
+      --fs-3xl: 48px;
+      --fs-display: clamp(32px, 4vw, 48px);
+      --fs-figure: clamp(28px, 4vh, 44px);
 
       --fw-medium: 500;
       --fw-semibold: 600;
@@ -58,6 +58,8 @@
       --ls-wide: 0.1em;
       --ls-display: 0.2em;
 
+      /* Grille 8px (base 8) */
+      --space-1: 4px;
       --space-2: 8px;
       --space-3: 12px;
       --space-4: 16px;
@@ -66,11 +68,14 @@
       --space-12: 48px;
       --space-16: 64px;
       --space-20: 80px;
+      --radius-sm: 8px;
+      --radius-md: 12px;
 
       --border-width-thin: 1px;
       --border-width-thick: 2px;
       --border-width-heavy: 6px;
-      --sidebar-width: 360px;
+      /* Sidebar connect : 280px, 272px en viewport &lt; 1280 (mode limit) */
+      --sidebar-width: 280px;
       --container-max-width: 1680px;
     }
 
@@ -96,15 +101,15 @@
       width: var(--sidebar-width);
       background: var(--color-bg-sidebar);
       color: var(--color-text-on-dark);
-      padding: var(--space-12) var(--space-8);
-      border-right: var(--border-width-thin) solid rgba(255, 255, 255, 0.12);
+      padding: var(--space-8) var(--space-4);
+      /* Cinematic: pas de cadre — séparation par espace, pas de bordure droite */
       position: sticky;
       top: 0;
       height: 100vh;
       display: flex;
       flex-direction: column;
       justify-content: space-between;
-      gap: var(--space-12);
+      gap: var(--space-8);
     }
 
     .logo-block {
@@ -116,17 +121,22 @@
     .eyebrow,
     .label {
       font-family: var(--font-mono);
-      font-size: var(--fs-xs);
+      font-size: var(--fs-caption, 11px);
       font-weight: var(--fw-bold);
       letter-spacing: var(--ls-display);
       text-transform: uppercase;
+      color: var(--color-text-ghost);
     }
 
-    .label {
+    .label:not(.label--text) {
       display: inline-block;
       border-left: 3px solid var(--color-accent);
       padding-left: var(--space-3);
-      margin-bottom: var(--space-6);
+      margin-bottom: var(--space-4);
+    }
+
+    .label.label--text {
+      margin-bottom: var(--space-2);
     }
 
     .logo {
@@ -169,9 +179,10 @@
 
     .sidebar-metrics {
       display: grid;
-      gap: var(--border-width-thin);
-      background: rgba(255, 255, 255, 0.12);
-      border: var(--border-width-thin) solid rgba(255, 255, 255, 0.12);
+      gap: var(--space-2);
+      padding: var(--space-4) 0;
+      background: linear-gradient(180deg, transparent, rgba(255, 255, 255, 0.04));
+      border-radius: var(--radius-sm);
     }
 
     .sidebar-card {
@@ -198,13 +209,14 @@
 
     .main {
       flex: 1;
+      background: var(--color-bg-page);
       padding: var(--space-16) clamp(32px, 5vw, 96px);
       max-width: var(--container-max-width);
     }
 
     .hero {
       padding-bottom: var(--space-16);
-      border-bottom: var(--border-width-heavy) solid var(--color-border-main);
+      border-bottom: 1px solid var(--color-border-subtle);
       margin-bottom: var(--space-16);
     }
 
@@ -230,14 +242,13 @@
       margin-top: var(--space-12);
       display: grid;
       grid-template-columns: repeat(4, minmax(0, 1fr));
-      gap: var(--border-width-thin);
-      background: var(--color-border-main);
-      border: var(--border-width-thin) solid var(--color-border-main);
+      gap: var(--space-2);
     }
 
     .hero-stat {
-      background: var(--color-white);
-      padding: var(--space-8);
+      background: rgba(255, 255, 255, 0.04);
+      padding: var(--space-4);
+      border-radius: var(--radius-sm);
     }
 
     .hero-stat-value {

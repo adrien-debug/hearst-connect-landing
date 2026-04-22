@@ -1,6 +1,20 @@
 @import 'tailwindcss';
 @import '../generated/dashboard-vars.css';
 
+@layer utilities {
+  .sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border: 0;
+  }
+}
+
 @theme {
   --font-sans: 'Satoshi Variable', Inter, -apple-system, sans-serif;
 }
@@ -73,7 +87,12 @@
 .connect-scope,
 .connect-scope * {
   font-family: 'Satoshi Variable', Inter, -apple-system, sans-serif;
-  border-radius: 0 !important;
+}
+
+/* Cinematic: radius utilitaires 8–12px; pas de “pill” systématique */
+.connect-scope {
+  --radius-cinematic-sm: 8px;
+  --radius-cinematic-md: 12px;
 }
 
 /* Mono pour les éléments de données — appliqué via inline styles dans les composants */

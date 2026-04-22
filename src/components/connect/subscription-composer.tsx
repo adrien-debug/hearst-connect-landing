@@ -36,25 +36,31 @@ export function SubscriptionComposer({
 }: Props) {
   const idAmount = 'subscribe-amount'
   const idAgree = 'subscribe-term-confirm'
+  const idAmountHint = 'subscribe-amount-hint'
+  const idAmountStatus = 'subscribe-amount-status'
+  const idFieldsetTerms = 'subscribe-fieldset-terms'
+
+  const showError = num > 0 && !isValid
+  const showValidHint = isValid && num > 0
 
   return (
     <div
+      className="flex min-h-0 flex-1 flex-col"
       style={{
-        display: 'flex',
-        flexDirection: 'column',
         gap: fitValue(mode, { normal: TOKENS.spacing[6], tight: TOKENS.spacing[4], limit: TOKENS.spacing[3] }),
-        minHeight: 0,
-        flex: 1,
       }}
     >
-      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', gap: fitValue(mode, { normal: TOKENS.spacing[6], tight: TOKENS.spacing[4], limit: TOKENS.spacing[2] }), flexShrink: 0, flexWrap: isLimit ? 'wrap' : 'nowrap' }}>
-        <div style={{ flex: 1, minWidth: 0 }}>
+      <div
+        className="flex shrink-0 flex-wrap items-end justify-between"
+        style={{ gap: fitValue(mode, { normal: TOKENS.spacing[6], tight: TOKENS.spacing[4], limit: TOKENS.spacing[2] }) }}
+      >
+        <div className="min-w-0 flex-1">
           <Label id="sub-kicker" tone="scene" variant="text">
             Subscription
           </Label>
           <h2
+            className="m-0"
             style={{
-              margin: 0,
               fontSize: fitValue(mode, { normal: TOKENS.fontSizes.xl, tight: TOKENS.fontSizes.lg, limit: TOKENS.fontSizes.md }),
               fontWeight: TOKENS.fontWeights.black,
               letterSpacing: TOKENS.letterSpacing.tight,
@@ -65,7 +71,7 @@ export function SubscriptionComposer({
             {vault.name}
           </h2>
         </div>
-        <div style={{ textAlign: 'right' }}>
+        <div className="text-right" role="group" aria-label="Target annual yield">
           <div
             style={{
               fontSize: fitValue(mode, { normal: TOKENS.fontSizes.xl, tight: TOKENS.fontSizes.lg, limit: TOKENS.fontSizes.md }),
@@ -92,21 +98,21 @@ export function SubscriptionComposer({
         </div>
       </div>
 
-      <div style={{ flexShrink: 0 }}>
-        <label htmlFor={idAmount} style={{ display: 'block' }}>
-        <div
-          style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, letterSpacing: TOKENS.letterSpacing.display, textTransform: 'uppercase', color: TOKENS.colors.textSecondary, marginBottom: TOKENS.spacing[2] }}
+      <fieldset
+        className="min-w-0 shrink-0 border-0 p-0"
+        style={{ margin: 0 }}
+      >
+        <legend className="sr-only">Deployment amount in USDC</legend>
+        <label
+          htmlFor={idAmount}
+          id={idAmountHint}
+          className="mb-2 block font-mono text-xs font-bold uppercase tracking-[0.2em] text-white/55"
         >
           Amount to deploy (USDC)
-        </div>
+        </label>
         <div
-          style={{
-            display: 'flex',
-            alignItems: 'baseline',
-            paddingBottom: TOKENS.spacing[3],
-            borderBottom: `1px solid ${isValid ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
-            transition: '120ms ease-out',
-          }}
+          className="flex items-baseline border-b border-white/10 pb-3 transition-colors"
+          style={{ borderBottomColor: isValid && num > 0 ? TOKENS.colors.accent : undefined }}
         >
           <input
             id={idAmount}
@@ -118,55 +124,43 @@ export function SubscriptionComposer({
             value={amount}
             onChange={(e) => onAmountChange(e.target.value)}
             autoComplete="off"
-            aria-invalid={!isValid && num > 0}
-            aria-describedby={num > 0 && !isValid ? `${idAmount}-error` : undefined}
+            aria-invalid={showError}
+            aria-describedby={[idAmountHint, num > 0 ? idAmountStatus : ''].filter(Boolean).join(' ') || undefined}
+            className="w-full min-w-0 border-0 bg-transparent font-bold text-white/90 outline-none"
             style={{
-              background: 'transparent',
-              border: 'none',
-              outline: 'none',
-              color: TOKENS.colors.textPrimary,
               fontSize: fitValue(mode, { normal: TOKENS.fontSizes.figure, tight: TOKENS.fontSizes.xxxl, limit: TOKENS.fontSizes.xl }),
               fontFamily: TOKENS.fonts.sans,
-              width: '100%',
-              fontWeight: TOKENS.fontWeights.black,
               letterSpacing: '-0.07em',
               lineHeight: 0.85,
             }}
           />
           <span
+            className="font-bold text-white/50"
             style={{
               fontSize: fitValue(mode, { normal: TOKENS.fontSizes.lg, tight: TOKENS.fontSizes.md, limit: TOKENS.fontSizes.sm }),
-              fontWeight: TOKENS.fontWeights.black,
-              color: TOKENS.colors.textSecondary,
-              opacity: 0.5,
             }}
             aria-hidden
           >
             USDC
           </span>
         </div>
-        </label>
-        <div style={{ marginTop: TOKENS.spacing[4], minHeight: 20 }}>
-          {num > 0 && !isValid && (
-            <div
-              id={`${idAmount}-error`}
-              style={{ fontSize: TOKENS.fontSizes.xs, color: TOKENS.colors.danger, fontWeight: TOKENS.fontWeights.bold }}
-              role="status"
-            >
-              Minimum deposit: {fmtUsd(vault.minDeposit)}
-            </div>
-          )}
+        <div
+          id={idAmountStatus}
+          role="status"
+          aria-live="polite"
+          className="mt-4 min-h-[20px] text-xs font-bold"
+          style={{ color: showError ? TOKENS.colors.danger : showValidHint ? TOKENS.colors.accent : 'transparent' }}
+        >
+          {showError && <span>Minimum deposit: {fmtUsd(vault.minDeposit)}</span>}
+          {showValidHint && !showError && <span>Deposit amount valid</span>}
         </div>
-      </div>
+      </fieldset>
 
       <div
+        className="grid shrink-0 border-0 border-t border-white/10 pt-4"
         style={{
-          display: 'grid',
           gridTemplateColumns: isLimit ? '1fr' : 'repeat(3, minmax(0,1fr))',
           gap: fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[2] }),
-          borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
-          paddingTop: fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[2] }),
-          flexShrink: 0,
         }}
       >
         <SpecItem mode={mode} label="Lock" value={vault.lockPeriod} />
@@ -175,16 +169,17 @@ export function SubscriptionComposer({
       </div>
 
       <div
+        className="mt-auto grid items-end"
         style={{
-          display: 'grid',
           gridTemplateColumns: isLimit ? '1fr' : 'minmax(0,1fr) minmax(0,280px)',
           gap: fitValue(mode, { normal: TOKENS.spacing[6], tight: TOKENS.spacing[4], limit: TOKENS.spacing[3] }),
-          alignItems: 'end',
-          marginTop: 'auto',
           paddingTop: fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[2] }),
         }}
       >
-        <div style={{ display: 'flex', flexDirection: 'column', gap: fitValue(mode, { normal: TOKENS.spacing[3], tight: TOKENS.spacing[2], limit: TOKENS.spacing[2] }) }}>
+        <div
+          className="flex flex-col"
+          style={{ gap: fitValue(mode, { normal: TOKENS.spacing[3], tight: TOKENS.spacing[2], limit: TOKENS.spacing[2] }) }}
+        >
           <ProjectionLine mode={mode} label="Est. annual yield" value={num > 0 ? `+ ${fmtUsd(yearlyYield)}` : '—'} highlight />
           <ProjectionLine
             mode={mode}
@@ -193,61 +188,56 @@ export function SubscriptionComposer({
             highlight
           />
           {!isLimit && (
-            <p style={{ fontSize: TOKENS.fontSizes.sm, color: TOKENS.colors.textSecondary, lineHeight: 1.5, maxWidth: 520, margin: 0 }}>
+            <p className="m-0 max-w-[520px] text-sm leading-normal text-white/55">
               Capital remains allocated until the term or target is met. Review the term sheet before confirming.
             </p>
           )}
         </div>
 
         <div
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            gap: fitValue(mode, { normal: TOKENS.spacing[3], tight: TOKENS.spacing[2], limit: TOKENS.spacing[2] }),
-            width: '100%',
-          }}
+          className="flex w-full flex-col"
+          style={{ gap: fitValue(mode, { normal: TOKENS.spacing[3], tight: TOKENS.spacing[2], limit: TOKENS.spacing[2] }) }}
         >
-          <div style={{ fontSize: 0 }}>{/* a11y: associate label */}</div>
-          <div
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: TOKENS.spacing[3],
-              cursor: 'pointer',
-            }}
-          >
-            <input
-              id={idAgree}
-              name="terms"
-              type="checkbox"
-              checked={agreed}
-              onChange={(e) => onAgreedChange(e.target.checked)}
-              style={{ width: 20, height: 20, flexShrink: 0, accentColor: TOKENS.colors.accent }}
-              aria-describedby={`${idAgree}-desc`}
-            />
-            <span
-              id={`${idAgree}-desc`}
-              style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}
+          <fieldset id={idFieldsetTerms} className="m-0 border-0 p-0">
+            <legend className="sr-only">Terms confirmation</legend>
+            <label
+              htmlFor={idAgree}
+              className="flex cursor-pointer items-center gap-3"
             >
-              I confirm the term sheet and minimum deposit.
-            </span>
-          </div>
+              <input
+                id={idAgree}
+                name="terms"
+                type="checkbox"
+                checked={agreed}
+                onChange={(e) => onAgreedChange(e.target.checked)}
+                className="h-5 w-5 shrink-0"
+                style={{ accentColor: TOKENS.colors.accent }}
+                aria-describedby={`${idAgree}-desc`}
+              />
+              <span
+                id={`${idAgree}-desc`}
+                className="text-sm font-bold text-white/55"
+              >
+                I confirm the term sheet and minimum deposit.
+              </span>
+            </label>
+          </fieldset>
           <button
             type="button"
             disabled={!isReady}
+            className="w-full font-black uppercase"
             style={{
-              width: '100%',
               padding: `${fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[3] })} ${fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[2] })}`,
-              background: isReady ? TOKENS.colors.textPrimary : TOKENS.colors.borderSubtle,
+              background: isReady ? TOKENS.colors.textPrimary : 'rgba(255,255,255,0.08)',
               color: isReady ? TOKENS.colors.black : TOKENS.colors.textGhost,
               border: 'none',
               fontSize: fitValue(mode, { normal: TOKENS.fontSizes.md, tight: TOKENS.fontSizes.sm, limit: TOKENS.fontSizes.sm }),
               fontWeight: TOKENS.fontWeights.black,
               letterSpacing: TOKENS.letterSpacing.display,
-              textTransform: 'uppercase',
               cursor: isReady ? 'pointer' : 'not-allowed',
             }}
             aria-label={isReady ? 'Confirm subscription' : 'Complete form to deploy'}
+            aria-disabled={!isReady}
           >
             {isReady ? 'Deploy capital' : 'Complete review'}
           </button>
@@ -288,14 +278,7 @@ function SpecItem({ label, value, mode }: { label: string; value: string; mode: 
 function ProjectionLine({ label, value, highlight, mode }: { label: string; value: string; highlight?: boolean; mode: SmartFitMode }) {
   return (
     <div
-      style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'baseline',
-        gap: TOKENS.spacing[4],
-        padding: `${TOKENS.spacing[2]} 0`,
-        borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
-      }}
+      className="flex items-baseline justify-between gap-4 border-b border-white/10 py-2"
     >
       <span
         style={{

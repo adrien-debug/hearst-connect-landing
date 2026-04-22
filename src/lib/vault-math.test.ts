@@ -24,6 +24,18 @@ describe('computeMonthlyYield', () => {
     expect(monthlyYield).toBe(120) // 12% APR on 12k / 12 months
     expect(produced + remaining).toBeCloseTo(monthlyYield, 8)
   })
+
+  it('is zero remaining at end of month', () => {
+    const { produced, remaining } = computeMonthlyYield(12_000, 12, 30, 30)
+    expect(remaining).toBe(0)
+    expect(produced).toBeGreaterThan(0)
+  })
+
+  it('handles first day of month', () => {
+    const a = computeMonthlyYield(10_000, 12, 1, 31)
+    const b = computeMonthlyYield(10_000, 12, 2, 31)
+    expect(b.produced).toBeGreaterThan(a.produced)
+  })
 })
 
 describe('projectScenario', () => {

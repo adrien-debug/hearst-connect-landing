@@ -163,15 +163,10 @@ export function SimulationPanel() {
         }}
       >
         <div
-          className="hide-scrollbar bg-gradient-to-r from-[#050505] via-[#050505] to-[#0a0a0a]/30"
+          className="hide-scrollbar flex min-h-0 flex-col overflow-auto bg-[#050505] bg-gradient-to-b from-[#050505] to-[#0a0a0a]/40"
           style={{
-            display: 'flex',
-            flexDirection: 'column',
             gap: TOKENS.spacing[4],
             padding: pad,
-            minHeight: 0,
-            overflow: 'auto',
-            background: TOKENS.colors.bgApp,
           }}
         >
           <div>

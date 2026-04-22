@@ -19,6 +19,8 @@
   --hc-font-title: 24px;
   --hc-font-body: 14px;
   --hc-font-caption: 11px;
+  --hc-radius-sm: 8px;
+  --hc-radius-md: 12px;
   --hc-sidebar-w: 280px;
   color-scheme: dark;
 }
