@@ -139,8 +139,8 @@ export function SubscribePanel({ vault }: { vault: AvailableVault }) {
         {/* Projection calculator */}
         {num > 0 && (
           <div style={{
-            background: 'rgba(0,0,0,0.2)',
-            boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+            background: 'var(--color-bg-secondary)',
+            
             padding: fitValue(mode, {
               normal: TOKENS.spacing[4],
               tight: TOKENS.spacing[3],
@@ -171,8 +171,8 @@ export function SubscribePanel({ vault }: { vault: AvailableVault }) {
         {/* Subscription form */}
         <div style={{
           flex: 1,
-          background: 'rgba(0,0,0,0.2)',
-          boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+          background: 'var(--color-bg-secondary)',
+          
           padding: fitValue(mode, {
             normal: TOKENS.spacing[6],
             tight: TOKENS.spacing[4],
@@ -198,8 +198,8 @@ export function SubscribePanel({ vault }: { vault: AvailableVault }) {
 
         {/* Terms block */}
         <div style={{
-          background: 'rgba(0,0,0,0.2)',
-          boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+          background: 'var(--color-bg-secondary)',
+          
           padding: fitValue(mode, {
             normal: TOKENS.spacing[4],
             tight: TOKENS.spacing[3],
@@ -235,8 +235,8 @@ function StatCard({ label, value, subtext, mode, accent = false }: {
 }) {
   return (
     <div style={{
-      background: 'rgba(0,0,0,0.2)',
-      boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+      background: 'var(--color-bg-secondary)',
+      
       padding: fitValue(mode, {
         normal: TOKENS.spacing[3],
         tight: TOKENS.spacing[2],

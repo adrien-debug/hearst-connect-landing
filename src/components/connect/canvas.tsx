@@ -34,7 +34,7 @@ export function Canvas() {
       }}
     >
       <header
-        className="grid h-16 w-full min-w-0 shrink-0 select-none items-stretch bg-[#050505] shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.08)]"
+        className="grid h-16 w-full min-w-0 shrink-0 select-none items-stretch bg-[#050505] border-b border-[rgba(255,255,255,0.08)]"
         style={{ gridTemplateColumns: `${sidebarPx}px minmax(0,1fr)` }}
       >
         <div className="flex h-full min-w-0 items-center px-4">

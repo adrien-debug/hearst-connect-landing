@@ -190,7 +190,6 @@ export function Card({ children, padding = 'md', style }: CardProps) {
         border: '1px solid var(--color-border-subtle)',
         borderRadius: 'var(--radius-lg)',
         padding: paddingMap[padding],
-        boxShadow: 'var(--shadow-inset)',
         ...style,
       }}
     >

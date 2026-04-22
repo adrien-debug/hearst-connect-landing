@@ -166,8 +166,8 @@ export function VaultDetailPanel({ vault }: { vault: ActiveVault | MaturedVault 
 
         {/* Target progress */}
         <div style={{
-          background: 'rgba(0,0,0,0.2)',
-          boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+          background: 'var(--color-bg-secondary)',
+          
           padding: fitValue(mode, {
             normal: TOKENS.spacing[4],
             tight: TOKENS.spacing[3],
@@ -231,8 +231,8 @@ export function VaultDetailPanel({ vault }: { vault: ActiveVault | MaturedVault 
 
         {/* Month distribution */}
         <div style={{
-          background: 'rgba(0,0,0,0.2)',
-          boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+          background: 'var(--color-bg-secondary)',
+          
           padding: fitValue(mode, {
             normal: TOKENS.spacing[4],
             tight: TOKENS.spacing[3],
@@ -268,6 +268,280 @@ export function VaultDetailPanel({ vault }: { vault: ActiveVault | MaturedVault 
             isMono={isLimit}
           />
         </div>
+
+        {/* Capital Protection Visual */}
+        <CapitalProtectionGauge 
+          deposited={vault.deposited} 
+          currentValue={currentValue}
+          mode={mode} 
+        />
+
+        {/* Performance History Chart */}
+        <PerformanceHistoryChart 
+          deposited={vault.deposited}
+          claimable={vault.claimable}
+          apr={vault.apr}
+          daysRemaining={daysRemaining}
+          mode={mode}
+        />
+      </div>
+    </div>
+  )
+}
+
+/** CapitalProtectionGauge — Visual capital safeguard indicator */
+function CapitalProtectionGauge({ 
+  deposited, 
+  currentValue,
+  mode 
+}: { 
+  deposited: number
+  currentValue: number
+  mode: SmartFitMode 
+}) {
+  const protectionLevel = Math.min(100, (currentValue / deposited) * 100)
+  const isProtected = currentValue >= deposited
+  
+  return (
+    <div style={{
+      background: TOKENS.colors.black,
+      borderRadius: 'var(--radius-lg)',
+      padding: fitValue(mode, {
+        normal: TOKENS.spacing[4],
+        tight: TOKENS.spacing[3],
+        limit: TOKENS.spacing[3],
+      }),
+      border: '1px solid var(--color-border-subtle)',
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: TOKENS.spacing[3],
+      }}>
+        <Label id="capital-protection" tone="scene" variant="text">
+          Capital Protection
+        </Label>
+        <span style={{
+          fontFamily: TOKENS.fonts.mono,
+          fontSize: TOKENS.fontSizes.xs,
+          fontWeight: TOKENS.fontWeights.bold,
+          letterSpacing: TOKENS.letterSpacing.display,
+          color: isProtected ? TOKENS.colors.accent : '#FFFFFF',
+          textTransform: 'uppercase',
+        }}>
+          {isProtected ? 'Protected' : 'At Risk'}
+        </span>
+      </div>
+      
+      {/* Protection Gauge */}
+      <div style={{
+        display: 'flex',
+        height: '32px',
+        borderRadius: '4px',
+        overflow: 'hidden',
+        background: 'var(--color-bg-secondary)',
+        position: 'relative',
+      }}>
+        {/* Principal zone */}
+        <div style={{
+          width: '100%',
+          height: '100%',
+          background: isProtected 
+            ? 'linear-gradient(90deg, rgba(167,251,144,0.3) 0%, rgba(167,251,144,0.1) 100%)'
+            : 'linear-gradient(90deg, rgba(122,122,122,0.3) 0%, rgba(122,122,122,0.1) 100%)',
+          position: 'relative',
+        }}>
+          {/* Current value marker */}
+          <div style={{
+            position: 'absolute',
+            left: `${Math.min(100, protectionLevel)}%`,
+            top: 0,
+            bottom: 0,
+            width: '2px',
+            background: isProtected ? TOKENS.colors.accent : '#7A7A7A',
+            transform: 'translateX(-50%)',
+          }} />
+        </div>
+      </div>
+      
+      {/* Labels */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginTop: TOKENS.spacing[2],
+        fontFamily: TOKENS.fonts.mono,
+        fontSize: TOKENS.fontSizes.micro,
+        color: TOKENS.colors.textGhost,
+      }}>
+        <span>Principal: {fmtUsdCompact(deposited)}</span>
+        <span style={{ color: isProtected ? TOKENS.colors.accent : '#FFFFFF' }}>
+          Current: {fmtUsdCompact(currentValue)} ({protectionLevel.toFixed(1)}%)
+        </span>
+      </div>
+      
+      {/* Safeguard explanation */}
+      <div style={{
+        marginTop: TOKENS.spacing[3],
+        padding: TOKENS.spacing[3],
+        background: 'var(--color-bg-secondary)',
+        borderRadius: 'var(--radius-md)',
+        fontSize: TOKENS.fontSizes.xs,
+        color: TOKENS.colors.textSecondary,
+        lineHeight: LINE_HEIGHT.body,
+      }}>
+        <span style={{ color: TOKENS.colors.accent, fontWeight: TOKENS.fontWeights.bold }}>● Safeguard active</span> — 
+        Capital is {isProtected ? 'above' : 'below'} principal threshold. 
+        {isProtected 
+          ? 'Yield generation continues normally. Auto-protection triggers if value drops below 95% of principal.'
+          : 'Recovery protocol can be initiated. Extended lock period may apply to recover principal.'
+        }
+      </div>
+    </div>
+  )
+}
+
+/** PerformanceHistoryChart — Historical value projection */
+function PerformanceHistoryChart({ 
+  deposited, 
+  claimable,
+  apr,
+  daysRemaining,
+  mode 
+}: { 
+  deposited: number
+  claimable: number
+  apr: number
+  daysRemaining: number
+  mode: SmartFitMode 
+}) {
+  // Generate projection data
+  const months = 6
+  const monthlyYield = (deposited * (apr / 100)) / 12
+  const data = Array.from({ length: months }, (_, i) => {
+    const month = i + 1
+    const projectedYield = Math.min(claimable + (monthlyYield * month), deposited * 0.5)
+    return {
+      month,
+      value: deposited + projectedYield,
+      yield: projectedYield,
+    }
+  })
+  
+  const maxValue = Math.max(...data.map(d => d.value))
+  const minValue = deposited * 0.98
+  
+  return (
+    <div style={{
+      background: TOKENS.colors.black,
+      borderRadius: 'var(--radius-lg)',
+      padding: fitValue(mode, {
+        normal: TOKENS.spacing[4],
+        tight: TOKENS.spacing[3],
+        limit: TOKENS.spacing[3],
+      }),
+      border: '1px solid var(--color-border-subtle)',
+    }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        marginBottom: TOKENS.spacing[3],
+      }}>
+        <Label id="performance-chart" tone="scene" variant="text">
+          Value Projection
+        </Label>
+        <span style={{
+          fontFamily: TOKENS.fonts.mono,
+          fontSize: TOKENS.fontSizes.micro,
+          color: TOKENS.colors.textGhost,
+          letterSpacing: TOKENS.letterSpacing.display,
+          textTransform: 'uppercase',
+        }}>
+          {daysRemaining}d remaining
+        </span>
+      </div>
+      
+      {/* Chart */}
+      <div style={{
+        height: '120px',
+        display: 'flex',
+        alignItems: 'flex-end',
+        justifyContent: 'space-between',
+        gap: TOKENS.spacing[2],
+        paddingBottom: TOKENS.spacing[4],
+        borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
+      }}>
+        {data.map((point, index) => {
+          const height = ((point.value - minValue) / (maxValue - minValue)) * 100
+          const isCurrent = index === 0
+          
+          return (
+            <div key={point.month} style={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: TOKENS.spacing[2],
+              flex: 1,
+            }}>
+              <div style={{
+                width: '100%',
+                height: `${Math.max(10, height)}%`,
+                background: isCurrent 
+                  ? TOKENS.colors.accent 
+                  : `rgba(200,200,200,${0.3 + (index * 0.1)})`,
+                borderRadius: '2px 2px 0 0',
+                minHeight: '4px',
+              }} />
+              <div style={{
+                fontFamily: TOKENS.fonts.mono,
+                fontSize: TOKENS.fontSizes.micro,
+                color: TOKENS.colors.textGhost,
+              }}>
+                M{point.month}
+              </div>
+            </div>
+          )
+        })}
+      </div>
+      
+      {/* Legend */}
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginTop: TOKENS.spacing[3],
+        fontSize: TOKENS.fontSizes.xs,
+      }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: TOKENS.spacing[2],
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            background: TOKENS.colors.accent,
+            borderRadius: '2px',
+          }} />
+          <span style={{ color: TOKENS.colors.textSecondary }}>
+            Current: {fmtUsdCompact(deposited + claimable)}
+          </span>
+        </div>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: TOKENS.spacing[2],
+        }}>
+          <div style={{
+            width: '8px',
+            height: '8px',
+            background: '#9A9A9A',
+            borderRadius: '2px',
+          }} />
+          <span style={{ color: TOKENS.colors.textSecondary }}>
+            Projected (6M): {fmtUsdCompact(data[data.length - 1].value)}
+          </span>
+        </div>
       </div>
     </div>
   )
@@ -286,8 +560,8 @@ function NarrativeBlock({ kicker, body, mode, isMono = false }: {
   return (
     <div style={{
       minWidth: 0,
-      background: 'rgba(0,0,0,0.2)',
-      boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+      background: 'var(--color-bg-secondary)',
+      
       padding: fitValue(mode, {
         normal: TOKENS.spacing[4],
         tight: TOKENS.spacing[3],
@@ -321,8 +595,8 @@ function StatCard({ label, value, subtext, mode, accent = false }: {
 }) {
   return (
     <div style={{
-      background: 'rgba(0,0,0,0.2)',
-      boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+      background: 'var(--color-bg-secondary)',
+      
       padding: fitValue(mode, {
         normal: TOKENS.spacing[3],
         tight: TOKENS.spacing[2],

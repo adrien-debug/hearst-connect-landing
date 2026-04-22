@@ -27,7 +27,7 @@ export function VaultNode({
         display: 'flex',
         alignItems: 'center',
         background: selected
-          ? `linear-gradient(90deg, rgba(167,251,144,0.08) 0%, transparent 100%)`
+          ? 'var(--color-accent-subtle)'
           : 'transparent',
         border: 'none',
         borderLeft: selected ? `2px solid ${TOKENS.colors.accent}` : '2px solid transparent',
@@ -44,7 +44,7 @@ export function VaultNode({
           fontWeight: TOKENS.fontWeights.black,
           textTransform: 'uppercase',
           letterSpacing: '0.02em',
-          color: selected ? TOKENS.colors.textPrimary : 'rgba(255,255,255,0.6)',
+          color: selected ? TOKENS.colors.textPrimary : 'var(--color-text-secondary)',
         }}
       >
         {vault.name.replace('HashVault ', '')}

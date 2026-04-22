@@ -25,7 +25,7 @@ export function ProjectionLens({
       }}
     >
       <header
-        className="bg-gradient-to-b from-transparent to-white/[0.02]"
+        className="bg-transparent"
         style={{
           paddingBottom: compact ? TOKENS.spacing[2] : TOKENS.spacing[4],
         }}

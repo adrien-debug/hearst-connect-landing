@@ -13,7 +13,7 @@ export function CompressedMetricsStrip({
   const { gap } = useShellPadding(mode)
   return (
     <div
-      className="bg-gradient-to-b from-transparent to-white/[0.02]"
+      className="bg-transparent"
       style={{
         display: 'grid',
         gridTemplateColumns: `repeat(${items.length}, minmax(0,1fr))`,

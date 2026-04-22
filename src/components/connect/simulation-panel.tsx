@@ -149,8 +149,8 @@ export function SimulationPanel() {
             display: 'flex',
             flexDirection: 'column',
             minHeight: 0,
-            background: 'rgba(0,0,0,0.2)',
-            boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+            background: 'var(--color-bg-secondary)',
+            
             padding: pad,
           }}
         >
@@ -199,7 +199,7 @@ export function SimulationPanel() {
               flex: 1,
               minHeight: isLimit ? 120 : 160,
               background: TOKENS.colors.black,
-              boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+              
               position: 'relative',
             }}
             aria-label="Projected value curves"
@@ -273,8 +273,8 @@ export function SimulationPanel() {
         <div
           style={{
             flexShrink: 0,
-            background: 'rgba(0,0,0,0.2)',
-            boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+            background: 'var(--color-bg-secondary)',
+            
             padding: pad,
           }}
         >
@@ -301,17 +301,14 @@ export function SimulationPanel() {
                     display: 'flex',
                     flexDirection: 'column',
                     background: isActive
-                      ? 'rgba(167,251,144,0.08)'
-                      : 'rgba(0,0,0,0.3)',
+                      ? 'var(--color-accent-subtle)'
+                      : 'var(--color-bg-tertiary)',
                     border: isActive
                       ? `1px solid ${TOKENS.colors.accent}`
                       : `1px solid ${TOKENS.colors.borderSubtle}`,
                     borderRadius: '8px',
                     padding: TOKENS.spacing[4],
                     cursor: 'pointer',
-                    boxShadow: isActive
-                      ? `inset 0 0 0 1px ${TOKENS.colors.accent}`
-                      : 'none',
                     position: 'relative',
                     overflow: 'hidden',
                   }}
@@ -325,8 +322,8 @@ export function SimulationPanel() {
                       right: 0,
                       height: `${Math.max(15, yieldPercent)}%`,
                       background: isActive
-                        ? 'rgba(167,251,144,0.15)'
-                        : 'rgba(255,255,255,0.05)',
+                        ? 'var(--color-accent-subtle)'
+                        : 'var(--color-bg-secondary)',
                       transition: 'height 300ms ease',
                     }}
                   />
@@ -352,14 +349,14 @@ export function SimulationPanel() {
                       }),
                       fontWeight: TOKENS.fontWeights.black,
                       letterSpacing: VALUE_LETTER_SPACING,
-                      color: isActive ? TOKENS.colors.textPrimary : 'rgba(255,255,255,0.7)',
+                      color: isActive ? TOKENS.colors.textPrimary : 'var(--color-text-secondary)',
                     }}>
                       {formatPercent(projection.annualApr * 100)}
                     </div>
                     <div style={{
                       fontFamily: TOKENS.fonts.mono,
                       fontSize: TOKENS.fontSizes.micro,
-                      color: isActive ? TOKENS.colors.textSecondary : 'rgba(255,255,255,0.4)',
+                      color: isActive ? TOKENS.colors.textSecondary : 'var(--color-text-ghost)',
                       marginTop: TOKENS.spacing[2],
                     }}>
                       {formatCompactUsd(projection.cumulativeYield)}
@@ -381,8 +378,8 @@ export function SimulationPanel() {
             {/* BTC Slider */}
             <div
               style={{
-                background: 'rgba(0,0,0,0.3)',
-                boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+                background: 'var(--color-bg-tertiary)',
+                
                 borderRadius: '6px',
                 padding: TOKENS.spacing[3],
               }}
@@ -437,8 +434,8 @@ export function SimulationPanel() {
             {/* Horizon Slider */}
             <div
               style={{
-                background: 'rgba(0,0,0,0.3)',
-                boxShadow: `inset 0 0 0 1px ${TOKENS.colors.borderSubtle}`,
+                background: 'var(--color-bg-tertiary)',
+                
                 borderRadius: '6px',
                 padding: TOKENS.spacing[3],
               }}

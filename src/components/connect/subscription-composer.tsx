@@ -228,7 +228,7 @@ export function SubscriptionComposer({
             className="w-full font-black uppercase"
             style={{
               padding: `${fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[3] })} ${fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[2] })}`,
-              background: isReady ? TOKENS.colors.textPrimary : 'rgba(255,255,255,0.08)',
+              background: isReady ? TOKENS.colors.textPrimary : 'var(--color-bg-tertiary)',
               color: isReady ? TOKENS.colors.black : TOKENS.colors.textGhost,
               border: 'none',
               fontSize: fitValue(mode, { normal: TOKENS.fontSizes.md, tight: TOKENS.fontSizes.sm, limit: TOKENS.fontSizes.sm }),
