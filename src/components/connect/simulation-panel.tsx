@@ -3,8 +3,8 @@
 import type { CSSProperties } from 'react'
 import { useMemo, useState } from 'react'
 import { Label } from '@/components/ui/label'
-import { TOKENS, fmtUsd } from './constants'
-import { useSmartFit } from './smart-fit'
+import { TOKENS, fmtUsd, VALUE_LETTER_SPACING } from './constants'
+import { useSmartFit, useShellPadding } from './smart-fit'
 import { ProjectionLens, MetricTilesRow, MetricTile } from './projection-lens'
 import {
   type ScenarioKey,
@@ -146,14 +146,15 @@ export function SimulationPanel() {
   }, [btcPrice, months])
 
   const delta = ((btcPrice - PROJECTION_SIM_BASE_PRICE) / PROJECTION_SIM_BASE_PRICE) * 100
-  const pad = mode === 'limit' ? TOKENS.spacing[3] : mode === 'tight' ? TOKENS.spacing[4] : TOKENS.spacing[6]
+  const { padding: pad } = useShellPadding(mode)
   const compact = isLimit || mode === 'tight'
 
   return (
     <div
       className="min-h-0 flex-1"
-      style={{ display: 'flex', flexDirection: 'column', background: TOKENS.colors.bgPage, color: TOKENS.colors.textPrimary, height: '100%', overflow: 'hidden' }}
+      style={{ display: 'flex', flexDirection: 'column', background: 'transparent', color: TOKENS.colors.textPrimary, height: '100%', overflow: 'hidden' }}
     >
+      {/* Main content area - 2 columns */}
       <div
         className="min-h-0 flex flex-1"
         style={{
@@ -162,56 +163,14 @@ export function SimulationPanel() {
           minHeight: 0,
         }}
       >
+        {/* Left panel - Controls only (no scenario selector) */}
         <div
-          className="hide-scrollbar flex min-h-0 flex-col overflow-auto bg-[#050505] bg-gradient-to-b from-[#050505] to-[#0a0a0a]/40"
+          className="hide-scrollbar flex min-h-0 flex-col overflow-auto bg-[#050505] bg-gradient-to-b from-[#050505] to-[#060606]/40"
           style={{
             gap: TOKENS.spacing[4],
             padding: pad,
           }}
         >
-          <div>
-            <Label id="sc-label" tone="scene" variant="text">
-              Scenario
-            </Label>
-            <div
-              role="radiogroup"
-              aria-labelledby="sc-label"
-              style={{
-                marginTop: TOKENS.spacing[2],
-                display: 'flex',
-                flexWrap: 'wrap',
-                gap: TOKENS.spacing[2],
-              }}
-            >
-              {(Object.keys(SCENARIOS) as ScenarioKey[]).map((key) => {
-                const isActive = scenario === key
-                return (
-                  <button
-                    key={`scenario-regime-${key}`}
-                    type="button"
-                    role="radio"
-                    aria-checked={isActive}
-                    onClick={() => setScenario(key)}
-                    style={{
-                      border: 'none',
-                      background: 'none',
-                      cursor: 'pointer',
-                      color: isActive ? TOKENS.colors.accent : TOKENS.colors.textSecondary,
-                      fontFamily: TOKENS.fonts.mono,
-                      fontSize: TOKENS.fontSizes.xs,
-                      fontWeight: TOKENS.fontWeights.bold,
-                      letterSpacing: TOKENS.letterSpacing.display,
-                      textTransform: 'uppercase' as const,
-                      padding: `${TOKENS.spacing[2]} 0`,
-                      boxShadow: isActive ? `inset 0 -1px 0 0 ${TOKENS.colors.accent}` : 'none',
-                    }}
-                  >
-                    {SCENARIOS[key].label}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
           <RangeField
             id="control-btc"
             label="BTC price"
@@ -244,6 +203,8 @@ export function SimulationPanel() {
             <InfoRow l="BTC delta" v={`${delta >= 0 ? '+' : ''}${formatPercent(delta)}`} />
           </div>
         </div>
+
+        {/* Right panel - Projection display */}
         <div
           className="min-h-0 flex-1"
           style={{
@@ -337,35 +298,111 @@ export function SimulationPanel() {
                 ))}
               </div>
             </div>
-            <div
-              className="hide-scrollbar"
-              style={{ marginTop: pad, display: 'grid', gridTemplateColumns: 'repeat(3,1fr)', gap: TOKENS.spacing[3], overflow: 'auto', maxHeight: isLimit ? 120 : 200 }}
-            >
-              {(Object.keys(projections) as ScenarioKey[]).map((k) => {
-                const p = projections[k]
-                const w = maxYield > 0 ? Math.max((p.cumulativeYield / maxYield) * 100, 8) : 8
-                return (
-                  <div key={k} style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2] }}>
-                    <div style={{ display: 'flex', justifyContent: 'space-between' }}>
-                      <span style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: 700, color: k === scenario ? TOKENS.colors.accent : TOKENS.colors.textSecondary }}>
-                        {SCENARIOS[k].label}
-                      </span>
-                      <span style={{ fontFamily: TOKENS.fonts.mono, fontSize: TOKENS.fontSizes.xs, color: TOKENS.colors.textGhost }}>
-                        {formatPercent(p.annualApr * 100)}
-                      </span>
-                    </div>
-                    <div
-                      style={{ height: 6, background: 'rgba(0,0,0,0.45)' }}
-                    >
-                      <div style={{ width: `${w}%`, height: '100%', background: k === scenario ? TOKENS.colors.accent : 'rgba(255,255,255,0.25)' }} />
-                    </div>
-                    <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: 800, color: TOKENS.colors.textPrimary }}>{formatCompactUsd(p.cumulativeYield)}</div>
-                    <div style={{ fontSize: TOKENS.fontSizes.micro, color: TOKENS.colors.textSecondary, lineHeight: 1.35 }}>Notional {fmtUsd(p.totalValue)}</div>
-                  </div>
-                )
-              })}
-            </div>
           </ProjectionLens>
+        </div>
+      </div>
+
+      {/* Bottom horizontal scenario selector */}
+      <div
+        style={{
+          flexShrink: 0,
+          borderTop: '1px solid rgba(255,255,255,0.08)',
+          background: 'linear-gradient(180deg, rgba(255,255,255,0.02) 0%, rgba(0,0,0,0.3) 100%)',
+          padding: `${TOKENS.spacing[3]} ${pad}`,
+        }}
+      >
+        <div
+          style={{
+            display: 'flex',
+            justifyContent: 'center',
+            gap: TOKENS.spacing[2],
+          }}
+        >
+          {(Object.keys(SCENARIOS) as ScenarioKey[]).map((key) => {
+            const isActive = scenario === key
+            const projection = projections[key]
+            return (
+              <button
+                key={`scenario-${key}`}
+                type="button"
+                onClick={() => setScenario(key)}
+                style={{
+                  flex: 1,
+                  maxWidth: '200px',
+                  display: 'flex',
+                  flexDirection: 'column',
+                  alignItems: 'center',
+                  gap: TOKENS.spacing[2],
+                  padding: `${TOKENS.spacing[3]} ${TOKENS.spacing[4]}`,
+                  background: isActive
+                    ? 'linear-gradient(180deg, rgba(167,251,144,0.08) 0%, rgba(167,251,144,0.02) 100%)'
+                    : 'linear-gradient(180deg, rgba(255,255,255,0.03) 0%, transparent 100%)',
+                  border: 'none',
+                  borderRadius: '8px',
+                  boxShadow: isActive
+                    ? `inset 0 0 0 1px ${TOKENS.colors.accent}, 0 2px 8px rgba(167,251,144,0.1)`
+                    : 'inset 0 0 0 1px rgba(255,255,255,0.06)',
+                  cursor: 'pointer',
+                  transition: 'all 150ms ease-out',
+                }}
+              >
+                <span
+                  style={{
+                    fontFamily: TOKENS.fonts.mono,
+                    fontSize: TOKENS.fontSizes.xs,
+                    fontWeight: TOKENS.fontWeights.bold,
+                    letterSpacing: TOKENS.letterSpacing.display,
+                    textTransform: 'uppercase',
+                    color: isActive ? TOKENS.colors.accent : TOKENS.colors.textSecondary,
+                  }}
+                >
+                  {SCENARIOS[key].label}
+                </span>
+                <span
+                  style={{
+                    fontFamily: TOKENS.fonts.sans,
+                    fontSize: TOKENS.fontSizes.md,
+                    fontWeight: TOKENS.fontWeights.black,
+                    letterSpacing: VALUE_LETTER_SPACING,
+                    color: isActive ? TOKENS.colors.textPrimary : 'rgba(255,255,255,0.6)',
+                  }}
+                >
+                  {formatPercent(projection.annualApr * 100)}
+                </span>
+                <span
+                  style={{
+                    fontFamily: TOKENS.fonts.mono,
+                    fontSize: TOKENS.fontSizes.micro,
+                    color: isActive ? TOKENS.colors.textSecondary : 'rgba(255,255,255,0.4)',
+                  }}
+                >
+                  {formatCompactUsd(projection.cumulativeYield)}
+                </span>
+                {/* Mini progress bar */}
+                <div
+                  style={{
+                    width: '100%',
+                    height: '3px',
+                    background: 'rgba(255,255,255,0.08)',
+                    borderRadius: '2px',
+                    overflow: 'hidden',
+                    marginTop: TOKENS.spacing[2],
+                  }}
+                >
+                  <div
+                    style={{
+                      height: '100%',
+                      width: `${maxYield > 0 ? (projection.cumulativeYield / maxYield) * 100 : 0}%`,
+                      minWidth: '8%',
+                      background: isActive ? TOKENS.colors.accent : 'rgba(255,255,255,0.25)',
+                      borderRadius: '2px',
+                      transition: 'width 300ms ease',
+                    }}
+                  />
+                </div>
+              </button>
+            )
+          })}
         </div>
       </div>
     </div>

@@ -1,7 +1,7 @@
 'use client'
 
-import { useEffect, useState } from 'react'
-import { SIDEBAR_WIDTH_PX, SIDEBAR_WIDTH_NARROW_PX } from './constants'
+import { useEffect, useMemo, useState } from 'react'
+import { SIDEBAR_WIDTH_PX, SIDEBAR_WIDTH_NARROW_PX, SHELL_PADDING, SHELL_GAP } from './constants'
 
 export type SmartFitMode = 'normal' | 'tight' | 'limit'
 
@@ -89,4 +89,23 @@ export function useSmartFit(options: SmartFitOptions) {
 
 export function fitValue<T>(mode: SmartFitMode, values: Record<SmartFitMode, T>): T {
   return values[mode]
+}
+
+/** Unified shell padding hook for consistent panel layouts */
+export function useShellPadding(mode: SmartFitMode) {
+  return useMemo(
+    () => ({
+      padding: SHELL_PADDING[mode],
+      gap: SHELL_GAP[mode],
+    }),
+    [mode]
+  )
+}
+
+/** Unified shell style object for panels */
+export function getShellStyle(mode: SmartFitMode) {
+  return {
+    padding: `${SHELL_PADDING[mode]} ${SHELL_PADDING[mode]}`,
+    gap: SHELL_GAP[mode],
+  } as const
 }

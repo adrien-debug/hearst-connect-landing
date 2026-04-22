@@ -63,8 +63,7 @@ export function Canvas() {
       <main className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
         <Sidebar vaults={vaults} selectedId={selectedId} onSelect={setSelectedId} />
         <section
-          className="min-h-0 min-w-0 flex-1 overflow-hidden"
-          style={{ background: TOKENS.colors.bgPage }}
+          className="connect-main-scene min-h-0 min-w-0 flex-1 overflow-hidden"
           aria-label="Main scene"
         >
           <MainPanel selected={selected} agg={agg} isSimulation={isSimulation} />

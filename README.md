@@ -41,8 +41,9 @@ NEXT_PUBLIC_GOOGLE_ADS_ID=              # Optional — Google Ads
 ## UI / design system (Cinematic Financial OS)
 
 - **Tokens** in `src/components/connect/constants.ts` (single source) and `src/styles/connect/dashboard-vars.css` (CSS variables for the `.connect-scope` shell).
-- **Look** : deep void `#050505`, scene `#0A0A0A`, accent `#A7FB90`, type scale 24 / 14 / 11, spacing on an **8px** grid, radii **8–12px** where a radius is used (favor alignment over boxes).
+- **Look** : deep void `#050505`, scene carbon `#030303` (denser than sidebar, subtle shoulder light + carbon materiality), accent `#A7FB90`, type scale 24 / 14 / 11, spacing on an **8px** grid, radii **8–12px** where a radius is used (favor alignment over boxes).
 - **Chromatic separation** : avoid heavy card borders; prefer **inset shadows**, very low-opacity gradients, and whitespace. Long reading uses soft contrast overlays, not hard frames.
+- **Sidebar vault panels** : enriched micro-panels with 4-layer structure (header + core value + visual signal + footer). Prime vaults show mini-donut progress; Growth vaults show linear gauge. Available vaults use simplified linear gauge. All panels: 10px radius, subtle carbon gradient background, 16px padding.
 - **Static reference** : `design-system.html` (tokens, labels bar vs text, sidebar width 280/272px).
 - **Tests** : `npm test` (Vitest) — `src/lib/*.test.ts` for `vault-math` and `projection-simulation`.
 - **Typecheck** (script `npm run lint`) : `tsc -p . --noEmit` — Next 16.2 in this repo does not ship `next lint`.
@@ -73,7 +74,7 @@ src/
 
 ## Recent Updates (Apr 22, 2026)
 
-- Cinematic Financial OS: dark scene (`#050505` / `#0A0A0A`), 280px sidebar, shared `Label`, `VaultNode` rows, routing via `useConnectRouting`, `dashboard-vars.css` + `constants.ts` alignment, Vitest for `aggregate` / `computeMonthlyYield` / `projectScenario`
+- Cinematic Financial OS: sidebar `#050505`, main scene `#060606` with matte gradients on `.connect-main-scene`, 280px sidebar, shared `Label`, `VaultNode` rows, routing via `useConnectRouting`, `dashboard-vars.css` + `constants.ts` alignment, Vitest for `aggregate` / `computeMonthlyYield` / `projectScenario`
 - Removed unused Web3 stack (wagmi, viem, RainbowKit) and dead hooks/ABIs; connect UI is mock-data driven until on-chain is re-enabled
 
 ## Previous Updates (Apr 21, 2026)

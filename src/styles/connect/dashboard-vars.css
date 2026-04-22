@@ -4,8 +4,15 @@
  */
 .connect-scope {
   --hc-bg-app: #050505;
-  --hc-bg-page: #0a0a0a;
+  /** Medium charcoal — distinct from sidebar #050505 */
+  --hc-bg-page: #141414;
   --hc-bg-sidebar: #050505;
+  /** Main stage: dramatic shoulder light + deep carbon layers + subtle edge separation */
+  --hc-stage-shoulder: radial-gradient(ellipse 160% 100% at 50% -30%, rgba(255, 255, 255, 0.045) 0%, transparent 55%);
+  --hc-stage-veil: linear-gradient(180deg, rgba(255, 255, 255, 0.008) 0%, transparent 55%);
+  --hc-stage-carbon: radial-gradient(ellipse at 25% 15%, rgba(15, 15, 15, 0.6) 0%, transparent 45%),
+                     radial-gradient(ellipse at 75% 85%, rgba(8, 8, 8, 0.5) 0%, transparent 40%),
+                     radial-gradient(ellipse at 50% 50%, rgba(5, 5, 5, 0.8) 0%, transparent 70%);
   --hc-accent: #a7fb90;
   --hc-text-primary: rgba(255, 255, 255, 0.92);
   --hc-text-secondary: rgba(255, 255, 255, 0.55);
@@ -23,6 +30,11 @@
   --hc-radius-md: 12px;
   --hc-sidebar-w: 280px;
   color-scheme: dark;
+}
+
+.connect-scope .connect-main-scene {
+  background-color: var(--hc-bg-page);
+  background-image: var(--hc-stage-shoulder), var(--hc-stage-carbon), var(--hc-stage-veil);
 }
 
 @media (max-width: 1279px) {

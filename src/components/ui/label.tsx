@@ -18,6 +18,9 @@ const toneColor: Record<NonNullable<ConnectLabelProps['tone']>, string> = {
   inverted: 'rgba(0,0,0,0.55)',
 }
 
+/** Standardized label margin-bottom for pixel alignment */
+const LABEL_MARGIN_BOTTOM = TOKENS.spacing[2] // 8px
+
 export function Label({ children, id, variant = 'bar', tone = 'scene', className, style }: ConnectLabelProps) {
   if (variant === 'text') {
     return (
@@ -30,7 +33,7 @@ export function Label({ children, id, variant = 'bar', tone = 'scene', className
           letterSpacing: TOKENS.letterSpacing.display,
           textTransform: 'uppercase',
           color: toneColor[tone],
-          marginBottom: TOKENS.spacing[2],
+          marginBottom: LABEL_MARGIN_BOTTOM,
           ...style,
         }}
         className={className}
@@ -51,7 +54,7 @@ export function Label({ children, id, variant = 'bar', tone = 'scene', className
         color: toneColor[tone],
         borderLeft: `3px solid ${TOKENS.colors.accent}`,
         paddingLeft: TOKENS.spacing[3],
-        marginBottom: TOKENS.spacing[3],
+        marginBottom: LABEL_MARGIN_BOTTOM,
         ...style,
       }}
       className={className}

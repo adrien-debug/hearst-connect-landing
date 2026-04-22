@@ -1,7 +1,7 @@
 'use client'
 
 import { useMonthProgress } from '@/hooks/useMonthProgress'
-import { TOKENS, fmtUsd } from './constants'
+import { TOKENS, fmtUsd, LINE_HEIGHT } from './constants'
 import { fitValue, type SmartFitMode } from './smart-fit'
 import { computeMonthlyYield } from './data'
 
@@ -30,12 +30,11 @@ export function MonthlyGauge({ deposited, apr, label, mode = 'normal' }: Monthly
   const showFirstMetric = mode !== 'limit'
   const showLabels = mode === 'normal'
 
-  // Static month label to avoid SSR mismatch — month resolved client-side via useMonthProgress
   const monthLabel = label ?? `Monthly Yield · ${apr.toFixed(1)}% APR`
 
   return (
     <div>
-      {/* Header row: label + monthly total */}
+      {/* Header row */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
@@ -49,6 +48,7 @@ export function MonthlyGauge({ deposited, apr, label, mode = 'normal' }: Monthly
           letterSpacing: TOKENS.letterSpacing.display,
           textTransform: 'uppercase' as const,
           color: TOKENS.colors.textPrimary,
+          lineHeight: LINE_HEIGHT.tight,
         }}>
           {monthLabel}
         </div>
@@ -67,7 +67,7 @@ export function MonthlyGauge({ deposited, apr, label, mode = 'normal' }: Monthly
 
       {/* Gauge track */}
       <div style={{ position: 'relative', marginBottom: rowGap }}>
-        {/* DAY badge above marker */}
+        {/* DAY badge */}
         <div style={{
           position: 'absolute',
           left: `${nowPct}%`,
@@ -88,11 +88,19 @@ export function MonthlyGauge({ deposited, apr, label, mode = 'normal' }: Monthly
         </div>
 
         {/* Track */}
-        <div style={{ position: 'relative', height: mode === 'limit' ? '10px' : '12px', background: TOKENS.colors.gray200, overflow: 'visible' }}>
-          {/* Elapsed — accent fill */}
+        <div style={{
+          position: 'relative',
+          height: mode === 'limit' ? '10px' : '12px',
+          background: TOKENS.colors.gray200,
+          overflow: 'visible',
+        }}>
+          {/* Elapsed fill */}
           <div style={{
-            position: 'absolute', top: 0, left: 0,
-            width: `${nowPct}%`, height: '100%',
+            position: 'absolute',
+            top: 0,
+            left: 0,
+            width: `${nowPct}%`,
+            height: '100%',
             background: TOKENS.colors.accent,
             zIndex: 1,
           }} />
@@ -111,7 +119,11 @@ export function MonthlyGauge({ deposited, apr, label, mode = 'normal' }: Monthly
       </div>
 
       {/* Metrics row */}
-      <div style={{ display: 'grid', gridTemplateColumns: showFirstMetric ? '1fr 1fr 1fr' : '1fr 1fr', gap: 0 }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: showFirstMetric ? '1fr 1fr 1fr' : '1fr 1fr',
+        gap: 0,
+      }}>
         {showFirstMetric && <MetricCell showLabel={showLabels} label="01" value={`+${fmtUsd(produced)}`} accent />}
         <MetricCell showLabel={showLabels} label="Today" value={`Day ${dayOfMonth}/${daysInMonth}`} center={!showFirstMetric} />
         {nowPct > 85
@@ -124,7 +136,12 @@ export function MonthlyGauge({ deposited, apr, label, mode = 'normal' }: Monthly
 }
 
 function MetricCell({
-  label, value, accent, center, right, showLabel = true,
+  label,
+  value,
+  accent,
+  center,
+  right,
+  showLabel = true,
 }: {
   label: string
   value: string
@@ -143,6 +160,7 @@ function MetricCell({
           color: TOKENS.colors.textGhost,
           letterSpacing: TOKENS.letterSpacing.wide,
           marginBottom: '2px',
+          lineHeight: LINE_HEIGHT.tight,
         }}>{label}</div>
       )}
       <div style={{
@@ -150,6 +168,7 @@ function MetricCell({
         fontSize: TOKENS.fontSizes.xs,
         fontWeight: TOKENS.fontWeights.bold,
         color: accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
+        lineHeight: LINE_HEIGHT.tight,
       }}>{value}</div>
     </div>
   )

@@ -1,7 +1,21 @@
 import { Label } from '@/components/ui/label'
-import { TOKENS } from './constants'
+import { TOKENS, VALUE_LETTER_SPACING, LINE_HEIGHT } from './constants'
 import type { SmartFitMode } from './smart-fit'
-import { fitValue } from './smart-fit'
+import { fitValue, useShellPadding } from './smart-fit'
+
+/** H2 title size by mode — standardized per design system */
+const H2_SIZE: Record<SmartFitMode, string> = {
+  normal: TOKENS.fontSizes.xxl, // 40px
+  tight: TOKENS.fontSizes.xl, // 24px
+  limit: TOKENS.fontSizes.lg, // 20px
+}
+
+/** Side metric value size by mode */
+const SIDE_VALUE_SIZE: Record<SmartFitMode, string> = {
+  normal: TOKENS.fontSizes.xxl, // 40px
+  tight: TOKENS.fontSizes.xl, // 24px
+  limit: TOKENS.fontSizes.lg, // 20px
+}
 
 export function HeroVaultStage({
   mode,
@@ -20,14 +34,15 @@ export function HeroVaultStage({
   sideValue: string
   sideBadge: string
 }) {
+  const { gap } = useShellPadding(mode)
   return (
     <div
       className="bg-gradient-to-b from-transparent to-white/[0.02]"
       style={{
         display: 'grid',
         gridTemplateColumns: fitValue(mode, { normal: '1.1fr 0.45fr', tight: '1fr 0.42fr', limit: '1fr' }),
-        gap: fitValue(mode, { normal: TOKENS.spacing[6], tight: TOKENS.spacing[4], limit: TOKENS.spacing[3] }),
-        paddingBottom: fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[2] }),
+        gap,
+        paddingBottom: TOKENS.spacing[4],
       }}
     >
       <div>
@@ -37,10 +52,10 @@ export function HeroVaultStage({
         <h2
           style={{
             margin: 0,
-            fontSize: fitValue(mode, { normal: TOKENS.fontSizes.xxxl, tight: TOKENS.fontSizes.xl, limit: TOKENS.fontSizes.lg }),
+            fontSize: H2_SIZE[mode],
             fontWeight: TOKENS.fontWeights.black,
             letterSpacing: TOKENS.letterSpacing.tight,
-            lineHeight: 0.95,
+            lineHeight: LINE_HEIGHT.title,
             color: TOKENS.colors.textPrimary,
           }}
         >
@@ -48,10 +63,10 @@ export function HeroVaultStage({
         </h2>
         <p
           style={{
-            margin: `${fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[2] })} 0 0 0`,
+            margin: `${TOKENS.spacing[4]} 0 0 0`,
             maxWidth: 700,
-            fontSize: fitValue(mode, { normal: TOKENS.fontSizes.sm, tight: TOKENS.fontSizes.sm, limit: TOKENS.fontSizes.micro }),
-            lineHeight: 1.5,
+            fontSize: TOKENS.fontSizes.sm,
+            lineHeight: LINE_HEIGHT.body,
             color: TOKENS.colors.textSecondary,
           }}
         >
@@ -71,8 +86,9 @@ export function HeroVaultStage({
           <div
             aria-label={`${sideLabel} ${sideValue}`}
             style={{
-              fontSize: fitValue(mode, { normal: TOKENS.fontSizes.xxl, tight: TOKENS.fontSizes.xl, limit: TOKENS.fontSizes.lg }),
+              fontSize: SIDE_VALUE_SIZE[mode],
               fontWeight: TOKENS.fontWeights.black,
+              letterSpacing: VALUE_LETTER_SPACING,
               color: TOKENS.colors.textPrimary,
             }}
           >

@@ -9,8 +9,8 @@ export const TOKENS = {
     black: '#000000',
     /** App shell / deep void */
     bgApp: '#050505',
-    /** Main scene */
-    bgPage: '#0A0A0A',
+    /** Main scene — medium charcoal distinct from sidebar */
+    bgPage: '#141414',
     /** Sidebar column */
     bgSidebar: '#050505',
     /** Subtle lift (modals, hover) */
@@ -92,6 +92,29 @@ export const TOKENS = {
 
 export const FONT = TOKENS.fonts.sans
 export const MONO = TOKENS.fonts.mono
+
+/** Shell padding values by responsive mode (px) */
+export const SHELL_PADDING: Record<'normal' | 'tight' | 'limit', number> = {
+  normal: 24,
+  tight: 16,
+  limit: 12,
+}
+
+/** Shell gap values by responsive mode (px) */
+export const SHELL_GAP: Record<'normal' | 'tight' | 'limit', number> = {
+  normal: 24,
+  tight: 16,
+  limit: 12,
+}
+
+export const LINE_HEIGHT = {
+  tight: 1.05,
+  display: 1.1,
+  title: 1.2,
+  body: 1.45,
+} as const
+
+export const VALUE_LETTER_SPACING = '-0.02em'
 
 export function fmtUsd(n: number): string {
   return '$' + n.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 })
