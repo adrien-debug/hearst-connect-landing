@@ -2,18 +2,33 @@
 
 import { useMonthProgress } from '@/hooks/useMonthProgress'
 import { TOKENS, fmtUsd } from './constants'
+import { fitValue, type SmartFitMode } from './smart-fit'
 import { computeMonthlyYield } from './data'
 
 interface MonthlyGaugeProps {
   deposited: number
   apr: number
   label?: string
+  mode?: SmartFitMode
 }
 
-export function MonthlyGauge({ deposited, apr, label }: MonthlyGaugeProps) {
+export function MonthlyGauge({ deposited, apr, label, mode = 'normal' }: MonthlyGaugeProps) {
   const { dayOfMonth, daysInMonth, progress } = useMonthProgress()
   const { monthlyYield, produced, remaining } = computeMonthlyYield(deposited, apr, dayOfMonth, daysInMonth)
   const nowPct = Math.max(2, Math.min(97, progress * 100))
+  const rowGap = fitValue(mode, {
+    normal: TOKENS.spacing[2],
+    tight: '4px',
+    limit: '0px',
+  })
+  const badgePadding = fitValue(mode, {
+    normal: `2px ${TOKENS.spacing[2]}`,
+    tight: '2px 6px',
+    limit: '2px 4px',
+  })
+  const showSummary = mode !== 'limit'
+  const showFirstMetric = mode !== 'limit'
+  const showLabels = mode === 'normal'
 
   // Static month label to avoid SSR mismatch — month resolved client-side via useMonthProgress
   const monthLabel = label ?? `Monthly Yield · ${apr.toFixed(1)}% APR`
@@ -25,7 +40,7 @@ export function MonthlyGauge({ deposited, apr, label }: MonthlyGaugeProps) {
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'baseline',
-        marginBottom: TOKENS.spacing[2],
+        marginBottom: rowGap,
       }}>
         <div style={{
           fontFamily: TOKENS.fonts.mono,
@@ -37,33 +52,35 @@ export function MonthlyGauge({ deposited, apr, label }: MonthlyGaugeProps) {
         }}>
           {monthLabel}
         </div>
-        <div style={{
-          fontFamily: TOKENS.fonts.mono,
-          fontSize: TOKENS.fontSizes.xs,
-          fontWeight: TOKENS.fontWeights.bold,
-          color: TOKENS.colors.textGhost,
-          letterSpacing: TOKENS.letterSpacing.wide,
-        }}>
-          {fmtUsd(monthlyYield)} / month
-        </div>
+        {showSummary && (
+          <div style={{
+            fontFamily: TOKENS.fonts.mono,
+            fontSize: TOKENS.fontSizes.xs,
+            fontWeight: TOKENS.fontWeights.bold,
+            color: TOKENS.colors.textGhost,
+            letterSpacing: TOKENS.letterSpacing.wide,
+          }}>
+            {fmtUsd(monthlyYield)} / month
+          </div>
+        )}
       </div>
 
       {/* Gauge track */}
-      <div style={{ position: 'relative', marginBottom: TOKENS.spacing[2] }}>
+      <div style={{ position: 'relative', marginBottom: rowGap }}>
         {/* DAY badge above marker */}
         <div style={{
           position: 'absolute',
           left: `${nowPct}%`,
           bottom: '100%',
           transform: 'translateX(-50%)',
-          marginBottom: TOKENS.spacing[2],
+          marginBottom: rowGap,
           fontFamily: TOKENS.fonts.mono,
           fontSize: TOKENS.fontSizes.xs,
           fontWeight: TOKENS.fontWeights.bold,
           letterSpacing: TOKENS.letterSpacing.wide,
           color: TOKENS.colors.textOnDark,
           background: TOKENS.colors.black,
-          padding: `2px ${TOKENS.spacing[2]}`,
+          padding: badgePadding,
           whiteSpace: 'nowrap' as const,
           zIndex: 3,
         }}>
@@ -71,7 +88,7 @@ export function MonthlyGauge({ deposited, apr, label }: MonthlyGaugeProps) {
         </div>
 
         {/* Track */}
-        <div style={{ position: 'relative', height: '12px', background: TOKENS.colors.gray200, overflow: 'visible' }}>
+        <div style={{ position: 'relative', height: mode === 'limit' ? '10px' : '12px', background: TOKENS.colors.gray200, overflow: 'visible' }}>
           {/* Elapsed — accent fill */}
           <div style={{
             position: 'absolute', top: 0, left: 0,
@@ -83,8 +100,8 @@ export function MonthlyGauge({ deposited, apr, label }: MonthlyGaugeProps) {
           <div style={{
             position: 'absolute',
             left: `${nowPct}%`,
-            top: '-3px',
-            height: '18px',
+            top: mode === 'limit' ? '-2px' : '-3px',
+            height: mode === 'limit' ? '14px' : '18px',
             width: TOKENS.borders.thick,
             background: TOKENS.colors.black,
             zIndex: 4,
@@ -94,12 +111,12 @@ export function MonthlyGauge({ deposited, apr, label }: MonthlyGaugeProps) {
       </div>
 
       {/* Metrics row */}
-      <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr 1fr', gap: 0 }}>
-        <MetricCell label="01" value={`+${fmtUsd(produced)}`} accent />
-        <MetricCell label="Today" value={`Day ${dayOfMonth}/${daysInMonth}`} center />
+      <div style={{ display: 'grid', gridTemplateColumns: showFirstMetric ? '1fr 1fr 1fr' : '1fr 1fr', gap: 0 }}>
+        {showFirstMetric && <MetricCell showLabel={showLabels} label="01" value={`+${fmtUsd(produced)}`} accent />}
+        <MetricCell showLabel={showLabels} label="Today" value={`Day ${dayOfMonth}/${daysInMonth}`} center={!showFirstMetric} />
         {nowPct > 85
-          ? <MetricCell label={String(daysInMonth)} value="Dist. imminent" right />
-          : <MetricCell label={String(daysInMonth)} value={`${fmtUsd(remaining)} left`} right />
+          ? <MetricCell showLabel={showLabels} label={String(daysInMonth)} value="Dist. imminent" right={showFirstMetric} />
+          : <MetricCell showLabel={showLabels} label={String(daysInMonth)} value={`${fmtUsd(remaining)} left`} right={showFirstMetric} />
         }
       </div>
     </div>
@@ -107,24 +124,27 @@ export function MonthlyGauge({ deposited, apr, label }: MonthlyGaugeProps) {
 }
 
 function MetricCell({
-  label, value, accent, center, right,
+  label, value, accent, center, right, showLabel = true,
 }: {
   label: string
   value: string
   accent?: boolean
   center?: boolean
   right?: boolean
+  showLabel?: boolean
 }) {
   return (
     <div style={{ textAlign: right ? 'right' : center ? 'center' : 'left' }}>
-      <div style={{
-        fontFamily: TOKENS.fonts.mono,
-        fontSize: TOKENS.fontSizes.xs,
-        fontWeight: TOKENS.fontWeights.bold,
-        color: TOKENS.colors.textGhost,
-        letterSpacing: TOKENS.letterSpacing.wide,
-        marginBottom: '2px',
-      }}>{label}</div>
+      {showLabel && (
+        <div style={{
+          fontFamily: TOKENS.fonts.mono,
+          fontSize: TOKENS.fontSizes.xs,
+          fontWeight: TOKENS.fontWeights.bold,
+          color: TOKENS.colors.textGhost,
+          letterSpacing: TOKENS.letterSpacing.wide,
+          marginBottom: '2px',
+        }}>{label}</div>
+      )}
       <div style={{
         fontFamily: TOKENS.fonts.mono,
         fontSize: TOKENS.fontSizes.xs,

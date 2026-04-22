@@ -2,8 +2,17 @@
 
 import { TOKENS, fmtUsdCompact } from './constants'
 import type { VaultLine, Aggregate, ActiveVault } from './data'
+import { fitValue, type SmartFitMode, useSmartFit } from './smart-fit'
 
 export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Aggregate }) {
+  const { mode } = useSmartFit({
+    tightHeight: 740,
+    limitHeight: 660,
+    tightWidth: 940,
+    limitWidth: 820,
+    reserveHeight: 64,
+    reserveWidth: 360,
+  })
   const activeVaults = vaults.filter((v): v is ActiveVault => v.type === 'active')
   const maturedByDate = activeVaults
     .map(v => ({ ...v, maturityDate: new Date(v.maturity) }))
@@ -18,6 +27,21 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
     ? activeVaults.reduce((sum, vault) => sum + vault.progress, 0) / activeVaults.length
     : 0
   const portfolioValue = agg.totalDeposited + agg.totalClaimable
+  const shellPadding = fitValue(mode, {
+    normal: TOKENS.spacing[6],
+    tight: TOKENS.spacing[4],
+    limit: TOKENS.spacing[3],
+  })
+  const shellGap = fitValue(mode, {
+    normal: TOKENS.spacing[6],
+    tight: TOKENS.spacing[4],
+    limit: TOKENS.spacing[3],
+  })
+  const heroValueSize = fitValue(mode, {
+    normal: TOKENS.fontSizes.xxxl,
+    tight: TOKENS.fontSizes.xxxl,
+    limit: TOKENS.fontSizes.xxl,
+  })
 
   return (
     <div
@@ -32,16 +56,25 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
       }}
     >
       <div style={{
-        padding: `${TOKENS.spacing[8]} ${TOKENS.spacing[8]}`,
+        padding: `${shellPadding} ${shellPadding}`,
         borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
         flexShrink: 0,
         background: TOKENS.colors.bgSurface,
       }}>
         <Label>Portfolio</Label>
-        <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: TOKENS.spacing[12], alignItems: 'center' }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: fitValue(mode, {
+            normal: '1.35fr 0.9fr',
+            tight: '1.28fr 0.9fr',
+            limit: '1.12fr 0.82fr',
+          }),
+          gap: shellGap,
+          alignItems: 'end',
+        }}>
           <div>
             <div style={{
-              fontSize: TOKENS.fontSizes.figure,
+              fontSize: heroValueSize,
               fontWeight: TOKENS.fontWeights.black,
               letterSpacing: TOKENS.letterSpacing.tight,
               lineHeight: 0.95,
@@ -50,7 +83,7 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
               {fmtUsdCompact(portfolioValue)}
             </div>
           </div>
-          <HeroMetric label="Available Yield" value={fmtUsdCompact(agg.totalClaimable)} secondary={`${activeVaults.length} active positions`} />
+          <HeroMetric mode={mode} label="Available Yield" value={fmtUsdCompact(agg.totalClaimable)} secondary={`${activeVaults.length} active positions`} />
         </div>
       </div>
 
@@ -58,26 +91,34 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
         flex: 1,
         display: 'flex',
         flexDirection: 'column',
-        padding: TOKENS.spacing[8],
-        gap: TOKENS.spacing[8],
+        padding: shellPadding,
+        gap: shellGap,
         minHeight: 0,
         overflow: 'hidden',
       }}>
         <div style={{ flexShrink: 0 }}>
-          <div>
-            <Label>Resource Allocation</Label>
-            <AllocationDonut vaults={activeVaults} total={agg.totalDeposited} />
-          </div>
+          <Label>Resource Allocation</Label>
+          <AllocationDonut mode={mode} vaults={activeVaults} total={agg.totalDeposited} />
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1.6fr 0.95fr', gap: TOKENS.spacing[8], flexShrink: 0 }}>
+        <div style={{
+          display: 'grid',
+          gridTemplateColumns: fitValue(mode, {
+            normal: '1.55fr 0.9fr',
+            tight: '1.48fr 0.9fr',
+            limit: '1.24fr 0.86fr',
+          }),
+          gap: shellGap,
+          flexShrink: 0,
+        }}>
           <div>
             <Label>Yield by Position</Label>
-            <YieldChart vaults={activeVaults} />
+            <YieldChart mode={mode} vaults={activeVaults} />
           </div>
           <div>
             <Label>Next Distribution Window</Label>
             <MaturityPanel
+              mode={mode}
               nextMaturity={nextMaturity}
               daysToNextMaturity={daysToNextMaturity}
               totalDeposited={agg.totalDeposited}
@@ -88,20 +129,30 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
           </div>
         </div>
 
-        <div style={{ flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0 }}>
+        <div style={{
+          flex: 1,
+          display: 'flex',
+          flexDirection: 'column',
+          minHeight: 0,
+          marginTop: fitValue(mode, {
+            normal: `-${TOKENS.spacing[2]}`,
+            tight: '0px',
+            limit: '0px',
+          }),
+        }}>
           <div style={{
             display: 'grid',
             gridTemplateColumns: '2.2fr 1.1fr 1.1fr 1fr 1fr',
             paddingBottom: TOKENS.spacing[2],
             borderBottom: `${TOKENS.borders.thick} solid ${TOKENS.colors.black}`,
-            flexShrink: 0
+            flexShrink: 0,
           }}>
             {['Position', 'Principal', 'Current Value', 'Yield', 'Maturity'].map(h => (
               <span key={h} style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, letterSpacing: TOKENS.letterSpacing.display, textTransform: 'uppercase', color: TOKENS.colors.textGhost }}>{h}</span>
             ))}
           </div>
           <div style={{ flex: 1, overflowY: 'auto' }} className="hide-scrollbar">
-            {activeVaults.map(v => <VaultRow key={v.id} vault={v} />)}
+            {activeVaults.map(v => <VaultRow key={v.id} mode={mode} vault={v} />)}
           </div>
         </div>
       </div>
@@ -109,29 +160,33 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
   )
 }
 
-function CapitalAllocation({ vaults, total }: { vaults: ActiveVault[]; total: number }) {
-  return <AllocationDonut vaults={vaults} total={total} />
-}
-
-function VaultRow({ vault: v }: { vault: ActiveVault }) {
+function VaultRow({ vault: v, mode }: { vault: ActiveVault; mode: SmartFitMode }) {
   const principal = Math.max(0, v.deposited - v.claimable)
   return (
     <div style={{
       display: 'grid',
       gridTemplateColumns: '2.2fr 1.1fr 1.1fr 1fr 1fr',
-      padding: `${TOKENS.spacing[4]} 0`,
+      padding: `${fitValue(mode, {
+        normal: TOKENS.spacing[3],
+        tight: TOKENS.spacing[2],
+        limit: TOKENS.spacing[2],
+      })} 0`,
       borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
       alignItems: 'center',
     }}>
       <div>
         <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.black, textTransform: 'uppercase' }}>{v.name}</div>
-        <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>{v.strategy}</div>
+        <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>
+          {mode === 'limit' ? `${v.apr}% APY` : v.strategy}
+        </div>
       </div>
       <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>{fmtUsdCompact(principal)}</div>
       <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.black }}>{fmtUsdCompact(v.deposited)}</div>
       <div>
         <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.black, color: TOKENS.colors.accent }}>{fmtUsdCompact(v.claimable)}</div>
-        <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>{v.apr}% APY</div>
+        {mode !== 'limit' && (
+          <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>{v.apr}% APY</div>
+        )}
       </div>
       <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.bold }}>{v.maturity}</div>
     </div>
@@ -147,22 +202,32 @@ function Label({ children, style = {} }: { children: React.ReactNode, style?: Re
 }
 
 function HeroMetric({
+  mode,
   label,
   value,
   secondary,
 }: {
+  mode: SmartFitMode
   label: string
   value: string
   secondary: string
 }) {
   return (
     <div style={{
-      paddingLeft: TOKENS.spacing[6],
+      paddingLeft: fitValue(mode, {
+        normal: TOKENS.spacing[4],
+        tight: TOKENS.spacing[3],
+        limit: TOKENS.spacing[3],
+      }),
       borderLeft: `${TOKENS.borders.thin} solid ${TOKENS.colors.gray200}`,
     }}>
       <Label>{label}</Label>
       <div style={{
-        fontSize: TOKENS.fontSizes.xl,
+        fontSize: fitValue(mode, {
+          normal: TOKENS.fontSizes.lg,
+          tight: TOKENS.fontSizes.md,
+          limit: TOKENS.fontSizes.md,
+        }),
         fontWeight: TOKENS.fontWeights.black,
         letterSpacing: '-0.03em',
         color: TOKENS.colors.black,
@@ -183,7 +248,7 @@ function HeroMetric({
   )
 }
 
-function YieldChart({ vaults }: { vaults: ActiveVault[] }) {
+function YieldChart({ vaults, mode }: { vaults: ActiveVault[]; mode: SmartFitMode }) {
   const points = ['0%', 'Current', 'Target']
   const targetValues = vaults.map(v => {
     const targetPct = parseFloat(v.target.replace('%', '')) || 0
@@ -205,13 +270,25 @@ function YieldChart({ vaults }: { vaults: ActiveVault[] }) {
     <div style={{
       border: `${TOKENS.borders.thin} solid ${TOKENS.colors.gray200}`,
       background: TOKENS.colors.bgSurface,
-      padding: TOKENS.spacing[6],
+      padding: fitValue(mode, {
+        normal: TOKENS.spacing[4],
+        tight: TOKENS.spacing[3],
+        limit: TOKENS.spacing[3],
+      }),
       display: 'flex',
       flexDirection: 'column',
-      gap: TOKENS.spacing[6],
+      gap: fitValue(mode, {
+        normal: TOKENS.spacing[4],
+        tight: TOKENS.spacing[3],
+        limit: TOKENS.spacing[2],
+      }),
       minHeight: '100%',
     }}>
-      <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ width: '100%', height: '180px', display: 'block' }} aria-hidden="true">
+      <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} style={{ width: '100%', height: fitValue(mode, {
+        normal: '148px',
+        tight: '132px',
+        limit: '116px',
+      }), display: 'block' }} aria-hidden="true">
         {[0, 1, 2].map(index => (
           <line
             key={index}
@@ -254,7 +331,11 @@ function YieldChart({ vaults }: { vaults: ActiveVault[] }) {
         })}
       </svg>
 
-      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: TOKENS.spacing[4] }}>
+      <div style={{ display: 'grid', gridTemplateColumns: 'repeat(3, minmax(0, 1fr))', gap: fitValue(mode, {
+        normal: TOKENS.spacing[3],
+        tight: TOKENS.spacing[2],
+        limit: TOKENS.spacing[2],
+      }) }}>
         {points.map(point => (
           <div key={point} style={{
             fontSize: TOKENS.fontSizes.xs,
@@ -268,12 +349,16 @@ function YieldChart({ vaults }: { vaults: ActiveVault[] }) {
         ))}
       </div>
 
-      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${vaults.length || 1}, minmax(0, 1fr))`, gap: TOKENS.spacing[4] }}>
+      <div style={{ display: 'grid', gridTemplateColumns: `repeat(${vaults.length || 1}, minmax(0, 1fr))`, gap: fitValue(mode, {
+        normal: TOKENS.spacing[3],
+        tight: TOKENS.spacing[2],
+        limit: TOKENS.spacing[2],
+      }) }}>
         {vaults.map((vault, index) => (
           <div key={vault.id} style={{ display: 'flex', alignItems: 'flex-start', gap: TOKENS.spacing[3] }}>
             <span style={{
-              width: '12px',
-              height: '12px',
+              width: '10px',
+              height: '10px',
               background: palette[index % palette.length],
               flexShrink: 0,
               marginTop: '2px',
@@ -282,9 +367,11 @@ function YieldChart({ vaults }: { vaults: ActiveVault[] }) {
               <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.black, textTransform: 'uppercase' }}>
                 {vault.name}
               </div>
-              <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>
-                {fmtUsdCompact(vault.claimable)} current · {vault.target} target
-              </div>
+              {mode !== 'limit' && (
+                <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>
+                  {fmtUsdCompact(vault.claimable)} current · {vault.target} target
+                </div>
+              )}
             </div>
           </div>
         ))}
@@ -294,6 +381,7 @@ function YieldChart({ vaults }: { vaults: ActiveVault[] }) {
 }
 
 function MaturityPanel({
+  mode,
   nextMaturity,
   daysToNextMaturity,
   totalDeposited,
@@ -301,6 +389,7 @@ function MaturityPanel({
   avgProgress,
   yieldShare,
 }: {
+  mode: SmartFitMode
   nextMaturity: string
   daysToNextMaturity: number
   totalDeposited: number
@@ -313,7 +402,11 @@ function MaturityPanel({
   return (
     <div style={{
       border: `${TOKENS.borders.thin} solid ${TOKENS.colors.gray200}`,
-      padding: TOKENS.spacing[6],
+      padding: fitValue(mode, {
+        normal: TOKENS.spacing[4],
+        tight: TOKENS.spacing[3],
+        limit: TOKENS.spacing[3],
+      }),
       background: TOKENS.colors.bgSurface,
       minHeight: '100%',
       display: 'flex',
@@ -322,7 +415,11 @@ function MaturityPanel({
     }}>
       <div>
         <div style={{
-          fontSize: TOKENS.fontSizes.xl,
+          fontSize: fitValue(mode, {
+            normal: TOKENS.fontSizes.lg,
+            tight: TOKENS.fontSizes.md,
+            limit: TOKENS.fontSizes.md,
+          }),
           fontWeight: TOKENS.fontWeights.black,
           letterSpacing: '-0.03em',
           color: TOKENS.colors.black,
@@ -334,14 +431,22 @@ function MaturityPanel({
           fontSize: TOKENS.fontSizes.xs,
           fontWeight: TOKENS.fontWeights.medium,
           color: TOKENS.colors.textSecondary,
-          marginBottom: TOKENS.spacing[6],
+          marginBottom: fitValue(mode, {
+            normal: TOKENS.spacing[4],
+            tight: TOKENS.spacing[3],
+            limit: TOKENS.spacing[2],
+          }),
           lineHeight: 1.5,
         }}>
           {daysToNextMaturity} days until the earliest maturity.
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[4] }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: fitValue(mode, {
+        normal: TOKENS.spacing[3],
+        tight: TOKENS.spacing[2],
+        limit: TOKENS.spacing[2],
+      }) }}>
         <div>
           <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: TOKENS.spacing[2] }}>
             <span style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, letterSpacing: TOKENS.letterSpacing.display, textTransform: 'uppercase', color: TOKENS.colors.textSecondary }}>
@@ -356,7 +461,11 @@ function MaturityPanel({
           </div>
         </div>
 
-        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: TOKENS.spacing[4] }}>
+        <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: fitValue(mode, {
+          normal: TOKENS.spacing[3],
+          tight: TOKENS.spacing[2],
+          limit: TOKENS.spacing[2],
+        }) }}>
           <StatCell label="Average Yield" value={`${avgApr.toFixed(2)}% APY`} accent />
           <StatCell label="Deployed Capital" value={fmtUsdCompact(totalDeposited)} />
         </div>
@@ -397,10 +506,18 @@ function StatCell({
   )
 }
 
-function AllocationDonut({ vaults, total }: { vaults: ActiveVault[]; total: number }) {
+function AllocationDonut({ vaults, total, mode }: { vaults: ActiveVault[]; total: number; mode: SmartFitMode }) {
   const palette = [TOKENS.colors.accent, TOKENS.colors.black, TOKENS.colors.gray500]
-  const size = 180
-  const strokeWidth = 28
+  const size = fitValue(mode, {
+    normal: 144,
+    tight: 128,
+    limit: 112,
+  })
+  const strokeWidth = fitValue(mode, {
+    normal: 20,
+    tight: 18,
+    limit: 16,
+  })
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
   let offsetCursor = 0
@@ -409,10 +526,22 @@ function AllocationDonut({ vaults, total }: { vaults: ActiveVault[]; total: numb
     <div style={{
       border: `${TOKENS.borders.thin} solid ${TOKENS.colors.gray200}`,
       background: TOKENS.colors.bgSurface,
-      padding: TOKENS.spacing[6],
+      padding: fitValue(mode, {
+        normal: TOKENS.spacing[4],
+        tight: TOKENS.spacing[3],
+        limit: TOKENS.spacing[3],
+      }),
       display: 'grid',
-      gridTemplateColumns: '220px 1fr',
-      gap: TOKENS.spacing[8],
+      gridTemplateColumns: fitValue(mode, {
+        normal: '176px 1fr',
+        tight: '160px 1fr',
+        limit: '136px 1fr',
+      }),
+      gap: fitValue(mode, {
+        normal: TOKENS.spacing[4],
+        tight: TOKENS.spacing[3],
+        limit: TOKENS.spacing[3],
+      }),
       alignItems: 'center',
     }}>
       <div style={{ position: 'relative', width: `${size}px`, height: `${size}px`, margin: '0 auto' }}>
@@ -465,7 +594,11 @@ function AllocationDonut({ vaults, total }: { vaults: ActiveVault[]; total: numb
             Deployed
           </div>
           <div style={{
-            fontSize: TOKENS.fontSizes.lg,
+            fontSize: fitValue(mode, {
+              normal: TOKENS.fontSizes.md,
+              tight: TOKENS.fontSizes.sm,
+              limit: TOKENS.fontSizes.sm,
+            }),
             fontWeight: TOKENS.fontWeights.black,
             color: TOKENS.colors.black,
           }}>
@@ -474,24 +607,28 @@ function AllocationDonut({ vaults, total }: { vaults: ActiveVault[]; total: numb
         </div>
       </div>
 
-      <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[4] }}>
+      <div style={{ display: 'flex', flexDirection: 'column', gap: fitValue(mode, {
+        normal: TOKENS.spacing[3],
+        tight: TOKENS.spacing[2],
+        limit: TOKENS.spacing[2],
+      }) }}>
         {vaults.map((vault, index) => {
           const pct = total > 0 ? (vault.deposited / total) * 100 : 0
           return (
             <div key={vault.id} style={{ display: 'flex', alignItems: 'flex-start', gap: TOKENS.spacing[3] }}>
               <span style={{
-                width: '12px',
-                height: '12px',
+                width: '10px',
+                height: '10px',
                 background: palette[index % palette.length],
                 flexShrink: 0,
                 marginTop: '2px',
               }} />
               <div>
-                <div style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.black, textTransform: 'uppercase' }}>
+                <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.black, textTransform: 'uppercase' }}>
                   {vault.name}
                 </div>
                 <div style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textSecondary }}>
-                  {fmtUsdCompact(vault.deposited)} · {pct.toFixed(1)}%
+                  {mode === 'limit' ? `${pct.toFixed(0)}%` : `${fmtUsdCompact(vault.deposited)} · ${pct.toFixed(1)}%`}
                 </div>
               </div>
             </div>
