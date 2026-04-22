@@ -19,6 +19,68 @@ const rangeStyle: CSSProperties = {
   cursor: 'pointer',
 }
 
+function RangeField({
+  id,
+  label,
+  valueDisplay,
+  minL,
+  maxL,
+  min,
+  max,
+  step,
+  val,
+  valueText,
+  onChange,
+}: {
+  id: string
+  label: string
+  valueDisplay: string
+  minL: string
+  maxL: string
+  min: number
+  max: number
+  step: number
+  val: number
+  valueText: string
+  onChange: (n: number) => void
+}) {
+  return (
+    <div
+      className="bg-gradient-to-b from-transparent to-white/[0.02] pb-3"
+      style={{ marginBottom: TOKENS.spacing[2] }}
+    >
+      <div style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: TOKENS.spacing[3] }}>
+        <div id={`${id}-l`} style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: TOKENS.colors.textSecondary }}>
+          {label}
+        </div>
+        <div style={{ fontFamily: TOKENS.fonts.mono, fontSize: TOKENS.fontSizes.lg, fontWeight: 700, color: TOKENS.colors.textPrimary }} aria-hidden>
+          {valueDisplay}
+        </div>
+      </div>
+      <input
+        id={`${id}-input`}
+        type="range"
+        role="slider"
+        aria-labelledby={`${id}-l`}
+        aria-valuemin={min}
+        aria-valuemax={max}
+        aria-valuenow={val}
+        aria-valuetext={valueText}
+        min={min}
+        max={max}
+        step={step}
+        value={val}
+        onChange={(e) => onChange(Number(e.target.value))}
+        style={rangeStyle}
+      />
+      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: TOKENS.spacing[2], color: TOKENS.colors.textSecondary, fontFamily: TOKENS.fonts.mono, fontSize: TOKENS.fontSizes.xs, fontWeight: 700, letterSpacing: '0.12em' }}>
+        <span>{minL}</span>
+        <span>{maxL}</span>
+      </div>
+    </div>
+  )
+}
+
 function formatCompactUsd(value: number) {
   return new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD', notation: 'compact', maximumFractionDigits: 1 }).format(
     value,
@@ -60,7 +122,14 @@ export function SimulationPanel() {
   const series = useMemo(() => {
     const steps = Array.from({ length: 6 }, (_, i) => {
       const m = Math.max(1, Math.round(((i + 1) / 6) * months))
-      return { month: m, bear: projectScenario(btcPrice, m, 'bear').totalValue, base: projectScenario(btcPrice, m, 'base').totalValue, bull: projectScenario(btcPrice, m, 'bull').totalValue }
+      const id = `projection-horizon-${i}-m${m}`
+      return {
+        id,
+        month: m,
+        bear: projectScenario(btcPrice, m, 'bear').totalValue,
+        base: projectScenario(btcPrice, m, 'base').totalValue,
+        bull: projectScenario(btcPrice, m, 'bull').totalValue,
+      }
     })
     const all = steps.flatMap((s) => [s.bear, s.base, s.bull])
     const minV = Math.min(...all)
@@ -94,23 +163,24 @@ export function SimulationPanel() {
         }}
       >
         <div
+          className="hide-scrollbar bg-gradient-to-r from-[#050505] via-[#050505] to-[#0a0a0a]/30"
           style={{
             display: 'flex',
             flexDirection: 'column',
             gap: TOKENS.spacing[4],
-            borderRight: isLimit ? 'none' : `1px solid ${TOKENS.colors.borderSubtle}`,
             padding: pad,
             minHeight: 0,
             overflow: 'auto',
             background: TOKENS.colors.bgApp,
           }}
-          className="hide-scrollbar"
         >
           <div>
             <Label id="sc-label" tone="scene" variant="text">
               Scenario
             </Label>
             <div
+              role="radiogroup"
+              aria-labelledby="sc-label"
               style={{
                 marginTop: TOKENS.spacing[2],
                 display: 'flex',
@@ -122,8 +192,10 @@ export function SimulationPanel() {
                 const isActive = scenario === key
                 return (
                   <button
-                    key={key}
+                    key={`scenario-regime-${key}`}
                     type="button"
+                    role="radio"
+                    aria-checked={isActive}
                     onClick={() => setScenario(key)}
                     style={{
                       border: 'none',
@@ -145,30 +217,32 @@ export function SimulationPanel() {
               })}
             </div>
           </div>
-          <ControlGroup label="BTC price" value={fmtUsd(btcPrice)} minL="$40K" maxL="$220K" id="control-btc">
-            <input
-              type="range"
-              min={40_000}
-              max={220_000}
-              step={1_000}
-              value={btcPrice}
-              onChange={(e) => setBtcPrice(Number(e.target.value))}
-              style={rangeStyle}
-              aria-label="Bitcoin price in dollars"
-            />
-          </ControlGroup>
-          <ControlGroup label="Horizon" value={`${months} mo`} minL="3M" maxL="36M" id="control-horizon">
-            <input
-              type="range"
-              min={3}
-              max={36}
-              step={1}
-              value={months}
-              onChange={(e) => setMonths(Number(e.target.value))}
-              style={rangeStyle}
-              aria-label="Time horizon in months"
-            />
-          </ControlGroup>
+          <RangeField
+            id="control-btc"
+            label="BTC price"
+            valueDisplay={fmtUsd(btcPrice)}
+            minL="$40K"
+            maxL="$220K"
+            min={40_000}
+            max={220_000}
+            step={1_000}
+            val={btcPrice}
+            valueText={`${fmtUsd(btcPrice)} per bitcoin`}
+            onChange={(n) => setBtcPrice(n)}
+          />
+          <RangeField
+            id="control-horizon"
+            label="Horizon"
+            valueDisplay={`${months} mo`}
+            minL="3M"
+            maxL="36M"
+            min={3}
+            max={36}
+            step={1}
+            val={months}
+            valueText={`${months} months`}
+            onChange={(n) => setMonths(n)}
+          />
           <div style={{ paddingTop: TOKENS.spacing[2] }}>
             <InfoRow l="Ticket" v="$500,000" />
             <InfoRow l="Base BTC" v="$95,000" />
@@ -238,7 +312,15 @@ export function SimulationPanel() {
               >
                 <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
                   {[20, 40, 60, 80].map((y) => (
-                    <line key={y} x1="0" y1={y} x2="100" y2={y} stroke="rgba(255,255,255,0.06)" strokeWidth="0.3" />
+                    <line
+                      key={`chart-gridline-y-${y}`}
+                      x1="0"
+                      y1={y}
+                      x2="100"
+                      y2={y}
+                      stroke="rgba(255,255,255,0.06)"
+                      strokeWidth="0.3"
+                    />
                   ))}
                   <polyline points={series.bear} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="0.4" />
                   <polyline points={series.base} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="0.45" />
@@ -255,8 +337,8 @@ export function SimulationPanel() {
                   color: TOKENS.colors.textSecondary,
                 }}
               >
-                {series.steps.map((s, i) => (
-                  <span key={`axis-${i}-${s.month}`}>M{s.month}</span>
+                {series.steps.map((s) => (
+                  <span key={s.id}>M{s.month}</span>
                 ))}
               </div>
             </div>
@@ -290,48 +372,6 @@ export function SimulationPanel() {
             </div>
           </ProjectionLens>
         </div>
-      </div>
-    </div>
-  )
-}
-
-function ControlGroup({
-  label,
-  value,
-  minL,
-  maxL,
-  id,
-  children,
-}: {
-  label: string
-  value: string
-  minL: string
-  maxL: string
-  id: string
-  children: React.ReactNode
-}) {
-  return (
-    <div
-      style={{
-        paddingBottom: TOKENS.spacing[3],
-        marginBottom: TOKENS.spacing[2],
-        borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
-      }}
-    >
-      <div
-        style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between', gap: TOKENS.spacing[3] }}
-      >
-        <div id={`${id}-l`} style={{ fontSize: TOKENS.fontSizes.xs, fontWeight: 700, letterSpacing: '0.2em', textTransform: 'uppercase' as const, color: TOKENS.colors.textSecondary }}>
-          {label}
-        </div>
-        <div style={{ fontFamily: TOKENS.fonts.mono, fontSize: TOKENS.fontSizes.lg, fontWeight: 700, color: TOKENS.colors.textPrimary }} aria-describedby={`${id}-l`}>
-          {value}
-        </div>
-      </div>
-      {children}
-      <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: TOKENS.spacing[2], color: TOKENS.colors.textSecondary, fontFamily: TOKENS.fonts.mono, fontSize: TOKENS.fontSizes.xs, fontWeight: 700, letterSpacing: '0.12em' }}>
-        <span>{minL}</span>
-        <span>{maxL}</span>
       </div>
     </div>
   )

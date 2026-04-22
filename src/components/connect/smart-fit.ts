@@ -1,14 +1,24 @@
 'use client'
 
 import { useEffect, useState } from 'react'
+import { SIDEBAR_WIDTH_PX, SIDEBAR_WIDTH_NARROW_PX } from './constants'
 
 export type SmartFitMode = 'normal' | 'tight' | 'limit'
+
+/** Matches sidebar column in `sidebar.tsx` for header/main alignment. */
+export function getSidebarWidthPx(mode: SmartFitMode): number {
+  return mode === 'limit' ? SIDEBAR_WIDTH_NARROW_PX : SIDEBAR_WIDTH_PX
+}
 
 interface SmartFitOptions {
   tightHeight: number
   limitHeight: number
   tightWidth?: number
   limitWidth?: number
+  /** Viewport &lt; this → `tight` (unless height forces `limit`). */
+  midBreakpoint?: number
+  /** Viewport &lt; this (with mid) → stricter `tight` / `limit` heuristics. */
+  narrowBreakpoint?: number
   reserveHeight?: number
   reserveWidth?: number
 }
@@ -16,21 +26,28 @@ interface SmartFitOptions {
 function resolveMode(width: number, height: number, options: SmartFitOptions): SmartFitMode {
   const availableWidth = Math.max(0, width - (options.reserveWidth ?? 0))
   const availableHeight = Math.max(0, height - (options.reserveHeight ?? 0))
+  const mid = options.midBreakpoint ?? 1280
+  const narrow = options.narrowBreakpoint ?? 1100
+  const heightCrisis = availableHeight <= options.limitHeight
+  const heightTight = availableHeight <= options.tightHeight
 
-  /** Under 1280px viewport, compress layout (Cinematic OS — no document scroll) */
-  if (width < 1280) {
-    if (availableHeight <= options.limitHeight) return 'limit'
+  /** &lt;1100px: smallest shell — limit if vertical space is also constrained, else tight */
+  if (width < narrow) {
+    if (heightCrisis) return 'limit'
+    if (heightTight) return 'tight'
     return 'tight'
   }
 
-  const isLimit =
-    availableHeight <= options.limitHeight ||
-    (options.limitWidth !== undefined && availableWidth <= options.limitWidth)
+  /** 1100–1280: compact but not always limit */
+  if (width < mid) {
+    if (heightCrisis) return 'limit'
+    return 'tight'
+  }
+
+  const isLimit = heightCrisis || (options.limitWidth !== undefined && availableWidth <= options.limitWidth)
   if (isLimit) return 'limit'
 
-  const isTight =
-    availableHeight <= options.tightHeight ||
-    (options.tightWidth !== undefined && availableWidth <= options.tightWidth)
+  const isTight = heightTight || (options.tightWidth !== undefined && availableWidth <= options.tightWidth)
   if (isTight) return 'tight'
 
   return 'normal'
@@ -57,12 +74,16 @@ export function useSmartFit(options: SmartFitOptions) {
     options.tightWidth,
     options.reserveHeight,
     options.reserveWidth,
+    options.midBreakpoint,
+    options.narrowBreakpoint,
   ])
 
   return {
     mode,
     isTight: mode !== 'normal',
     isLimit: mode === 'limit',
+    /** Sidebar lists & metadata: same idea as pre-refactor `isCompactBottom` */
+    isCompactBottom: mode !== 'normal',
   }
 }
 

@@ -22,12 +22,12 @@ export function HeroVaultStage({
 }) {
   return (
     <div
+      className="bg-gradient-to-b from-transparent to-white/[0.02]"
       style={{
         display: 'grid',
         gridTemplateColumns: fitValue(mode, { normal: '1.1fr 0.45fr', tight: '1fr 0.42fr', limit: '1fr' }),
         gap: fitValue(mode, { normal: TOKENS.spacing[6], tight: TOKENS.spacing[4], limit: TOKENS.spacing[3] }),
         paddingBottom: fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[2] }),
-        borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
       }}
     >
       <div>

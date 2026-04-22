@@ -2,7 +2,8 @@
 
 import '@/styles/connect/dashboard-vars.css'
 import { useConnectRouting } from './use-connect-routing'
-import { TOKENS, SIDEBAR_WIDTH_PX, MONO } from './constants'
+import { TOKENS, MONO } from './constants'
+import { getSidebarWidthPx, useSmartFit } from './smart-fit'
 import { Sidebar } from './sidebar'
 import { PortfolioSummary } from './portfolio-summary'
 import { VaultDetailPanel } from './vault-detail-panel'
@@ -16,70 +17,42 @@ const ON_DARK_GHOST = 'rgba(255,255,255,0.35)'
 
 export function Canvas() {
   const { vaults, agg, selectedId, setSelectedId, selected, isSimulation } = useConnectRouting()
+  const { mode } = useSmartFit({
+    tightHeight: 760,
+    limitHeight: 680,
+    reserveHeight: 64,
+  })
+  const sidebarPx = getSidebarWidthPx(mode)
 
   return (
     <div
-      className="connect-scope fixed inset-0 flex flex-col"
+      className="connect-scope fixed inset-0 z-[1] flex flex-col overflow-hidden antialiased [isolation:isolate] h-[100dvh]"
       style={{
         background: TOKENS.colors.bgApp,
         color: TOKENS.colors.textPrimary,
         fontFamily: TOKENS.fonts.sans,
-        WebkitFontSmoothing: 'antialiased',
-        zIndex: 1,
-        isolation: 'isolate',
-        overflow: 'hidden',
-        height: '100dvh',
       }}
     >
       <header
-        className="shrink-0 flex items-center select-none"
-        style={{
-          height: TOKENS.spacing[16],
-          width: '100%',
-          minWidth: 0,
-          background: TOKENS.colors.bgSidebar,
-          boxShadow: 'inset 0 -1px 0 0 rgba(255,255,255,0.08)',
-          padding: `0 ${TOKENS.spacing[6]} 0 0`,
-          display: 'grid',
-          gridTemplateColumns: `minmax(0,${SIDEBAR_WIDTH_PX}px) minmax(0,1fr)`,
-          alignItems: 'center',
-        }}
+        className="grid h-16 w-full min-w-0 shrink-0 select-none items-stretch bg-[#050505] shadow-[inset_0_-1px_0_0_rgba(255,255,255,0.08)]"
+        style={{ gridTemplateColumns: `${sidebarPx}px minmax(0,1fr)` }}
       >
-        <div
-          style={{
-            display: 'flex',
-            alignItems: 'center',
-            padding: `0 ${TOKENS.spacing[4]} 0 ${TOKENS.spacing[4]}`,
-            minWidth: 0,
-            height: '100%',
-            borderRight: 'none',
-          }}
-        >
+        <div className="flex h-full min-w-0 items-center px-4">
           <img
             src="/logos/hearst-connect-blackbg.svg"
             alt="Hearst Connect"
-            style={{
-              display: 'block',
-              height: 42,
-              maxWidth: 180,
-              width: 'auto',
-              objectFit: 'contain',
-            }}
+            className="block h-[42px] w-auto max-w-[180px] object-contain"
           />
         </div>
-        <div
-          className="flex min-w-0 items-center justify-end"
-          style={{ height: '100%' }}
-        >
+        <div className="flex h-full min-w-0 items-center justify-end pr-8">
           <span
+            className="text-right uppercase"
             style={{
               fontFamily: MONO,
               fontSize: TOKENS.fontSizes.xs,
               fontWeight: TOKENS.fontWeights.bold,
               letterSpacing: TOKENS.letterSpacing.display,
-              textTransform: 'uppercase' as const,
               color: ON_DARK_GHOST,
-              marginRight: TOKENS.spacing[6],
             }}
           >
             {WALLET}
@@ -87,11 +60,11 @@ export function Canvas() {
         </div>
       </header>
 
-      <main className="min-h-0 min-w-0 flex flex-1" style={{ overflow: 'hidden' }}>
+      <main className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
         <Sidebar vaults={vaults} selectedId={selectedId} onSelect={setSelectedId} />
         <section
-          className="min-h-0 min-w-0 flex-1"
-          style={{ overflow: 'hidden', minWidth: 0, background: TOKENS.colors.bgPage }}
+          className="min-h-0 min-w-0 flex-1 overflow-hidden"
+          style={{ background: TOKENS.colors.bgPage }}
           aria-label="Main scene"
         >
           <MainPanel selected={selected} agg={agg} isSimulation={isSimulation} />

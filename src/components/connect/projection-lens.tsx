@@ -25,9 +25,9 @@ export function ProjectionLens({
       }}
     >
       <header
+        className="bg-gradient-to-b from-transparent to-white/[0.02]"
         style={{
           paddingBottom: compact ? TOKENS.spacing[2] : TOKENS.spacing[4],
-          borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
         }}
       >
         <Label id="lens-kicker" tone="scene" variant="text">

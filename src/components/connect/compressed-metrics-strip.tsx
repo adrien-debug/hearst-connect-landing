@@ -12,6 +12,7 @@ export function CompressedMetricsStrip({
 }) {
   return (
     <div
+      className="bg-gradient-to-b from-transparent to-white/[0.02]"
       style={{
         display: 'grid',
         gridTemplateColumns: `repeat(${items.length}, minmax(0,1fr))`,
@@ -21,7 +22,6 @@ export function CompressedMetricsStrip({
           limit: TOKENS.spacing[3],
         }),
         paddingBottom: fitValue(mode, { normal: TOKENS.spacing[4], tight: TOKENS.spacing[3], limit: TOKENS.spacing[2] }),
-        borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
       }}
     >
       {items.map((m) => (

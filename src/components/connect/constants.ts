@@ -1,5 +1,7 @@
 /** Cinematic Financial OS — source of truth for connect scope. Keep `dashboard-vars.css` in sync. */
 export const SIDEBAR_WIDTH_PX = 280
+/** Below ~1280px when mode is `limit` (tighter column). */
+export const SIDEBAR_WIDTH_NARROW_PX = 272
 
 export const TOKENS = {
   colors: {

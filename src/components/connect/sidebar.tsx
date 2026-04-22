@@ -1,11 +1,11 @@
 'use client'
 
 import { Label } from '@/components/ui/label'
-import { SIDEBAR_WIDTH_PX, TOKENS, fmtUsdCompact } from './constants'
+import { TOKENS, fmtUsdCompact } from './constants'
 import type { VaultLine, ActiveVault, AvailableVault } from './data'
 import { SIMULATION_VIEW_ID } from './view-ids'
 import { VaultNode } from './vault-node'
-import { fitValue, useSmartFit } from './smart-fit'
+import { fitValue, getSidebarWidthPx, useSmartFit } from './smart-fit'
 
 interface SidebarProps {
   vaults: VaultLine[]
@@ -14,12 +14,12 @@ interface SidebarProps {
 }
 
 export function Sidebar({ vaults, selectedId, onSelect }: SidebarProps) {
-  const { mode, isLimit } = useSmartFit({
+  const { mode, isLimit, isCompactBottom } = useSmartFit({
     tightHeight: 760,
     limitHeight: 680,
     reserveHeight: 64,
   })
-  const isCompactBottom = mode !== 'normal'
+  const sidebarW = getSidebarWidthPx(mode)
   const activeVaults = vaults
     .filter((v): v is ActiveVault => v.type === 'active')
     .sort((a, b) => b.deposited - a.deposited)
@@ -34,7 +34,7 @@ export function Sidebar({ vaults, selectedId, onSelect }: SidebarProps) {
       id="connect-sidebar"
       className="flex h-full min-h-0 shrink-0 flex-col"
       style={{
-        width: isLimit ? 272 : SIDEBAR_WIDTH_PX,
+        width: sidebarW,
         maxWidth: '100%',
         background: TOKENS.colors.bgSidebar,
         display: 'grid',
