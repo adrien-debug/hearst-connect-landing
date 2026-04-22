@@ -37,7 +37,7 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
         flexShrink: 0,
         background: TOKENS.colors.bgSurface,
       }}>
-        <Label>Available Yield</Label>
+        <Label>Portfolio</Label>
         <div style={{ display: 'grid', gridTemplateColumns: '1.5fr 1fr', gap: TOKENS.spacing[12], alignItems: 'center' }}>
           <div>
             <div style={{
@@ -47,10 +47,10 @@ export function PortfolioSummary({ vaults, agg }: { vaults: VaultLine[]; agg: Ag
               lineHeight: 0.95,
               color: TOKENS.colors.black,
             }}>
-              {fmtUsdCompact(agg.totalClaimable)}
+              {fmtUsdCompact(portfolioValue)}
             </div>
           </div>
-          <HeroMetric label="Portfolio Value" value={fmtUsdCompact(portfolioValue)} secondary={`${activeVaults.length} active positions`} />
+          <HeroMetric label="Available Yield" value={fmtUsdCompact(agg.totalClaimable)} secondary={`${activeVaults.length} active positions`} />
         </div>
       </div>
 

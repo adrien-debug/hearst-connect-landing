@@ -2,6 +2,7 @@
 
 import { TOKENS, fmtUsdCompact } from './constants'
 import type { Aggregate, VaultLine, ActiveVault, AvailableVault } from './data'
+import { SIMULATION_VIEW_ID } from './view-ids'
 
 interface SidebarProps {
   vaults: VaultLine[]
@@ -14,8 +15,9 @@ export function Sidebar({ vaults, selectedId, onSelect, agg }: SidebarProps) {
   const activeVaults = vaults
     .filter((v): v is ActiveVault => v.type === 'active')
     .sort((a, b) => b.deposited - a.deposited)
-  const primaryAvailableVault = vaults.find((v): v is AvailableVault => v.type === 'available') ?? null
+  const availableVaults = vaults.filter((v): v is AvailableVault => v.type === 'available')
   const isOverview = selectedId === null
+  const isSimulation = selectedId === SIMULATION_VIEW_ID
 
   return (
     <aside
@@ -35,55 +37,37 @@ export function Sidebar({ vaults, selectedId, onSelect, agg }: SidebarProps) {
         borderBottom: `1px solid rgba(255,255,255,0.12)`,
         flexShrink: 0,
       }}>
-        <SectionLabel>Register</SectionLabel>
-        <button
-          type="button"
-          onClick={() => onSelect(null)}
-          style={{
-            width: '100%',
-            background: isOverview ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
-            border: `${TOKENS.borders.thin} solid ${isOverview ? TOKENS.colors.accent : 'rgba(255,255,255,0.16)'}`,
-            padding: `${TOKENS.spacing[4]} ${TOKENS.spacing[4]}`,
-            cursor: 'pointer',
-            textAlign: 'left',
-            transition: '120ms ease-out',
-          }}
-        >
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', gap: TOKENS.spacing[4] }}>
-            <div>
-              <div style={{
-                fontFamily: TOKENS.fonts.sans,
-                fontSize: TOKENS.fontSizes.sm,
-                fontWeight: TOKENS.fontWeights.black,
-                textTransform: 'uppercase',
-                color: TOKENS.colors.textOnDark,
-                marginBottom: '2px',
-              }}>
-                Portfolio Overview
-              </div>
-              <div style={{
-                fontFamily: TOKENS.fonts.mono,
-                fontSize: TOKENS.fontSizes.xs,
-                fontWeight: TOKENS.fontWeights.bold,
-                color: isOverview ? TOKENS.colors.accent : 'rgba(255,255,255,0.55)',
-                letterSpacing: TOKENS.letterSpacing.wide,
-              }}>
-                {fmtUsdCompact(agg.totalDeposited + agg.totalClaimable)} value
-              </div>
-            </div>
-            <div style={{
+        <SectionLabel>Portfolio</SectionLabel>
+        <div style={{
+          fontFamily: TOKENS.fonts.sans,
+          fontSize: TOKENS.fontSizes.lg,
+          fontWeight: TOKENS.fontWeights.black,
+          textTransform: 'uppercase',
+          color: TOKENS.colors.textOnDark,
+        }}>
+          Portfolio
+        </div>
+        {!isOverview && (
+          <button
+            type="button"
+            onClick={() => onSelect(null)}
+            style={{
+              marginTop: TOKENS.spacing[3],
+              background: 'none',
+              border: 'none',
+              padding: 0,
+              cursor: 'pointer',
               fontFamily: TOKENS.fonts.mono,
               fontSize: TOKENS.fontSizes.xs,
               fontWeight: TOKENS.fontWeights.bold,
               letterSpacing: TOKENS.letterSpacing.display,
               textTransform: 'uppercase',
-              color: isOverview ? TOKENS.colors.accent : TOKENS.colors.textOnDark,
-              whiteSpace: 'nowrap',
-            }}>
-              {isOverview ? 'Current View' : 'Open'}
-            </div>
-          </div>
-        </button>
+              color: TOKENS.colors.accent,
+            }}
+          >
+            Back to Overview
+          </button>
+        )}
       </div>
 
       <div style={{
@@ -95,7 +79,7 @@ export function Sidebar({ vaults, selectedId, onSelect, agg }: SidebarProps) {
       }}>
         <SectionLabel>Active Positions</SectionLabel>
         <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[6] }}>
-          {activeVaults.map(v => {
+          {activeVaults.map((v, index) => {
             const isSel = selectedId === v.id
             return (
               <button
@@ -116,6 +100,17 @@ export function Sidebar({ vaults, selectedId, onSelect, agg }: SidebarProps) {
               >
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: TOKENS.spacing[4] }}>
                   <div style={{ minWidth: 0 }}>
+                    <div style={{
+                      fontFamily: TOKENS.fonts.mono,
+                      fontSize: TOKENS.fontSizes.xs,
+                      fontWeight: TOKENS.fontWeights.bold,
+                      letterSpacing: TOKENS.letterSpacing.display,
+                      textTransform: 'uppercase',
+                      color: 'rgba(255,255,255,0.45)',
+                      marginBottom: TOKENS.spacing[2],
+                    }}>
+                      Vault {index + 1}
+                    </div>
                     <div style={{
                       fontFamily: TOKENS.fonts.sans,
                       fontSize: TOKENS.fontSizes.sm,
@@ -148,51 +143,141 @@ export function Sidebar({ vaults, selectedId, onSelect, agg }: SidebarProps) {
         </div>
       </div>
 
-      {primaryAvailableVault && (
-        <div style={{
-          padding: `${TOKENS.spacing[6]} ${TOKENS.spacing[8]} ${TOKENS.spacing[6]}`,
-          borderTop: `1px solid rgba(255,255,255,0.12)`,
-          background: `linear-gradient(180deg, rgba(255,255,255,0) 0%, ${TOKENS.colors.accentDim} 100%)`,
-          flexShrink: 0,
-        }}>
-          <SectionLabel>Available Vault</SectionLabel>
-          <button
-            type="button"
-            onClick={() => onSelect(primaryAvailableVault.id)}
-            style={{
-              width: '100%',
-              background: selectedId === primaryAvailableVault.id ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
-              border: `${TOKENS.borders.thin} solid ${selectedId === primaryAvailableVault.id ? TOKENS.colors.accent : 'rgba(255,255,255,0.16)'}`,
-              padding: TOKENS.spacing[4],
-              cursor: 'pointer',
-              textAlign: 'left',
-            }}
-          >
-            <div style={{
-              fontFamily: TOKENS.fonts.sans,
-              fontSize: TOKENS.fontSizes.sm,
-              fontWeight: TOKENS.fontWeights.black,
-              textTransform: 'uppercase',
-              color: TOKENS.colors.textOnDark,
-              marginBottom: TOKENS.spacing[2],
-            }}>
-              {primaryAvailableVault.name}
+      <div style={{
+        padding: `${TOKENS.spacing[6]} ${TOKENS.spacing[8]} ${TOKENS.spacing[6]}`,
+        borderTop: `1px solid rgba(255,255,255,0.12)`,
+        background: `linear-gradient(180deg, rgba(255,255,255,0) 0%, ${TOKENS.colors.accentDim} 100%)`,
+        flexShrink: 0,
+      }}>
+        <SectionLabel>Simulation</SectionLabel>
+        <button
+          type="button"
+          onClick={() => onSelect(SIMULATION_VIEW_ID)}
+          style={{
+            width: '100%',
+            background: TOKENS.colors.accent,
+            border: `${TOKENS.borders.thin} solid ${isSimulation ? TOKENS.colors.white : TOKENS.colors.accent}`,
+            padding: TOKENS.spacing[4],
+            cursor: 'pointer',
+            textAlign: 'left',
+            color: TOKENS.colors.black,
+            boxShadow: isSimulation ? `inset 0 0 0 1px ${TOKENS.colors.white}` : 'none',
+            marginBottom: availableVaults.length > 0 ? TOKENS.spacing[6] : '0px',
+          }}
+        >
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: TOKENS.spacing[4] }}>
+            <div>
+              <div style={{
+                fontFamily: TOKENS.fonts.mono,
+                fontSize: TOKENS.fontSizes.xs,
+                fontWeight: TOKENS.fontWeights.bold,
+                letterSpacing: TOKENS.letterSpacing.display,
+                textTransform: 'uppercase',
+                color: 'rgba(0,0,0,0.55)',
+                marginBottom: TOKENS.spacing[2],
+              }}>
+                Simulation
+              </div>
+              <div style={{
+                fontFamily: TOKENS.fonts.sans,
+                fontSize: TOKENS.fontSizes.sm,
+                fontWeight: TOKENS.fontWeights.black,
+                textTransform: 'uppercase',
+                color: TOKENS.colors.black,
+                marginBottom: TOKENS.spacing[2],
+              }}>
+                Projection Tool
+              </div>
             </div>
             <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              gap: TOKENS.spacing[3],
               fontFamily: TOKENS.fonts.mono,
               fontSize: TOKENS.fontSizes.xs,
               fontWeight: TOKENS.fontWeights.bold,
-              color: TOKENS.colors.accent,
+              color: TOKENS.colors.black,
+              whiteSpace: 'nowrap',
             }}>
-              <span>{primaryAvailableVault.apr}% APY</span>
-              <span>Min. {fmtUsdCompact(primaryAvailableVault.minDeposit)}</span>
+              Open
             </div>
-          </button>
-        </div>
-      )}
+          </div>
+          <div style={{
+            fontFamily: TOKENS.fonts.mono,
+            fontSize: TOKENS.fontSizes.xs,
+            fontWeight: TOKENS.fontWeights.bold,
+            color: 'rgba(0,0,0,0.65)',
+          }}>
+            Bear / Base / Bull · BTC Price · Time · Graph
+          </div>
+        </button>
+
+        {availableVaults.length > 0 && (
+          <>
+            <SectionLabel>Available Deals</SectionLabel>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[3] }}>
+              {availableVaults.map((vault, index) => {
+                const isSelected = selectedId === vault.id
+                return (
+                  <button
+                    key={vault.id}
+                    type="button"
+                    onClick={() => onSelect(vault.id)}
+                    style={{
+                      width: '100%',
+                      background: isSelected ? 'rgba(255,255,255,0.08)' : 'rgba(255,255,255,0.03)',
+                      border: `${TOKENS.borders.thin} solid ${isSelected ? TOKENS.colors.accent : 'rgba(255,255,255,0.16)'}`,
+                      padding: TOKENS.spacing[4],
+                      cursor: 'pointer',
+                      textAlign: 'left',
+                    }}
+                  >
+                    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', gap: TOKENS.spacing[4] }}>
+                      <div>
+                        <div style={{
+                          fontFamily: TOKENS.fonts.mono,
+                          fontSize: TOKENS.fontSizes.xs,
+                          fontWeight: TOKENS.fontWeights.bold,
+                          letterSpacing: TOKENS.letterSpacing.display,
+                          textTransform: 'uppercase',
+                          color: 'rgba(255,255,255,0.45)',
+                          marginBottom: TOKENS.spacing[2],
+                        }}>
+                          Deal {index + 1}
+                        </div>
+                        <div style={{
+                          fontFamily: TOKENS.fonts.sans,
+                          fontSize: TOKENS.fontSizes.sm,
+                          fontWeight: TOKENS.fontWeights.black,
+                          textTransform: 'uppercase',
+                          color: TOKENS.colors.textOnDark,
+                          marginBottom: TOKENS.spacing[2],
+                        }}>
+                          {vault.name}
+                        </div>
+                      </div>
+                      <div style={{
+                        fontFamily: TOKENS.fonts.mono,
+                        fontSize: TOKENS.fontSizes.xs,
+                        fontWeight: TOKENS.fontWeights.bold,
+                        color: TOKENS.colors.accent,
+                        whiteSpace: 'nowrap',
+                      }}>
+                        {vault.apr}% APY
+                      </div>
+                    </div>
+                    <div style={{
+                      fontFamily: TOKENS.fonts.mono,
+                      fontSize: TOKENS.fontSizes.xs,
+                      fontWeight: TOKENS.fontWeights.bold,
+                      color: 'rgba(255,255,255,0.55)',
+                    }}>
+                      Min. {fmtUsdCompact(vault.minDeposit)}
+                    </div>
+                  </button>
+                )
+              })}
+            </div>
+          </>
+        )}
+      </div>
     </aside>
   )
 }
