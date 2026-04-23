@@ -1048,6 +1048,100 @@ function MaturityTimelineCompact({ vaults, mode }: { vaults: ActiveVault[]; mode
   )
 }
 
+/** AvailableVaultItem — Compact vault item for available vaults list */
+function AvailableVaultItem({
+  vault,
+  onClick,
+}: {
+  vault: AvailableVault
+  onClick?: () => void
+}) {
+  return (
+    <div
+      onClick={onClick}
+      role={onClick ? 'button' : undefined}
+      tabIndex={onClick ? 0 : undefined}
+      onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick() } : undefined}
+      style={{
+        background: TOKENS.colors.bgTertiary,
+        borderRadius: TOKENS.radius.sm,
+        padding: TOKENS.spacing[3],
+        border: `1px solid ${TOKENS.colors.borderSubtle}`,
+        cursor: onClick ? 'pointer' : 'default',
+        transition: 'all 120ms ease-out',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'space-between',
+        gap: TOKENS.spacing[3],
+      }}
+      onMouseEnter={(e) => {
+        if (onClick) {
+          e.currentTarget.style.borderColor = TOKENS.colors.accent
+          e.currentTarget.style.background = TOKENS.colors.black
+        }
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.borderColor = TOKENS.colors.borderSubtle
+        e.currentTarget.style.background = TOKENS.colors.bgTertiary
+      }}
+    >
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        gap: TOKENS.spacing[2],
+        minWidth: 0,
+        flex: 1,
+      }}>
+        <span style={{
+          fontSize: TOKENS.fontSizes.sm,
+          fontWeight: TOKENS.fontWeights.bold,
+          color: TOKENS.colors.textPrimary,
+          overflow: 'hidden',
+          textOverflow: 'ellipsis',
+          whiteSpace: 'nowrap',
+        }}>
+          {vault.name}
+        </span>
+        <div style={{
+          display: 'flex',
+          gap: TOKENS.spacing[2],
+          fontSize: TOKENS.fontSizes.xs,
+          color: TOKENS.colors.textSecondary,
+        }}>
+          <span>{vault.term}</span>
+          <span>•</span>
+          <span>{vault.token}</span>
+        </div>
+      </div>
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        gap: TOKENS.spacing[2],
+        flexShrink: 0,
+      }}>
+        <span style={{
+          fontSize: TOKENS.fontSizes.lg,
+          fontWeight: TOKENS.fontWeights.black,
+          color: TOKENS.colors.accent,
+          letterSpacing: VALUE_LETTER_SPACING,
+        }}>
+          {vault.apr}%
+        </span>
+        <span style={{
+          fontSize: TOKENS.fontSizes.micro,
+          fontWeight: TOKENS.fontWeights.bold,
+          color: TOKENS.colors.textGhost,
+          textTransform: 'uppercase',
+          letterSpacing: TOKENS.letterSpacing.display,
+        }}>
+          APY
+        </span>
+      </div>
+    </div>
+  )
+}
+
 /** AvailableVaultTeaser — Ultra-compact vault teaser */
 function AvailableVaultTeaser({
   vault,
