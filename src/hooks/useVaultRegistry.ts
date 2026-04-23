@@ -2,9 +2,29 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { Address } from 'viem'
+import { base } from 'wagmi/chains'
 import type { VaultConfig, VaultConfigInput, VaultRegistryState } from '@/types/vault'
 
 const STORAGE_KEY = 'hearst:vault-registry'
+
+const SEED_VAULT: VaultConfig = {
+  id: 'seed-hashvault-test',
+  name: 'HashVault Test',
+  description: 'Vault de test pour souscription',
+  vaultAddress: '0x0000000000000000000000000000000000000001' as Address,
+  usdcAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as Address,
+  chain: base,
+  apr: 8.5,
+  target: '25%',
+  lockPeriodDays: 180,
+  minDeposit: 1000,
+  strategy: 'Stablecoin Yield · Low Risk',
+  fees: '1.0% Mgmt · 10% Perf',
+  risk: 'Low',
+  image: '/logos/hearst.svg',
+  isActive: true,
+  createdAt: Date.now(),
+}
 
 function generateVaultId(): string {
   return `vault-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
@@ -22,7 +42,15 @@ function loadFromStorage(): VaultRegistryState {
 
   try {
     const stored = localStorage.getItem(STORAGE_KEY)
-    if (!stored) return getInitialState()
+
+    if (!stored) {
+      const seeded: VaultRegistryState = {
+        vaults: [SEED_VAULT],
+        activeVaultId: SEED_VAULT.id,
+      }
+      saveToStorage(seeded)
+      return seeded
+    }
 
     const parsed = JSON.parse(stored) as VaultRegistryState
 

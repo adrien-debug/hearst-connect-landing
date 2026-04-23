@@ -117,14 +117,14 @@ export function VaultNotConfigured({ onConfigure }: { onConfigure?: () => void }
 }
 
 export function WalletNotConnected({ onConnect }: { onConnect?: () => void }) {
-  const { connect, isPending } = useConnect()
+  const { connect, connectors, isPending } = useConnect()
 
   const handleConnect = () => {
     if (onConnect) {
       onConnect()
     } else {
-      // @ts-ignore - wagmi v2 connect without args
-      connect()
+      const connector = connectors[0]
+      if (connector) connect({ connector })
     }
   }
 

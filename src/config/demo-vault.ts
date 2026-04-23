@@ -17,6 +17,8 @@ export const DEMO_VAULT: AvailableVault = {
   image: '/logos/hearst.svg',
   minDeposit: 500_000,
   lockPeriod: '3 Years',
+  term: '3Y',
+  token: 'USDC',
   risk: 'Moderate',
   fees: '1.5% Mgmt · 15% Perf',
 }

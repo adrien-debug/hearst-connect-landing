@@ -27,19 +27,26 @@ export function useVaultLines() {
   const { activeVaults, isLoading: isRegistryLoading, hasVaults } = useVaultRegistry()
 
   const vaultLines = useMemo<VaultLine[]>(() => {
-    const configuredLines: AvailableVault[] = activeVaults.map((config) => ({
-      id: config.id,
-      name: config.name,
-      type: 'available',
-      apr: config.apr,
-      target: config.target,
-      strategy: config.strategy,
-      image: config.image,
-      minDeposit: config.minDeposit,
-      lockPeriod: `${Math.floor(config.lockPeriodDays / 365)} Years`,
-      risk: config.risk,
-      fees: config.fees,
-    }))
+    const configuredLines: AvailableVault[] = activeVaults.map((config) => {
+      const years = config.lockPeriodDays / 365
+      const lockLabel = years >= 1 ? `${Math.floor(years)} Years` : `${config.lockPeriodDays} Days`
+      const termLabel = years >= 1 ? `${Math.floor(years)}Y` : `${config.lockPeriodDays}D`
+      return {
+        id: config.id,
+        name: config.name,
+        type: 'available',
+        apr: config.apr,
+        target: config.target,
+        strategy: config.strategy,
+        image: config.image,
+        minDeposit: config.minDeposit,
+        lockPeriod: lockLabel,
+        term: termLabel,
+        token: 'USDC',
+        risk: config.risk,
+        fees: config.fees,
+      }
+    })
 
     // Always include demo vault if no real vaults exist
     if (configuredLines.length === 0) {

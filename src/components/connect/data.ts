@@ -29,6 +29,8 @@ export interface AvailableVault extends BaseVault {
   type: 'available'
   minDeposit: number
   lockPeriod: string
+  term: string
+  token: string
   risk: string
   fees: string
 }
@@ -130,12 +132,29 @@ export const VAULTS: VaultLine[] = [
     image: 'https://images.unsplash.com/photo-1639762681485-074b7f938ba0?auto=format&fit=crop&q=80&w=200&h=200',
   },
   {
+    id: 'test-vault',
+    name: 'HashVault Test',
+    type: 'available',
+    apr: 8.5,
+    minDeposit: 1000,
+    lockPeriod: '6 Months',
+    term: '6M',
+    token: 'USDC',
+    target: '25%',
+    risk: 'Low',
+    fees: '1.0% Mgmt · 10% Perf',
+    strategy: 'Stablecoin Yield · Low Risk',
+    image: 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?auto=format&fit=crop&q=80&w=200&h=200',
+  },
+  {
     id: 'prime-new',
     name: 'HashVault Prime',
     type: 'available',
     apr: 12.0,
     minDeposit: 500000,
     lockPeriod: '3 Years',
+    term: '3Y',
+    token: 'USDC',
     target: '36%',
     risk: 'Moderate',
     fees: '1.5% Mgmt · 15% Perf',
@@ -149,6 +168,8 @@ export const VAULTS: VaultLine[] = [
     apr: 15.0,
     minDeposit: 250000,
     lockPeriod: '3 Years',
+    term: '3Y',
+    token: 'BTC',
     target: '45%',
     risk: 'Growth',
     fees: '2.0% Mgmt · 15% Perf',

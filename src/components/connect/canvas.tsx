@@ -213,7 +213,7 @@ function MainPanel({
 
 function WalletButton() {
   const { address, isConnected } = useAccount()
-  const { connect, isPending: isConnecting } = useConnect()
+  const { connect, connectors, isPending: isConnecting } = useConnect()
   const { disconnect } = useDisconnect()
 
   const formatAddress = (addr: string) => {
@@ -221,8 +221,8 @@ function WalletButton() {
   }
 
   const handleConnect = () => {
-    // @ts-ignore - wagmi v2 connect without args
-    connect()
+    const connector = connectors[0]
+    if (connector) connect({ connector })
   }
 
   if (!isConnected) {
