@@ -92,18 +92,26 @@ export function MetricTile({ label, value, detail, accent, compact }: { label: s
       style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: compact ? TOKENS.spacing[2] : TOKENS.spacing[3],
+        gap: TOKENS.spacing[2],
         padding: compact ? `${TOKENS.spacing[2]} 0` : `${TOKENS.spacing[3]} 0`,
         minWidth: 0,
       }}
     >
-      <Label id={`lens-tile-${label}`} tone="scene" variant="text">
+      <div style={{
+        fontSize: TOKENS.fontSizes.micro,
+        fontWeight: TOKENS.fontWeights.bold,
+        fontFamily: TOKENS.fonts.mono,
+        letterSpacing: TOKENS.letterSpacing.display,
+        textTransform: 'uppercase',
+        color: TOKENS.colors.textSecondary,
+      }}>
         {label}
-      </Label>
+      </div>
       <div
         style={{
           fontSize: compact ? TOKENS.fontSizes.lg : TOKENS.fontSizes.xl,
           fontWeight: TOKENS.fontWeights.black,
+          letterSpacing: TOKENS.letterSpacing.tight,
           color: accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
         }}
         aria-label={`${label} ${value}`}
@@ -111,7 +119,11 @@ export function MetricTile({ label, value, detail, accent, compact }: { label: s
         {value}
       </div>
       <div
-        style={{ fontSize: TOKENS.fontSizes.micro, color: TOKENS.colors.textSecondary, lineHeight: 1.45 }}
+        style={{ 
+          fontSize: TOKENS.fontSizes.xs, 
+          color: TOKENS.colors.textGhost, 
+          lineHeight: 1.45 
+        }}
       >
         {detail}
       </div>

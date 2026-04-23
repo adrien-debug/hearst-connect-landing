@@ -122,11 +122,11 @@ export function SimulationPanel() {
             letterSpacing: TOKENS.letterSpacing.display,
             textTransform: 'uppercase',
           }}>
-            {months} months · {fmtUsd(btcPrice)} BTC
+            {scenario.toUpperCase()} SCENARIO
           </div>
         </div>
 
-        {/* Main cockpit gauges — 3 Scenarios */}
+        {/* Main cockpit gauges — Actual Metrics */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: fitValue(mode, {
@@ -141,88 +141,30 @@ export function SimulationPanel() {
           }),
         }}>
           <CockpitGauge
-            label="Bear"
-            value={formatPercent(projections.bear.annualApr * 100)}
-            valueCompact={formatPercent(projections.bear.annualApr * 100)}
-            subtext={`${formatCompactUsd(projections.bear.cumulativeYield)} yield`}
+            label="Projected Value"
+            value={fmtUsd(active.totalValue)}
+            valueCompact={fmtUsdCompact(active.totalValue)}
+            subtext="Capital + Yield"
             mode={mode}
-            primary={scenario === 'bear'}
-            accent={scenario === 'bear'}
-            onClick={() => setScenario('bear')}
-            active={scenario === 'bear'}
+            primary
             align="center"
           />
           <CockpitGauge
-            label="Base"
-            value={formatPercent(projections.base.annualApr * 100)}
-            valueCompact={formatPercent(projections.base.annualApr * 100)}
-            subtext={`${formatCompactUsd(projections.base.cumulativeYield)} yield`}
+            label="Cumulative Yield"
+            value={`+${fmtUsd(active.cumulativeYield)}`}
+            valueCompact={`+${fmtUsdCompact(active.cumulativeYield)}`}
+            subtext={`${formatPercent(active.annualApr * 100)} APY`}
             mode={mode}
-            primary={scenario === 'base'}
-            accent={scenario === 'base'}
-            onClick={() => setScenario('base')}
-            active={scenario === 'base'}
+            accent
             align="center"
           />
           <CockpitGauge
-            label="Bull"
-            value={formatPercent(projections.bull.annualApr * 100)}
-            valueCompact={formatPercent(projections.bull.annualApr * 100)}
-            subtext={`${formatCompactUsd(projections.bull.cumulativeYield)} yield`}
+            label="Implied BTC Price"
+            value={fmtUsd(active.expectedPrice)}
+            valueCompact={fmtUsdCompact(active.expectedPrice)}
+            subtext="At maturity"
             mode={mode}
-            primary={scenario === 'bull'}
-            accent={scenario === 'bull'}
-            onClick={() => setScenario('bull')}
-            active={scenario === 'bull'}
             align="center"
-          />
-        </div>
-      </div>
-
-      {/* Sticky Controls Bar */}
-      <div
-        style={{
-          flexShrink: 0,
-          background: TOKENS.colors.bgApp,
-          borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
-          padding: `${pad}px`,
-        }}
-      >
-        {/* Sliders - BTC & Horizon */}
-        <div
-          style={{
-            display: 'grid',
-            gridTemplateColumns: isLimit ? '1fr' : '1fr 1fr',
-            gap: `${TOKENS.spacing[3]}px`,
-          }}
-        >
-          <RangeSlider
-            id="btc-price"
-            label="BTC Price"
-            value={btcPrice}
-            min={40_000}
-            max={220_000}
-            step={1_000}
-            formatValue={fmtUsd}
-            minLabel="$40K"
-            maxLabel="$220K"
-            ariaLabel="Bitcoin price projection"
-            ariaValueText={(v) => `${fmtUsd(v)} per BTC`}
-            onChange={setBtcPrice}
-          />
-          <RangeSlider
-            id="horizon"
-            label="Horizon"
-            value={months}
-            min={3}
-            max={36}
-            step={1}
-            formatValue={(v) => `${v} mo`}
-            minLabel="3M"
-            maxLabel="36M"
-            ariaLabel="Time horizon projection"
-            ariaValueText={(v) => `${v} months`}
-            onChange={setMonths}
           />
         </div>
       </div>
@@ -235,124 +177,295 @@ export function SimulationPanel() {
           display: 'flex',
           flexDirection: 'column',
           minHeight: 0,
-          overflow: 'auto',
+          overflow: 'hidden', // Changed from auto to hidden to fit in screen
           padding: `${pad}px`,
           gap: `${shellGap}px`,
         }}
       >
-        {/* Projection Chart */}
-        <div
-          style={{
-            flex: 1,
-            display: 'flex',
-            flexDirection: 'column',
-            minHeight: isLimit ? 296 : 400,
-            background: TOKENS.colors.bgSecondary,
-            borderRadius: TOKENS.radius.lg,
-            padding: fitValue(mode, {
-              normal: TOKENS.spacing[4],
-              tight: TOKENS.spacing[3],
-              limit: TOKENS.spacing[2],
-            }),
-          }}
-        >
+        {/* Chart & Recap Grid */}
+        <div style={{
+          flex: 1,
+          display: 'grid',
+          gridTemplateColumns: fitValue(mode, {
+            normal: '1fr 380px',
+            tight: '1fr 320px',
+            limit: '1fr',
+          }),
+          gap: `${shellGap}px`,
+          minHeight: 0,
+        }}>
+          {/* Left Column: Chart + Controls */}
           <div style={{
             display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'baseline',
-            marginBottom: TOKENS.spacing[3],
+            flexDirection: 'column',
+            gap: `${shellGap}px`,
+            minHeight: 0,
           }}>
-            <Label id="proj-path" tone="scene" variant="text">
-              Projected Path
-            </Label>
-            <div style={{
-              fontFamily: TOKENS.fonts.mono,
-              fontSize: TOKENS.fontSizes.xs,
-              color: TOKENS.colors.textGhost,
-            }}>
-              {months} months · {fmtUsd(btcPrice)} BTC
-            </div>
-          </div>
+            {/* Projection Chart */}
+            <div
+              style={{
+                flex: 1,
+                display: 'flex',
+                flexDirection: 'column',
+                minHeight: 0,
+                background: TOKENS.colors.black,
+                border: `1px solid ${TOKENS.colors.borderSubtle}`,
+                borderRadius: TOKENS.radius.lg,
+                padding: fitValue(mode, {
+                  normal: TOKENS.spacing[6],
+                  tight: TOKENS.spacing[4],
+                  limit: TOKENS.spacing[3],
+                }),
+              }}
+            >
+              <div style={{
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'baseline',
+                marginBottom: TOKENS.spacing[4],
+              }}>
+                <span style={{
+                  fontFamily: TOKENS.fonts.mono,
+                  fontSize: TOKENS.fontSizes.micro,
+                  fontWeight: TOKENS.fontWeights.bold,
+                  letterSpacing: TOKENS.letterSpacing.display,
+                  textTransform: 'uppercase',
+                  color: TOKENS.colors.textSecondary,
+                }}>
+                  Projected Path
+                </span>
+              </div>
 
-          {/* Chart */}
-          <div
-            style={{
-              flex: 1,
-              minHeight: isLimit ? 120 : 160,
-              background: TOKENS.colors.bgTertiary,
-              borderRadius: TOKENS.radius.lg,
-              position: 'relative',
-            }}
-            aria-label="Projected value curves"
-          >
-            <div key={`${scenario}-${btcPrice}-${months}`} className="connect-panel-stage h-full">
-              <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
-                {[20, 40, 60, 80].map((y) => (
-                  <line
-                    key={`chart-gridline-y-${y}`}
-                    x1="0"
-                    y1={y}
-                    x2="100"
-                    y2={y}
-                    stroke="rgba(255,255,255,0.06)"
-                    strokeWidth="0.3"
-                  />
+              {/* Chart */}
+              <div
+                style={{
+                  flex: 1,
+                  minHeight: 0,
+                  background: 'transparent',
+                  position: 'relative',
+                }}
+                aria-label="Projected value curves"
+              >
+                <div key={`${scenario}-${btcPrice}-${months}`} className="connect-panel-stage h-full">
+                  <svg viewBox="0 0 100 100" preserveAspectRatio="none" style={{ width: '100%', height: '100%', display: 'block' }}>
+                    {[20, 40, 60, 80].map((y) => (
+                      <line
+                        key={`chart-gridline-y-${y}`}
+                        x1="0"
+                        y1={y}
+                        x2="100"
+                        y2={y}
+                        stroke="rgba(255,255,255,0.06)"
+                        strokeWidth="0.3"
+                      />
+                    ))}
+                    <polyline points={series.bear} fill="none" stroke={scenario === 'bear' ? TOKENS.colors.accent : "rgba(255,255,255,0.2)"} strokeWidth={scenario === 'bear' ? "0.8" : "0.3"} />
+                    <polyline points={series.base} fill="none" stroke={scenario === 'base' ? TOKENS.colors.accent : "rgba(255,255,255,0.2)"} strokeWidth={scenario === 'base' ? "0.8" : "0.3"} />
+                    <polyline points={series.bull} fill="none" stroke={scenario === 'bull' ? TOKENS.colors.accent : "rgba(255,255,255,0.2)"} strokeWidth={scenario === 'bull' ? "0.8" : "0.3"} />
+                  </svg>
+                </div>
+              </div>
+
+              <div
+                style={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  marginTop: TOKENS.spacing[3],
+                  fontFamily: TOKENS.fonts.mono,
+                  fontSize: TOKENS.fontSizes.micro,
+                  color: TOKENS.colors.textGhost,
+                }}
+              >
+                {series.steps.map((s) => (
+                  <span key={s.id}>M{s.month}</span>
                 ))}
-                <polyline points={series.bear} fill="none" stroke="rgba(255,255,255,0.35)" strokeWidth="0.4" />
-                <polyline points={series.base} fill="none" stroke="rgba(255,255,255,0.6)" strokeWidth="0.45" />
-                <polyline points={series.bull} fill="none" stroke={TOKENS.colors.accent} strokeWidth="0.5" />
-              </svg>
+              </div>
+            </div>
+
+            {/* Controls Panel */}
+            <div
+              style={{
+                background: TOKENS.colors.black,
+                border: `1px solid ${TOKENS.colors.borderSubtle}`,
+                borderRadius: TOKENS.radius.lg,
+                padding: fitValue(mode, {
+                  normal: TOKENS.spacing[6],
+                  tight: TOKENS.spacing[4],
+                  limit: TOKENS.spacing[3],
+                }),
+                display: 'flex',
+                flexDirection: 'column',
+                gap: TOKENS.spacing[6],
+                flexShrink: 0,
+              }}
+            >
+              {/* Scenario Selector */}
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: TOKENS.spacing[4] }}>
+                <span style={{
+                  fontFamily: TOKENS.fonts.mono,
+                  fontSize: TOKENS.fontSizes.micro,
+                  fontWeight: TOKENS.fontWeights.bold,
+                  letterSpacing: TOKENS.letterSpacing.display,
+                  textTransform: 'uppercase',
+                  color: TOKENS.colors.textSecondary,
+                }}>
+                  Market Scenario
+                </span>
+                <div style={{ 
+                  display: 'flex', 
+                  background: TOKENS.colors.bgTertiary, 
+                  borderRadius: '24px', 
+                  padding: '4px',
+                  border: `1px solid ${TOKENS.colors.borderSubtle}`
+                }}>
+                  {(['bear', 'base', 'bull'] as const).map(s => (
+                    <button
+                      key={s}
+                      onClick={() => setScenario(s)}
+                      style={{
+                        padding: '6px 24px',
+                        borderRadius: '20px',
+                        background: scenario === s ? TOKENS.colors.accent : 'transparent',
+                        color: scenario === s ? TOKENS.colors.black : TOKENS.colors.textSecondary,
+                        fontSize: TOKENS.fontSizes.xs,
+                        fontWeight: TOKENS.fontWeights.bold,
+                        textTransform: 'uppercase',
+                        letterSpacing: TOKENS.letterSpacing.display,
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: 'all 0.2s ease',
+                        boxShadow: scenario === s ? `0 2px 8px ${TOKENS.colors.accent}40` : 'none',
+                      }}
+                    >
+                      {s}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              {/* Sliders */}
+              <div
+                style={{
+                  display: 'grid',
+                  gridTemplateColumns: isLimit ? '1fr' : '1fr 1fr',
+                  gap: `${TOKENS.spacing[6]}px`,
+                }}
+              >
+                <RangeSlider
+                  id="btc-price"
+                  label="BTC Price"
+                  value={btcPrice}
+                  min={40_000}
+                  max={220_000}
+                  step={1_000}
+                  formatValue={fmtUsd}
+                  minLabel="$40K"
+                  maxLabel="$220K"
+                  ariaLabel="Bitcoin price projection"
+                  ariaValueText={(v) => `${fmtUsd(v)} per BTC`}
+                  onChange={setBtcPrice}
+                />
+                <RangeSlider
+                  id="horizon"
+                  label="Horizon"
+                  value={months}
+                  min={3}
+                  max={36}
+                  step={1}
+                  formatValue={(v) => `${v} mo`}
+                  minLabel="3M"
+                  maxLabel="36M"
+                  ariaLabel="Time horizon projection"
+                  ariaValueText={(v) => `${v} months`}
+                  onChange={setMonths}
+                />
+              </div>
             </div>
           </div>
 
-          <div
-            style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginTop: TOKENS.spacing[2],
+          {/* Right Column: Recap Panel */}
+          <div style={{
+            background: TOKENS.colors.black,
+            border: `1px solid ${TOKENS.colors.borderSubtle}`,
+            borderRadius: TOKENS.radius.lg,
+            padding: fitValue(mode, {
+              normal: TOKENS.spacing[6],
+              tight: TOKENS.spacing[4],
+              limit: TOKENS.spacing[3],
+            }),
+            display: 'flex',
+            flexDirection: 'column',
+            minHeight: 0,
+          }}>
+            <span style={{
               fontFamily: TOKENS.fonts.mono,
               fontSize: TOKENS.fontSizes.micro,
+              fontWeight: TOKENS.fontWeights.bold,
+              letterSpacing: TOKENS.letterSpacing.display,
+              textTransform: 'uppercase',
               color: TOKENS.colors.textSecondary,
-            }}
-          >
-            {series.steps.map((s) => (
-              <span key={s.id}>M{s.month}</span>
-            ))}
-          </div>
-
-          {/* Metrics row */}
-          <div style={{ marginTop: TOKENS.spacing[3] }}>
-            <MetricTilesRow columns={4} compact={compact}>
-              <MetricTile
-                label="Yield"
-                value={fmtUsd(active.cumulativeYield)}
-                detail="Cumulative"
-                compact={compact}
-              />
-              <MetricTile
-                label="Total Value"
-                value={fmtUsd(active.totalValue)}
-                detail="Capital + yield"
-                compact={compact}
-              />
-              <MetricTile
-                label="Implied BTC"
-                value={fmtUsd(active.expectedPrice)}
-                detail="Target price"
-                accent
-                compact={compact}
-              />
-              <MetricTile
-                label="Ticket"
-                value="$500K"
-                detail="Entry"
-                compact={compact}
-              />
-            </MetricTilesRow>
+              marginBottom: TOKENS.spacing[4],
+            }}>
+              Projection Recap
+            </span>
+            
+            <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[3], flex: 1, minHeight: 0, overflowY: 'auto' }} className="hide-scrollbar">
+              <RecapRow label="Initial Deposit" value={fmtUsd(500000)} />
+              <RecapRow label="Duration" value={`${months} Months`} />
+              <RecapRow label="BTC Target" value={fmtUsd(active.expectedPrice)} />
+              
+              <div style={{ height: 1, background: TOKENS.colors.borderSubtle, margin: `${TOKENS.spacing[1]}px 0`, flexShrink: 0 }} />
+              
+              <RecapRow label="Est. APY" value={formatPercent(active.annualApr * 100)} />
+              <RecapRow label="Net Yield" value={`+${fmtUsd(active.cumulativeYield)}`} accent />
+              
+              <div style={{ height: 1, background: TOKENS.colors.borderSubtle, margin: `${TOKENS.spacing[1]}px 0`, flex: 1, minHeight: TOKENS.spacing[4] }} />
+              
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-end', marginTop: 'auto', flexShrink: 0 }}>
+                <span style={{ 
+                  fontSize: TOKENS.fontSizes.xs, 
+                  fontWeight: TOKENS.fontWeights.bold,
+                  color: TOKENS.colors.textPrimary,
+                  textTransform: 'uppercase',
+                  letterSpacing: TOKENS.letterSpacing.display,
+                }}>
+                  Total Value
+                </span>
+                <span style={{ 
+                  fontSize: TOKENS.fontSizes.xl, 
+                  fontWeight: TOKENS.fontWeights.black,
+                  color: TOKENS.colors.textPrimary,
+                  letterSpacing: VALUE_LETTER_SPACING,
+                }}>
+                  {fmtUsdCompact(active.totalValue)}
+                </span>
+              </div>
+            </div>
           </div>
         </div>
-
       </div>
+    </div>
+  )
+}
+
+function RecapRow({ label, value, accent, primary }: { label: string; value: string; accent?: boolean; primary?: boolean }) {
+  return (
+    <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+      <span style={{ 
+        fontSize: TOKENS.fontSizes.xs, 
+        color: primary ? TOKENS.colors.textPrimary : TOKENS.colors.textSecondary,
+        fontWeight: primary ? TOKENS.fontWeights.bold : 'normal',
+      }}>
+        {label}
+      </span>
+      <span style={{ 
+        fontSize: primary ? TOKENS.fontSizes.md : TOKENS.fontSizes.sm, 
+        fontWeight: TOKENS.fontWeights.bold,
+        color: accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
+        letterSpacing: VALUE_LETTER_SPACING,
+      }}>
+        {value}
+      </span>
     </div>
   )
 }

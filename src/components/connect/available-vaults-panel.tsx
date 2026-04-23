@@ -161,7 +161,7 @@ function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardP
       tabIndex={0}
       onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') onClick() }}
       style={{
-        background: TOKENS.colors.bgSecondary,
+        background: TOKENS.colors.black,
         borderRadius: TOKENS.radius.lg,
         padding: fitValue(mode, {
           normal: TOKENS.spacing[6],
@@ -177,11 +177,11 @@ function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardP
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = TOKENS.colors.accent
-        e.currentTarget.style.background = TOKENS.colors.bgTertiary
+        e.currentTarget.style.background = TOKENS.colors.bgSecondary
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = TOKENS.colors.borderSubtle
-        e.currentTarget.style.background = TOKENS.colors.bgSecondary
+        e.currentTarget.style.background = TOKENS.colors.black
       }}
     >
       {/* Header */}
@@ -250,7 +250,7 @@ function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardP
 
       {/* Target Progress Preview */}
       <div style={{
-        background: TOKENS.colors.bgTertiary,
+        background: TOKENS.colors.bgSecondary,
         borderRadius: TOKENS.radius.md,
         padding: TOKENS.spacing[3],
       }}>
