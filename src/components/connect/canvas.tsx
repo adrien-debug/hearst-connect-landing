@@ -8,12 +8,11 @@ import { VaultDetailPanel } from './vault-detail-panel'
 import { SubscribePanel } from './subscribe-panel'
 import { SimulationPanel } from './simulation-panel'
 import { AvailableVaultsPanel } from './available-vaults-panel'
-import { VaultNotConfigured, LoadingState } from './empty-states'
+import { LoadingState } from './empty-states'
 import type { VaultLine, Aggregate, AvailableVault } from './data'
 import { SIMULATION_VIEW_ID, AVAILABLE_VAULTS_VIEW_ID } from './view-ids'
 import { DockRadial } from './dock-radial'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { injected } from 'wagmi/connectors'
 
 const ON_DARK_GHOST = 'rgba(255,255,255,0.35)'
 
@@ -68,54 +67,6 @@ export function Canvas() {
         </header>
         <main className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden">
           <LoadingState />
-        </main>
-      </div>
-    )
-  }
-
-  // Show empty state when no vaults configured
-  if (!hasVaults) {
-    return (
-      <div
-        className="connect-scope fixed inset-0 z-1 flex h-dvh flex-col overflow-hidden antialiased isolate"
-        style={{
-          background: TOKENS.colors.bgApp,
-          color: TOKENS.colors.textPrimary,
-          fontFamily: TOKENS.fonts.sans,
-        }}
-      >
-        <header
-          style={{
-            display: 'flex',
-            flexDirection: 'row',
-            alignItems: 'center',
-            justifyContent: 'space-between',
-            height: '64px',
-            width: '100%',
-            background: TOKENS.colors.bgApp,
-            borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
-            paddingLeft: TOKENS.spacing[6],
-            paddingRight: TOKENS.spacing[6],
-            zIndex: 100,
-          }}
-        >
-          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
-            <img
-              src="/logos/hearst.svg"
-              alt="Hearst"
-              style={{
-                height: TOKENS.spacing[8],
-                width: 'auto',
-                display: 'block',
-              }}
-            />
-          </div>
-          <WalletButton />
-        </header>
-        <main className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden p-8">
-          <div style={{ maxWidth: '500px', width: '100%' }}>
-            <VaultNotConfigured />
-          </div>
         </main>
       </div>
     )
@@ -270,7 +221,8 @@ function WalletButton() {
   }
 
   const handleConnect = () => {
-    connect({ connector: injected() })
+    // @ts-ignore - wagmi v2 connect without args
+    connect()
   }
 
   if (!isConnected) {

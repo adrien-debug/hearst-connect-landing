@@ -1,12 +1,35 @@
 'use client'
 
 import { useState } from 'react'
-import { useVaultRegistry, useVaultById } from '@/hooks/useVaultRegistry'
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
+import { injected } from 'wagmi/connectors'
+import { useVaultRegistry } from '@/hooks/useVaultRegistry'
 import type { VaultConfig, VaultConfigInput } from '@/types/vault'
 import { TOKENS, MONO, fmtUsd } from '@/components/connect/constants'
 import { isAddress } from 'viem'
 
+const ADMIN_ADDRESSES = (process.env.NEXT_PUBLIC_ADMIN_ADDRESSES || '')
+  .split(',')
+  .map((a) => a.trim().toLowerCase())
+  .filter(Boolean)
+
+function useAdminGuard() {
+  const { address, isConnected } = useAccount()
+  // If no whitelist configured, allow all (dev mode)
+  if (ADMIN_ADDRESSES.length === 0) return { isAuthorized: true, isConnected, address }
+  if (!isConnected || !address) return { isAuthorized: false, isConnected, address }
+  return {
+    isAuthorized: ADMIN_ADDRESSES.includes(address.toLowerCase()),
+    isConnected,
+    address,
+  }
+}
+
 export function AdminClient() {
+  const { isAuthorized, isConnected, address } = useAdminGuard()
+  const { connect, isPending: isConnecting } = useConnect()
+  const { disconnect } = useDisconnect()
+
   const {
     vaults,
     hasVaults,
@@ -21,6 +44,94 @@ export function AdminClient() {
 
   const [editingVault, setEditingVault] = useState<VaultConfig | null>(null)
   const [showForm, setShowForm] = useState(false)
+
+  // Gate: wallet not connected
+  if (!isConnected) {
+    return (
+      <AdminShell>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${TOKENS.spacing[12]}px`, textAlign: 'center' }}>
+          <h2 style={{ fontSize: TOKENS.fontSizes.xl, fontWeight: TOKENS.fontWeights.black, margin: `0 0 ${TOKENS.spacing[3]}px 0`, textTransform: 'uppercase' }}>
+            Admin Access
+          </h2>
+          <p style={{ fontSize: TOKENS.fontSizes.sm, color: TOKENS.colors.textSecondary, margin: `0 0 ${TOKENS.spacing[6]}px 0`, maxWidth: '400px' }}>
+            Connect your wallet to access the admin panel.{ADMIN_ADDRESSES.length > 0 ? ' Only whitelisted addresses are authorized.' : ''}
+          </p>
+          <button
+            onClick={() => connect({ connector: injected() })}
+            disabled={isConnecting}
+            style={{
+              padding: `${TOKENS.spacing[3]}px ${TOKENS.spacing[6]}px`,
+              background: TOKENS.colors.accent,
+              color: TOKENS.colors.black,
+              border: 'none',
+              borderRadius: TOKENS.radius.md,
+              fontSize: TOKENS.fontSizes.sm,
+              fontWeight: TOKENS.fontWeights.bold,
+              cursor: isConnecting ? 'wait' : 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              opacity: isConnecting ? 0.7 : 1,
+            }}
+          >
+            {isConnecting ? 'Connecting…' : 'Connect Wallet'}
+          </button>
+        </div>
+      </AdminShell>
+    )
+  }
+
+  // Gate: wallet connected but not authorized
+  if (!isAuthorized) {
+    return (
+      <AdminShell>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', padding: `${TOKENS.spacing[12]}px`, textAlign: 'center' }}>
+          <h2 style={{ fontSize: TOKENS.fontSizes.xl, fontWeight: TOKENS.fontWeights.black, margin: `0 0 ${TOKENS.spacing[3]}px 0`, textTransform: 'uppercase', color: TOKENS.colors.danger }}>
+            Access Denied
+          </h2>
+          <p style={{ fontSize: TOKENS.fontSizes.sm, color: TOKENS.colors.textSecondary, margin: `0 0 ${TOKENS.spacing[2]}px 0`, maxWidth: '400px' }}>
+            Your wallet is not authorized to access the admin panel.
+          </p>
+          <p style={{ fontSize: TOKENS.fontSizes.micro, color: TOKENS.colors.textGhost, fontFamily: MONO, margin: `0 0 ${TOKENS.spacing[6]}px 0` }}>
+            {address?.slice(0, 6)}…{address?.slice(-4)}
+          </p>
+          <div style={{ display: 'flex', gap: TOKENS.spacing[3] }}>
+            <button
+              onClick={() => disconnect()}
+              style={{
+                padding: `${TOKENS.spacing[2]}px ${TOKENS.spacing[4]}px`,
+                background: 'transparent',
+                border: `1px solid ${TOKENS.colors.borderSubtle}`,
+                borderRadius: TOKENS.radius.md,
+                color: TOKENS.colors.textSecondary,
+                fontSize: TOKENS.fontSizes.sm,
+                fontWeight: TOKENS.fontWeights.bold,
+                cursor: 'pointer',
+                textTransform: 'uppercase',
+              }}
+            >
+              Switch Wallet
+            </button>
+            <a
+              href="/app"
+              style={{
+                padding: `${TOKENS.spacing[2]}px ${TOKENS.spacing[4]}px`,
+                background: TOKENS.colors.accent,
+                color: TOKENS.colors.black,
+                border: 'none',
+                borderRadius: TOKENS.radius.md,
+                fontSize: TOKENS.fontSizes.sm,
+                fontWeight: TOKENS.fontWeights.bold,
+                textDecoration: 'none',
+                textTransform: 'uppercase',
+              }}
+            >
+              Back to App
+            </a>
+          </div>
+        </div>
+      </AdminShell>
+    )
+  }
 
   const handleSave = async (data: VaultConfigInput) => {
     if (editingVault) {
@@ -98,25 +209,32 @@ export function AdminClient() {
             Admin
           </h1>
         </div>
-        <button
-          onClick={() => setShowForm(true)}
-          disabled={isAdding}
-          style={{
-            padding: `${TOKENS.spacing[2]}px ${TOKENS.spacing[4]}px`,
-            background: TOKENS.colors.accent,
-            color: TOKENS.colors.black,
-            border: 'none',
-            borderRadius: TOKENS.radius.md,
-            fontSize: TOKENS.fontSizes.sm,
-            fontWeight: TOKENS.fontWeights.bold,
-            cursor: isAdding ? 'wait' : 'pointer',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
-            opacity: isAdding ? 0.7 : 1,
-          }}
-        >
-          {isAdding ? 'Creating...' : '+ Add Vault'}
-        </button>
+        <div style={{ display: 'flex', alignItems: 'center', gap: TOKENS.spacing[3] }}>
+          {address && (
+            <span style={{ fontSize: TOKENS.fontSizes.micro, color: TOKENS.colors.textGhost, fontFamily: MONO, letterSpacing: TOKENS.letterSpacing.display, textTransform: 'uppercase' }}>
+              {address.slice(0, 6)}…{address.slice(-4)}
+            </span>
+          )}
+          <button
+            onClick={() => setShowForm(true)}
+            disabled={isAdding}
+            style={{
+              padding: `${TOKENS.spacing[2]}px ${TOKENS.spacing[4]}px`,
+              background: TOKENS.colors.accent,
+              color: TOKENS.colors.black,
+              border: 'none',
+              borderRadius: TOKENS.radius.md,
+              fontSize: TOKENS.fontSizes.sm,
+              fontWeight: TOKENS.fontWeights.bold,
+              cursor: isAdding ? 'wait' : 'pointer',
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+              opacity: isAdding ? 0.7 : 1,
+            }}
+          >
+            {isAdding ? 'Creating...' : '+ Add Vault'}
+          </button>
+        </div>
       </header>
 
       {/* Main Content */}
@@ -708,6 +826,54 @@ function LoadingState() {
           to { transform: rotate(360deg); }
         }
       `}</style>
+    </div>
+  )
+}
+
+function AdminShell({ children }: { children: React.ReactNode }) {
+  return (
+    <div
+      style={{
+        minHeight: '100vh',
+        background: TOKENS.colors.bgApp,
+        color: TOKENS.colors.textPrimary,
+        fontFamily: TOKENS.fonts.sans,
+      }}
+    >
+      <header
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          padding: `${TOKENS.spacing[4]}px ${TOKENS.spacing[6]}px`,
+          borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
+          background: TOKENS.colors.bgSidebar,
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'center', gap: TOKENS.spacing[4] }}>
+          <a
+            href="/app"
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: TOKENS.spacing[2],
+              color: TOKENS.colors.textSecondary,
+              textDecoration: 'none',
+              fontSize: TOKENS.fontSizes.sm,
+              fontWeight: TOKENS.fontWeights.bold,
+              textTransform: 'uppercase',
+              letterSpacing: '0.05em',
+            }}
+          >
+            <span>←</span>
+            <span>Back to App</span>
+          </a>
+          <h1 style={{ fontSize: TOKENS.fontSizes.xl, fontWeight: TOKENS.fontWeights.black, textTransform: 'uppercase', letterSpacing: '0.02em', margin: 0 }}>
+            Admin
+          </h1>
+        </div>
+      </header>
+      <main>{children}</main>
     </div>
   )
 }

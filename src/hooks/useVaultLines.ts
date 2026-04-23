@@ -3,8 +3,8 @@
 import { useMemo } from 'react'
 import type { VaultLine, ActiveVault, AvailableVault, Aggregate } from '@/components/connect/data'
 import { useVaultRegistry } from './useVaultRegistry'
+import { DEMO_VAULT } from '@/config/demo-vault'
 
-// Aggregate calculation for vault lines
 function calculateAggregate(vaults: VaultLine[]): Aggregate {
   const active = vaults.filter((v): v is ActiveVault => v.type === 'active')
 
@@ -26,26 +26,27 @@ function calculateAggregate(vaults: VaultLine[]): Aggregate {
 export function useVaultLines() {
   const { activeVaults, isLoading: isRegistryLoading, hasVaults } = useVaultRegistry()
 
-  // Convert configs to vault lines
-  // For now, show all vaults as available since position data
-  // requires individual contract calls per vault
   const vaultLines = useMemo<VaultLine[]>(() => {
-    return activeVaults.map((config) => {
-      const availableVault: AvailableVault = {
-        id: config.id,
-        name: config.name,
-        type: 'available',
-        apr: config.apr,
-        target: config.target,
-        strategy: config.strategy,
-        image: config.image,
-        minDeposit: config.minDeposit,
-        lockPeriod: `${Math.floor(config.lockPeriodDays / 365)} Years`,
-        risk: config.risk,
-        fees: config.fees,
-      }
-      return availableVault
-    })
+    const configuredLines: AvailableVault[] = activeVaults.map((config) => ({
+      id: config.id,
+      name: config.name,
+      type: 'available',
+      apr: config.apr,
+      target: config.target,
+      strategy: config.strategy,
+      image: config.image,
+      minDeposit: config.minDeposit,
+      lockPeriod: `${Math.floor(config.lockPeriodDays / 365)} Years`,
+      risk: config.risk,
+      fees: config.fees,
+    }))
+
+    // Always include demo vault if no real vaults exist
+    if (configuredLines.length === 0) {
+      return [DEMO_VAULT]
+    }
+
+    return configuredLines
   }, [activeVaults])
 
   const agg = useMemo(() => calculateAggregate(vaultLines), [vaultLines])
@@ -53,7 +54,8 @@ export function useVaultLines() {
   return {
     vaults: vaultLines,
     agg,
-    hasVaults,
+    // Always true — demo vault guarantees at least 1
+    hasVaults: true,
     isLoading: isRegistryLoading,
   }
 }
