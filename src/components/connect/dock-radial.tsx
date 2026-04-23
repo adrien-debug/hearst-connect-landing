@@ -45,25 +45,57 @@ export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialPro
   const isDashboardActive = currentState === 'dashboard'
 
   return (
-    <div
-      style={{
+    <>
+      {/* Left Footer Info */}
+      <div style={{
         position: 'fixed',
-        bottom: '24px',
-        left: '50%',
-        transform: 'translateX(-50%)',
-        zIndex: 50,
-        display: 'flex',
-        alignItems: 'center',
-        background: 'rgba(10, 10, 10, 0.65)',
-        backdropFilter: 'blur(16px)',
-        WebkitBackdropFilter: 'blur(16px)',
-        border: `1px solid rgba(255, 255, 255, 0.1)`,
-        borderRadius: '32px',
-        padding: '6px',
-        gap: '8px',
-        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
-      }}
-    >
+        bottom: '32px',
+        left: '32px',
+        zIndex: 40,
+        fontFamily: TOKENS.fonts.mono,
+        fontSize: '10px',
+        fontWeight: TOKENS.fontWeights.bold,
+        color: TOKENS.colors.textGhost,
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+      }}>
+        v1.0.42
+      </div>
+
+      {/* Right Footer Info */}
+      <div style={{
+        position: 'fixed',
+        bottom: '32px',
+        right: '32px',
+        zIndex: 40,
+        fontFamily: TOKENS.fonts.mono,
+        fontSize: '10px',
+        fontWeight: TOKENS.fontWeights.bold,
+        color: TOKENS.colors.textGhost,
+        letterSpacing: '0.1em',
+        textTransform: 'uppercase',
+      }}>
+        System Operational
+      </div>
+
+      {/* Main Dock Radial */}
+      <div
+        style={{
+          position: 'fixed',
+          bottom: '24px',
+          left: '50%',
+          transform: 'translateX(-50%)',
+          zIndex: 50,
+          display: 'flex',
+          alignItems: 'center',
+          background: TOKENS.colors.black,
+          border: `1px solid rgba(255, 255, 255, 0.1)`,
+          borderRadius: '32px',
+          padding: '6px',
+          gap: '8px',
+          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
+        }}
+      >
       {/* Hearst Logo / Home Button */}
       <button
         onClick={() => handleNavClick('dashboard')}
@@ -81,36 +113,24 @@ export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialPro
           justifyContent: 'center',
           transition: 'all 0.2s ease',
           position: 'relative',
+          padding: 0, // Ensure no padding interferes with centering
         }}
         title="Dashboard"
       >
-        {isDashboardActive && (
-          <span
-            style={{
-              position: 'absolute',
-              bottom: '4px',
-              width: '4px',
-              height: '4px',
-              borderRadius: '50%',
-              background: TOKENS.colors.accent,
-              boxShadow: `0 0 8px ${TOKENS.colors.accent}`,
-            }}
-          />
-        )}
         <svg
           xmlns="http://www.w3.org/2000/svg"
-          viewBox="0 0 130 143"
+          viewBox="572.6 466.87 129.26 142.86"
           style={{
-            width: '18px',
-            height: '18px',
+            width: '20px',
+            height: '20px',
             color: isDashboardActive ? TOKENS.colors.accent : TOKENS.colors.white,
-            filter: isDashboardActive ? `drop-shadow(0 0 4px ${TOKENS.colors.accent}80)` : 'none',
             transition: 'all 0.2s ease',
-            transform: isDashboardActive ? 'translateY(-2px)' : 'translateY(0)',
+            display: 'block', // Force block display to prevent flexbox squishing
+            margin: 'auto', // Ensure it centers perfectly
           }}
         >
-          <polygon fill="currentColor" points="29.1,0 0,0 0,142.8 29.1,142.8 29.1,82.2 60.5,112.5 93.2,112.5 29.1,50.6 29.1,0" />
-          <polygon fill="currentColor" points="100.1,0 100.1,61.2 72.0,34.0 39.4,34.0 100.1,92.8 100.1,142.8 129.3,142.8 129.3,0 100.1,0" />
+          <polygon fill="currentColor" points="601.74 466.87 572.6 466.87 572.6 609.73 601.74 609.73 601.74 549.07 633.11 579.43 665.76 579.43 601.74 517.46 601.74 466.87" />
+          <polygon fill="currentColor" points="672.72 466.87 672.72 528.12 644.63 500.93 611.98 500.93 672.72 559.72 672.72 609.73 701.86 609.73 701.86 466.87 672.72 466.87" />
         </svg>
       </button>
 
@@ -169,5 +189,6 @@ export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialPro
         })}
       </div>
     </div>
+    </>
   )
 }
