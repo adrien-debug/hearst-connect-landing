@@ -62,15 +62,35 @@ const nextConfig = {
       '@react-native-async-storage/async-storage': false,
     };
 
-    // Fix wagmi v2 webpack issues with tempo modules
-    // Replace tempo modules with a mock that exports undefined
+    // Fix wagmi v3 webpack issues with optional modules
     const path = require('path');
+    const webpack = require('webpack');
+    const mockPath = path.resolve(__dirname, 'src/lib/wagmi-tempo-mock.js');
+
+    // Alias-based resolution for static imports
     config.resolve.alias = {
       ...config.resolve.alias,
-      '@wagmi/core/tempo': path.resolve(__dirname, 'src/lib/wagmi-tempo-mock.js'),
-      '@wagmi/core/dist/esm/tempo/Connectors.js': path.resolve(__dirname, 'src/lib/wagmi-tempo-mock.js'),
-      '@wagmi/core/dist/esm/tempo/exports.js': path.resolve(__dirname, 'src/lib/wagmi-tempo-mock.js'),
+      '@wagmi/core/tempo': mockPath,
+      '@wagmi/core/dist/esm/tempo/Connectors.js': mockPath,
+      '@wagmi/core/dist/esm/tempo/exports.js': mockPath,
+      '@base-org/account': mockPath,
+      '@coinbase/wallet-sdk': mockPath,
+      '@metamask/connect-evm': mockPath,
     };
+
+    // NormalModuleReplacementPlugin catches dynamic imports that alias misses
+    const optionalDeps = [
+      /^porto$/,
+      /^porto\/internal$/,
+      /^@safe-global\/safe-apps-sdk$/,
+      /^@safe-global\/safe-apps-provider$/,
+      /^@walletconnect\/ethereum-provider$/,
+    ];
+    for (const pattern of optionalDeps) {
+      config.plugins.push(
+        new webpack.NormalModuleReplacementPlugin(pattern, mockPath),
+      );
+    }
 
     config.module.rules.forEach((rule) => {
       if (!rule.oneOf) return;

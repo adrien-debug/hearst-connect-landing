@@ -270,7 +270,7 @@ function WalletButton() {
   }
 
   const handleConnect = () => {
-    connect({ connector: injected({ target: 'metaMask' }) })
+    connect({ connector: injected() })
   }
 
   if (!isConnected) {

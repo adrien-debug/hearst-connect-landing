@@ -15,7 +15,7 @@ import type { SmartFitMode } from './smart-fit'
 import { CockpitGauge } from './cockpit-gauge'
 import { StatCard } from './stat-card'
 import { ActionButton } from './action-button'
-import { usePositionData } from '@/hooks/usePositionDataReal'
+import { usePositionData } from '@/hooks/usePositionData'
 import { useVaultActions } from '@/hooks/useVault'
 import { useVaultById } from '@/hooks/useVaultRegistry'
 import { useTransaction } from '@/hooks/useTransaction'
@@ -738,7 +738,7 @@ function CapitalProtectionGauge({
   currentValue: number
   mode: SmartFitMode
 }) {
-  const protectionLevel = Math.min(100, (currentValue / deposited) * 100)
+  const protectionLevel = deposited > 0 ? Math.min(100, (currentValue / deposited) * 100) : 0
   const isProtected = currentValue >= deposited
 
   return (

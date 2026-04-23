@@ -61,6 +61,13 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
     try {
       setIsDepositing(true)
       const amountBigInt = parseUnits(amount, 6) // USDC has 6 decimals
+
+      // Validate BigInt doesn't overflow
+      const maxSafe = BigInt(Number.MAX_SAFE_INTEGER)
+      if (amountBigInt > maxSafe) {
+        throw new Error('Amount too large. Please enter a smaller amount.')
+      }
+
       await deposit(amountBigInt)
       // Success - could show toast/redirect here
       setAmount('')

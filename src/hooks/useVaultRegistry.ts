@@ -34,7 +34,9 @@ function loadFromStorage(): VaultRegistryState {
         chain: v.chain,
       })) || [],
     }
-  } catch {
+  } catch (e) {
+    console.error('[VaultRegistry] Corrupted storage, resetting:', e)
+    try { localStorage.removeItem(STORAGE_KEY) } catch {}
     return getInitialState()
   }
 }
@@ -63,6 +65,9 @@ export function useVaultRegistry() {
 
   const addVaultMutation = useMutation({
     mutationFn: async (input: VaultConfigInput): Promise<VaultConfig> => {
+      // Re-read fresh state from storage to avoid race conditions
+      const freshState = loadFromStorage()
+
       const newVault: VaultConfig = {
         ...input,
         id: input.id || generateVaultId(),
@@ -71,8 +76,8 @@ export function useVaultRegistry() {
       }
 
       const newState: VaultRegistryState = {
-        vaults: [...currentState.vaults, newVault],
-        activeVaultId: currentState.activeVaultId || newVault.id,
+        vaults: [...freshState.vaults, newVault],
+        activeVaultId: freshState.activeVaultId || newVault.id,
       }
 
       saveToStorage(newState)
@@ -85,11 +90,14 @@ export function useVaultRegistry() {
 
   const removeVaultMutation = useMutation({
     mutationFn: async (vaultId: string): Promise<void> => {
-      const newVaults = currentState.vaults.filter((v) => v.id !== vaultId)
+      // Re-read fresh state from storage to avoid race conditions
+      const freshState = loadFromStorage()
+
+      const newVaults = freshState.vaults.filter((v) => v.id !== vaultId)
       const newActiveId =
-        currentState.activeVaultId === vaultId
+        freshState.activeVaultId === vaultId
           ? newVaults[0]?.id || null
-          : currentState.activeVaultId
+          : freshState.activeVaultId
 
       const newState: VaultRegistryState = {
         vaults: newVaults,
@@ -105,8 +113,11 @@ export function useVaultRegistry() {
 
   const setActiveVaultMutation = useMutation({
     mutationFn: async (vaultId: string | null): Promise<void> => {
+      // Re-read fresh state from storage to avoid race conditions
+      const freshState = loadFromStorage()
+
       const newState: VaultRegistryState = {
-        ...currentState,
+        ...freshState,
         activeVaultId: vaultId,
       }
 
@@ -125,21 +136,24 @@ export function useVaultRegistry() {
       vaultId: string
       updates: Partial<VaultConfigInput>
     }): Promise<VaultConfig> => {
-      const vaultIndex = currentState.vaults.findIndex((v) => v.id === vaultId)
+      // Re-read fresh state from storage to avoid race conditions
+      const freshState = loadFromStorage()
+
+      const vaultIndex = freshState.vaults.findIndex((v) => v.id === vaultId)
       if (vaultIndex === -1) {
         throw new Error(`Vault ${vaultId} not found`)
       }
 
       const updatedVault: VaultConfig = {
-        ...currentState.vaults[vaultIndex],
+        ...freshState.vaults[vaultIndex],
         ...updates,
       }
 
-      const newVaults = [...currentState.vaults]
+      const newVaults = [...freshState.vaults]
       newVaults[vaultIndex] = updatedVault
 
       const newState: VaultRegistryState = {
-        ...currentState,
+        ...freshState,
         vaults: newVaults,
       }
 

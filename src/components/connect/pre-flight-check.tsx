@@ -3,6 +3,7 @@
 import { useAccount, useChainId } from 'wagmi'
 import { useTokenAllowance } from '@/hooks/useTokenAllowance'
 import { useVaultGlobal } from '@/hooks/useVault'
+import { useVaultById } from '@/hooks/useVaultRegistry'
 import { TOKENS, MONO } from './constants'
 import type { AvailableVault } from './data'
 
@@ -16,18 +17,19 @@ type PreFlightStatus = {
 export function usePreFlightCheck(vault: AvailableVault, depositAmount: string): PreFlightStatus {
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
-  
-  // USDC contract - would come from env/config
-  const USDC_ADDRESS = '0xA0b86a33E6441E6C7D3D4B4f6e8C2d9E4f5A1B2C' as const
-  const VAULT_ADDRESS = '0x1234567890123456789012345678901234567890' as const
-  
+
+  // Get vault addresses from registry
+  const vaultConfig = useVaultById(vault.id)
+  const usdcAddress = vaultConfig?.usdcAddress
+  const vaultAddress = vaultConfig?.vaultAddress
+
   const { hasAllowance, isLoading: isAllowanceLoading } = useTokenAllowance(
-    USDC_ADDRESS,
+    usdcAddress,
     address,
-    VAULT_ADDRESS
+    vaultAddress
   )
-  
-  const { global } = useVaultGlobal(VAULT_ADDRESS)
+
+  const { global } = useVaultGlobal(vaultAddress)
   
   const status: PreFlightStatus = {
     wallet: isConnected ? 'connected' : 'disconnected',
@@ -47,12 +49,12 @@ export function usePreFlightCheck(vault: AvailableVault, depositAmount: string):
   return status
 }
 
-export function PreFlightCheck({ 
-  vault, 
+export function PreFlightCheck({
+  vault,
   depositAmount,
   onApprove,
   isApproving,
-}: { 
+}: {
   vault: AvailableVault
   depositAmount: string
   onApprove: () => void
@@ -60,17 +62,19 @@ export function PreFlightCheck({
 }) {
   const { address, isConnected } = useAccount()
   const chainId = useChainId()
-  
-  const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_ADDRESS as `0x${string}` | undefined
-  const VAULT_ADDRESS = process.env.NEXT_PUBLIC_VAULT_ADDRESS as `0x${string}` | undefined
-  
+
+  // Get vault addresses from registry
+  const vaultConfig = useVaultById(vault.id)
+  const usdcAddress = vaultConfig?.usdcAddress
+  const vaultAddress = vaultConfig?.vaultAddress
+
   const { hasAllowance, isLoading: isAllowanceLoading } = useTokenAllowance(
-    USDC_ADDRESS,
+    usdcAddress,
     address,
-    VAULT_ADDRESS
+    vaultAddress
   )
-  
-  const { global } = useVaultGlobal(VAULT_ADDRESS)
+
+  const { global } = useVaultGlobal(vaultAddress)
   
   const formatAddress = (addr?: string) => {
     if (!addr) return ''
