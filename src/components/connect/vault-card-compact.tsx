@@ -2,6 +2,8 @@
 
 import { useState } from 'react'
 import { TOKENS, fmtUsdCompact, VALUE_LETTER_SPACING } from './constants'
+import { formatVaultName } from './formatting'
+import { ActionButton } from './action-button'
 import type { ActiveVault } from './data'
 import type { SmartFitMode } from './smart-fit'
 
@@ -35,7 +37,7 @@ export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, 
       style={{
         background: TOKENS.colors.black,
         borderRadius: TOKENS.radius.md,
-        padding: mode === 'limit' ? '10px 12px' : '12px 14px',
+        padding: mode === 'limit' ? `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}` : `${TOKENS.spacing[3]} ${TOKENS.spacing[4]}`,
         border: `1px solid ${isHovered ? TOKENS.colors.borderStrong : TOKENS.colors.borderSubtle}`,
         cursor: onClick ? 'pointer' : 'default',
         transition: 'all 120ms ease-out',
@@ -83,7 +85,7 @@ export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, 
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
           }}>
-            {vault.name.replace('HashVault ', '')}
+            {formatVaultName(vault.name)}
           </span>
           <span style={{
             fontSize: '12px',
@@ -209,56 +211,3 @@ export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, 
   )
 }
 
-function ActionButton({ 
-  label, 
-  variant, 
-  onClick 
-}: { 
-  label: string
-  variant: 'accent' | 'primary' | 'danger'
-  onClick: (e: React.MouseEvent) => void
-}) {
-  const styles = {
-    accent: {
-      background: TOKENS.colors.accent,
-      color: TOKENS.colors.black,
-      border: 'none',
-    },
-    primary: {
-      background: TOKENS.colors.accentSubtle,
-      color: TOKENS.colors.accent,
-      border: `1px solid ${TOKENS.colors.accent}`,
-    },
-    danger: {
-      background: 'rgba(239, 68, 68, 0.15)',
-      color: TOKENS.colors.danger,
-      border: `1px solid ${TOKENS.colors.danger}`,
-    },
-  }
-
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: `${TOKENS.spacing[2]}px ${TOKENS.spacing[3]}px`,
-        borderRadius: TOKENS.radius.sm,
-        fontSize: TOKENS.fontSizes.micro,
-        fontWeight: TOKENS.fontWeights.black,
-        textTransform: 'uppercase',
-        letterSpacing: '0.1em',
-        cursor: 'pointer',
-        transition: 'all 100ms ease-out',
-        whiteSpace: 'nowrap',
-        ...styles[variant],
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'scale(1.05)'
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'scale(1)'
-      }}
-    >
-      {label}
-    </button>
-  )
-}

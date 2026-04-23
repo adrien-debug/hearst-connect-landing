@@ -8,6 +8,7 @@ import type { AvailableVault } from './data'
 import { useSmartFit, useShellPadding, fitValue } from './smart-fit'
 import type { SmartFitMode } from './smart-fit'
 import { CockpitGauge } from './cockpit-gauge'
+import { StatCard } from './stat-card'
 
 export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBack?: () => void }) {
   const { mode, isLimit } = useSmartFit({
@@ -143,10 +144,10 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
           gap: TOKENS.spacing[2],
           flexShrink: 0,
         }}>
-          <StatCard label="Minimum" value={fmtUsdCompact(vault.minDeposit)} subtext="Entry threshold" mode={mode} />
-          <StatCard label="Target" value={vault.target} subtext="Cumulative yield" mode={mode} accent />
-          <StatCard label="Unlock Timeline" value={vault.lockPeriod} subtext="Duration" mode={mode} />
-          <StatCard label="Risk" value={vault.risk} subtext="Profile" mode={mode} />
+          <StatCard label="Minimum" value={fmtUsdCompact(vault.minDeposit)} subtext="Entry threshold" mode={mode} size="compact" />
+          <StatCard label="Target" value={vault.target} subtext="Cumulative yield" mode={mode} accent size="compact" />
+          <StatCard label="Unlock Timeline" value={vault.lockPeriod} subtext="Duration" mode={mode} size="compact" />
+          <StatCard label="Risk" value={vault.risk} subtext="Profile" mode={mode} size="compact" />
         </div>
 
         {/* Projection calculator */}
@@ -234,57 +235,6 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
             <TermItem label="Maturity" value={vault.lockPeriod} />
           </div>
         </div>
-      </div>
-    </div>
-  )
-}
-
-function StatCard({ label, value, subtext, mode, accent = false }: {
-  label: string
-  value: string
-  subtext: string
-  mode: SmartFitMode
-  accent?: boolean
-}) {
-  return (
-    <div style={{
-      background: TOKENS.colors.bgSecondary,
-      borderRadius: TOKENS.radius.lg,
-      padding: fitValue(mode, {
-        normal: TOKENS.spacing[3],
-        tight: TOKENS.spacing[2],
-        limit: TOKENS.spacing[2],
-      }),
-    }}>
-      <div style={{
-        fontSize: TOKENS.fontSizes.micro,
-        fontWeight: TOKENS.fontWeights.bold,
-        letterSpacing: TOKENS.letterSpacing.display,
-        textTransform: 'uppercase',
-        color: TOKENS.colors.textSecondary,
-        marginBottom: TOKENS.spacing[2],
-        fontFamily: MONO,
-      }}>
-        {label}
-      </div>
-      <div style={{
-        fontSize: fitValue(mode, {
-          normal: TOKENS.fontSizes.lg,
-          tight: TOKENS.fontSizes.md,
-          limit: TOKENS.fontSizes.md,
-        }),
-        fontWeight: TOKENS.fontWeights.black,
-        letterSpacing: VALUE_LETTER_SPACING,
-        color: accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
-      }}>
-        {value}
-      </div>
-      <div style={{
-        fontSize: TOKENS.fontSizes.xs,
-        color: TOKENS.colors.textGhost,
-        marginTop: TOKENS.spacing[2],
-      }}>
-        {subtext}
       </div>
     </div>
   )

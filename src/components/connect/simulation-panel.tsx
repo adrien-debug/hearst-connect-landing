@@ -1,24 +1,16 @@
 'use client'
 
-import type { CSSProperties } from 'react'
 import { useMemo, useState } from 'react'
 import { Label } from '@/components/ui/label'
-import { TOKENS, MONO, fmtUsd, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING } from './constants'
+import { TOKENS, MONO, fmtUsd, fmtUsdCompact, VALUE_LETTER_SPACING } from './constants'
 import { useSmartFit, useShellPadding, fitValue } from './smart-fit'
-import type { SmartFitMode } from './smart-fit'
 import { CockpitGauge } from './cockpit-gauge'
+import { RangeSlider } from './range-slider'
 import { MetricTilesRow, MetricTile } from './projection-lens'
 import {
   type ScenarioKey,
-  SCENARIOS,
   projectScenario,
 } from '@/lib/projection-simulation'
-
-const rangeStyle: CSSProperties = {
-  width: '100%',
-  accentColor: TOKENS.colors.accent,
-  cursor: 'pointer',
-}
 
 function formatCompactUsd(value: number) {
   return new Intl.NumberFormat('en-US', {
@@ -204,113 +196,34 @@ export function SimulationPanel() {
             gap: `${TOKENS.spacing[3]}px`,
           }}
         >
-          {/* BTC Slider */}
-          <div
-            style={{
-              background: TOKENS.colors.bgSecondary,
-              borderRadius: TOKENS.radius.md,
-              padding: TOKENS.spacing[3],
-            }}
-          >
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: TOKENS.spacing[2],
-            }}>
-              <Label id="btc-price" tone="scene" variant="text">
-                BTC Price
-              </Label>
-              <span style={{
-                fontFamily: TOKENS.fonts.mono,
-                fontSize: TOKENS.fontSizes.md,
-                fontWeight: TOKENS.fontWeights.black,
-                letterSpacing: VALUE_LETTER_SPACING,
-                color: TOKENS.colors.textPrimary,
-              }}>
-                {fmtUsd(btcPrice)}
-              </span>
-            </div>
-            <input
-              type="range"
-              min={40_000}
-              max={220_000}
-              step={1_000}
-              value={btcPrice}
-              onChange={(e) => setBtcPrice(Number(e.target.value))}
-              style={rangeStyle}
-              aria-label="Bitcoin price projection"
-              aria-valuemin={40_000}
-              aria-valuemax={220_000}
-              aria-valuenow={btcPrice}
-              aria-valuetext={`${fmtUsd(btcPrice)} per BTC`}
-            />
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginTop: TOKENS.spacing[2],
-              fontFamily: TOKENS.fonts.mono,
-              fontSize: TOKENS.fontSizes.micro,
-              color: TOKENS.colors.textGhost,
-            }}>
-              <span>$40K</span>
-              <span>$220K</span>
-            </div>
-          </div>
-
-          {/* Horizon Slider */}
-          <div
-            style={{
-              background: TOKENS.colors.bgSecondary,
-              borderRadius: TOKENS.radius.md,
-              padding: TOKENS.spacing[3],
-            }}
-          >
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: TOKENS.spacing[2],
-            }}>
-              <Label id="horizon" tone="scene" variant="text">
-                Horizon
-              </Label>
-              <span style={{
-                fontFamily: TOKENS.fonts.mono,
-                fontSize: TOKENS.fontSizes.md,
-                fontWeight: TOKENS.fontWeights.black,
-                letterSpacing: VALUE_LETTER_SPACING,
-                color: TOKENS.colors.textPrimary,
-              }}>
-                {months} mo
-              </span>
-            </div>
-            <input
-              type="range"
-              min={3}
-              max={36}
-              step={1}
-              value={months}
-              onChange={(e) => setMonths(Number(e.target.value))}
-              style={rangeStyle}
-              aria-label="Time horizon projection"
-              aria-valuemin={3}
-              aria-valuemax={36}
-              aria-valuenow={months}
-              aria-valuetext={`${months} months`}
-            />
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              marginTop: TOKENS.spacing[2],
-              fontFamily: TOKENS.fonts.mono,
-              fontSize: TOKENS.fontSizes.micro,
-              color: TOKENS.colors.textGhost,
-            }}>
-              <span>3M</span>
-              <span>36M</span>
-            </div>
-          </div>
+          <RangeSlider
+            id="btc-price"
+            label="BTC Price"
+            value={btcPrice}
+            min={40_000}
+            max={220_000}
+            step={1_000}
+            formatValue={fmtUsd}
+            minLabel="$40K"
+            maxLabel="$220K"
+            ariaLabel="Bitcoin price projection"
+            ariaValueText={(v) => `${fmtUsd(v)} per BTC`}
+            onChange={setBtcPrice}
+          />
+          <RangeSlider
+            id="horizon"
+            label="Horizon"
+            value={months}
+            min={3}
+            max={36}
+            step={1}
+            formatValue={(v) => `${v} mo`}
+            minLabel="3M"
+            maxLabel="36M"
+            ariaLabel="Time horizon projection"
+            ariaValueText={(v) => `${v} months`}
+            onChange={setMonths}
+          />
         </div>
       </div>
 
@@ -333,7 +246,7 @@ export function SimulationPanel() {
             flex: 1,
             display: 'flex',
             flexDirection: 'column',
-            minHeight: isLimit ? 300 : 400,
+            minHeight: isLimit ? 296 : 400,
             background: TOKENS.colors.bgSecondary,
             borderRadius: TOKENS.radius.lg,
             padding: fitValue(mode, {
@@ -439,127 +352,7 @@ export function SimulationPanel() {
           </div>
         </div>
 
-        {/* Scenario Selector */}
-        <div
-          style={{
-            flexShrink: 0,
-            background: TOKENS.colors.bgSecondary,
-            borderRadius: TOKENS.radius.lg,
-            padding: pad,
-          }}
-        >
-          <div
-            style={{
-              display: 'grid',
-              gridTemplateColumns: 'repeat(3, 1fr)',
-              gap: `${TOKENS.spacing[2]}px`,
-            }}
-          >
-            {(Object.keys(SCENARIOS) as ScenarioKey[]).map((key) => {
-              const isActive = scenario === key
-              const projection = projections[key]
-              const yieldPercent = maxYield > 0 ? (projection.cumulativeYield / maxYield) * 100 : 33
-
-              return (
-                <button
-                  key={`scenario-${key}`}
-                  type="button"
-                  onClick={() => setScenario(key)}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    background: isActive
-                      ? TOKENS.colors.accentSubtle
-                      : TOKENS.colors.bgTertiary,
-                    border: isActive
-                      ? `1px solid ${TOKENS.colors.accent}`
-                      : `1px solid ${TOKENS.colors.borderSubtle}`,
-                    borderRadius: TOKENS.radius.md,
-                    padding: fitValue(mode, {
-                      normal: TOKENS.spacing[3],
-                      tight: TOKENS.spacing[2],
-                      limit: TOKENS.spacing[2],
-                    }),
-                    cursor: 'pointer',
-                    position: 'relative',
-                    overflow: 'hidden',
-                  }}
-                >
-                  {/* Background gauge */}
-                  <div
-                    style={{
-                      position: 'absolute',
-                      bottom: 0,
-                      left: 0,
-                      right: 0,
-                      height: `${Math.max(15, yieldPercent)}%`,
-                      background: isActive
-                        ? TOKENS.colors.accentSubtle
-                        : TOKENS.colors.bgSecondary,
-                      transition: 'height 300ms ease',
-                    }}
-                  />
-
-                  {/* Content */}
-                  <div style={{ position: 'relative', zIndex: 1 }}>
-                    <div style={{
-                      fontFamily: MONO,
-                      fontSize: TOKENS.fontSizes.micro,
-                      fontWeight: TOKENS.fontWeights.bold,
-                      letterSpacing: TOKENS.letterSpacing.display,
-                      textTransform: 'uppercase',
-                      color: isActive ? TOKENS.colors.accent : TOKENS.colors.textSecondary,
-                      marginBottom: TOKENS.spacing[2],
-                    }}>
-                      {SCENARIOS[key].label}
-                    </div>
-                    <div style={{
-                      fontSize: fitValue(mode, {
-                        normal: TOKENS.fontSizes.lg,
-                        tight: TOKENS.fontSizes.md,
-                        limit: TOKENS.fontSizes.md,
-                      }),
-                      fontWeight: TOKENS.fontWeights.black,
-                      letterSpacing: VALUE_LETTER_SPACING,
-                      color: isActive ? TOKENS.colors.textPrimary : TOKENS.colors.textSecondary,
-                    }}>
-                      {formatPercent(projection.annualApr * 100)}
-                    </div>
-                    <div style={{
-                      fontFamily: TOKENS.fonts.mono,
-                      fontSize: TOKENS.fontSizes.micro,
-                      color: isActive ? TOKENS.colors.textSecondary : TOKENS.colors.textGhost,
-                      marginTop: TOKENS.spacing[2],
-                    }}>
-                      {formatCompactUsd(projection.cumulativeYield)}
-                    </div>
-                  </div>
-                </button>
-              )
-            })}
-          </div>
-        </div>
       </div>
     </div>
   )
 }
-
-function InfoRow({ l, v }: { l: string; v: string }) {
-  return (
-    <div style={{
-      display: 'flex',
-      justifyContent: 'space-between',
-      fontSize: TOKENS.fontSizes.sm,
-      padding: `${TOKENS.spacing[2]} 0`,
-      borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
-    }}>
-      <span style={{ color: TOKENS.colors.textSecondary }}>{l}</span>
-      <span style={{
-        fontFamily: TOKENS.fonts.mono,
-        fontWeight: TOKENS.fontWeights.bold,
-        color: TOKENS.colors.textPrimary,
-      }}>{v}</span>
-    </div>
-  )
-}
-

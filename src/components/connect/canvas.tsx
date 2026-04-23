@@ -1,6 +1,7 @@
 'use client'
 
 import '@/styles/connect/dashboard-vars.css'
+import { useState } from 'react'
 import { useConnectRouting } from './use-connect-routing'
 import { TOKENS, MONO } from './constants'
 import { PortfolioSummary } from './portfolio-summary'
@@ -36,39 +37,36 @@ export function Canvas() {
       }}
     >
       <header
-        className="flex h-16 w-full min-w-0 shrink-0 select-none items-center justify-between"
         style={{
+          display: 'flex',
+          flexDirection: 'row',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          height: '64px',
+          width: '100%',
           background: TOKENS.colors.bgApp,
           borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
-          paddingLeft: TOKENS.spacing[4],
-          paddingRight: TOKENS.spacing[8],
+          paddingLeft: TOKENS.spacing[6],
+          paddingRight: TOKENS.spacing[6],
           zIndex: 100,
         }}
       >
+        {/* Logo - aligné à gauche */}
         <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
           <img
-            src="/logos/hearst-connect-blackbg.svg"
-            alt="Hearst Connect"
+            src="/logos/hearst.svg"
+            alt="Hearst"
             style={{
-              height: '42px',
+              height: TOKENS.spacing[8],
               width: 'auto',
               display: 'block',
             }}
           />
         </div>
-        <div className="flex h-full min-w-0 items-center justify-end">
-          <span
-            className="text-right uppercase"
-            style={{
-              fontFamily: MONO,
-              fontSize: TOKENS.fontSizes.xs,
-              fontWeight: TOKENS.fontWeights.bold,
-              letterSpacing: TOKENS.letterSpacing.display,
-              color: ON_DARK_GHOST,
-            }}
-          >
-            {WALLET}
-          </span>
+
+        {/* Wallet / Connect Button - aligné à droite */}
+        <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+          <WalletButton />
         </div>
       </header>
 
@@ -136,5 +134,101 @@ function MainPanel({
       onVaultSelect={onVaultSelect}
       onAvailableVaultsClick={() => onVaultSelect(AVAILABLE_VAULTS_VIEW_ID)}
     />
+  )
+}
+
+function WalletButton() {
+  const [isConnected, setIsConnected] = useState(false)
+
+  const handleConnect = () => {
+    setIsConnected(true)
+  }
+
+  const handleDisconnect = () => {
+    setIsConnected(false)
+  }
+
+  if (!isConnected) {
+    return (
+      <button
+        onClick={handleConnect}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: TOKENS.spacing[2],
+          padding: `${TOKENS.spacing[2]}px ${TOKENS.spacing[4]}px`,
+          background: TOKENS.colors.accent,
+          color: TOKENS.colors.black,
+          border: 'none',
+          borderRadius: TOKENS.radius.md,
+          fontFamily: MONO,
+          fontSize: TOKENS.fontSizes.xs,
+          fontWeight: TOKENS.fontWeights.bold,
+          letterSpacing: TOKENS.letterSpacing.display,
+          textTransform: 'uppercase',
+          cursor: 'pointer',
+          transition: 'all 120ms ease-out',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.opacity = '0.9'
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.opacity = '1'
+        }}
+      >
+        <svg width={TOKENS.spacing[4]} height={TOKENS.spacing[4]} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M19 7H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z" />
+          <path d="M16 11h0" />
+        </svg>
+        Connect
+      </button>
+    )
+  }
+
+  return (
+    <div style={{ display: 'flex', alignItems: 'center', gap: TOKENS.spacing[2] }}>
+      <span
+        style={{
+          fontFamily: MONO,
+          fontSize: TOKENS.fontSizes.xs,
+          fontWeight: TOKENS.fontWeights.bold,
+          letterSpacing: TOKENS.letterSpacing.display,
+          color: ON_DARK_GHOST,
+          textTransform: 'uppercase',
+        }}
+      >
+        {WALLET}
+      </span>
+      <button
+        onClick={handleDisconnect}
+        style={{
+          padding: `${TOKENS.spacing[2]}px`,
+          background: 'transparent',
+          border: `1px solid ${TOKENS.colors.borderSubtle}`,
+          borderRadius: TOKENS.radius.md,
+          cursor: 'pointer',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: TOKENS.colors.textSecondary,
+          transition: 'all 120ms ease-out',
+        }}
+        onMouseEnter={(e) => {
+          e.currentTarget.style.borderColor = TOKENS.colors.accent
+          e.currentTarget.style.color = TOKENS.colors.accent
+        }}
+        onMouseLeave={(e) => {
+          e.currentTarget.style.borderColor = TOKENS.colors.borderSubtle
+          e.currentTarget.style.color = TOKENS.colors.textSecondary
+        }}
+        title="Disconnect"
+      >
+        <svg width={TOKENS.spacing[3]} height={TOKENS.spacing[3]} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+      </button>
+    </div>
   )
 }

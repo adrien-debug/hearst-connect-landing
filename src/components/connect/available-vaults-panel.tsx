@@ -2,6 +2,7 @@
 
 import { Label } from '@/components/ui/label'
 import { TOKENS, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING, MONO } from './constants'
+import { formatVaultName } from './formatting'
 import type { AvailableVault } from './data'
 import { useSmartFit, useShellPadding, fitValue } from './smart-fit'
 import type { SmartFitMode } from './smart-fit'
@@ -92,7 +93,7 @@ export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsP
           {displayVaults.map((vault, index) => (
             <CockpitGauge
               key={vault?.id || `empty-${index}`}
-              label={vault?.name?.replace('HashVault ', '') || '—'}
+              label={vault ? formatVaultName(vault.name) : '—'}
               value={vault ? `${vault.apr}%` : '—'}
               valueCompact={vault ? `${vault.apr}%` : '—'}
               subtext={vault ? `${vault.target} target · ${vault.lockPeriod}` : 'No vault'}

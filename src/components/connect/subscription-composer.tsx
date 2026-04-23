@@ -58,18 +58,18 @@ export function SubscriptionComposer({
           <Label id="sub-kicker" tone="scene" variant="text">
             Subscription
           </Label>
-          <h2
+          <h1
             className="m-0"
             style={{
               fontSize: fitValue(mode, { normal: TOKENS.fontSizes.xl, tight: TOKENS.fontSizes.lg, limit: TOKENS.fontSizes.md }),
               fontWeight: TOKENS.fontWeights.black,
               letterSpacing: TOKENS.letterSpacing.tight,
               color: TOKENS.colors.textPrimary,
-              lineHeight: 0.95,
+              lineHeight: 1,
             }}
           >
             {vault.name}
-          </h2>
+          </h1>
         </div>
         <div className="text-right" role="group" aria-label="Target annual yield">
           <div
@@ -131,7 +131,7 @@ export function SubscriptionComposer({
               fontSize: fitValue(mode, { normal: TOKENS.fontSizes.figure, tight: TOKENS.fontSizes.xxxl, limit: TOKENS.fontSizes.xl }),
               fontFamily: TOKENS.fonts.sans,
               letterSpacing: '-0.07em',
-              lineHeight: 0.85,
+              lineHeight: 1,
             }}
           />
           <span
@@ -210,7 +210,7 @@ export function SubscriptionComposer({
                 type="checkbox"
                 checked={agreed}
                 onChange={(e) => onAgreedChange(e.target.checked)}
-                className="h-5 w-5 shrink-0"
+                className="h-6 w-6 shrink-0"
                 style={{ accentColor: TOKENS.colors.accent }}
                 aria-describedby={`${idAgree}-desc`}
               />

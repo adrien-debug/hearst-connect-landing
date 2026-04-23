@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useCallback } from 'react'
 import { TOKENS, VALUE_LETTER_SPACING } from './constants'
 import { SIMULATION_VIEW_ID, AVAILABLE_VAULTS_VIEW_ID } from './view-ids'
 
@@ -13,8 +13,7 @@ interface DockRadialProps {
 type NavState = 'dashboard' | 'available' | 'simulation'
 
 export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialProps) {
-  const [isExpanded, setIsExpanded] = useState(false)
-  const [isHovered, setIsHovered] = useState(false)
+  const [hoveredId, setHoveredId] = useState<string | null>(null)
 
   // Determine current state from routing
   const currentState: NavState = (() => {
@@ -24,35 +23,10 @@ export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialPro
     return 'dashboard'
   })()
 
-  // Auto-collapse when clicking outside
-  useEffect(() => {
-    if (!isExpanded) return
-    const handleClickOutside = (e: MouseEvent) => {
-      const target = e.target as HTMLElement
-      if (!target.closest('[data-dock-radial]')) {
-        setIsExpanded(false)
-      }
-    }
-    document.addEventListener('click', handleClickOutside)
-    return () => document.removeEventListener('click', handleClickOutside)
-  }, [isExpanded])
-
-  // Keyboard shortcut: Space to toggle
-  useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if (e.code === 'Space' && !(e.target instanceof HTMLInputElement)) {
-        e.preventDefault()
-        setIsExpanded(prev => !prev)
-      }
-    }
-    window.addEventListener('keydown', handleKeyDown)
-    return () => window.removeEventListener('keydown', handleKeyDown)
-  }, [])
-
   const handleNavClick = useCallback((state: NavState) => {
     switch (state) {
       case 'dashboard':
-        onSelect(null) // null = dashboard/overview
+        onSelect(null)
         break
       case 'available':
         onSelect(AVAILABLE_VAULTS_VIEW_ID)
@@ -61,18 +35,16 @@ export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialPro
         onSelect(SIMULATION_VIEW_ID)
         break
     }
-    setIsExpanded(false)
   }, [onSelect])
 
   const navItems = [
-    { id: 'dashboard' as const, label: 'DASH', x: -70, y: -30 },
-    { id: 'available' as const, label: 'AVAIL', x: 0, y: -55 },
-    { id: 'simulation' as const, label: 'SIMU', x: 70, y: -30 },
+    { id: 'dashboard' as const, label: 'Dashboard' },
+    { id: 'available' as const, label: 'Available' },
+    { id: 'simulation' as const, label: 'Simulation' },
   ]
 
   return (
     <div
-      data-dock-radial
       style={{
         position: 'fixed',
         bottom: '24px',
@@ -81,141 +53,103 @@ export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialPro
         zIndex: 50,
         display: 'flex',
         alignItems: 'center',
-        justifyContent: 'center',
+        background: 'rgba(10, 10, 10, 0.65)',
+        backdropFilter: 'blur(16px)',
+        WebkitBackdropFilter: 'blur(16px)',
+        border: `1px solid rgba(255, 255, 255, 0.1)`,
+        borderRadius: '32px',
+        padding: '6px',
+        gap: '8px',
+        boxShadow: '0 8px 32px rgba(0, 0, 0, 0.4)',
       }}
-      onMouseEnter={() => setIsHovered(true)}
-      onMouseLeave={() => setIsHovered(false)}
     >
-      {/* Glow background */}
-      {isExpanded && (
-        <div
-          style={{
-            position: 'absolute',
-            width: '300px',
-            height: '150px',
-            background: `radial-gradient(ellipse at center bottom, ${TOKENS.colors.accentGlow} 0%, transparent 70%)`,
-            pointerEvents: 'none',
-            animation: 'fadeIn 300ms ease',
-          }}
-        />
-      )}
-
-      {/* Nav items */}
-      {navItems.map((item, index) => {
-        const isActive = currentState === item.id
-        return (
-          <button
-            key={item.id}
-            onClick={() => handleNavClick(item.id)}
-            style={{
-              position: 'absolute',
-              transform: isExpanded
-                ? `translate(${item.x}px, ${item.y}px)`
-                : 'translate(0, 20px) scale(0)',
-              opacity: isExpanded ? 1 : 0,
-              transition: 'all 400ms cubic-bezier(0.34, 1.56, 0.64, 1)',
-              transitionDelay: isExpanded ? `${index * 60}ms` : '0ms',
-              padding: '8px 14px',
-              background: isActive ? TOKENS.colors.accent : TOKENS.colors.bgSurface,
-              border: `1px solid ${isActive ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
-              borderRadius: '16px',
-              cursor: 'pointer',
-              boxShadow: isActive
-                ? `0 0 16px ${TOKENS.colors.accentGlow}`
-                : '0 4px 12px rgba(0,0,0,0.3)',
-            }}
-          >
-            <span
-              style={{
-                fontSize: '10px',
-                fontWeight: TOKENS.fontWeights.black,
-                letterSpacing: VALUE_LETTER_SPACING,
-                color: isActive ? TOKENS.colors.black : TOKENS.colors.textPrimary,
-                textTransform: 'uppercase',
-              }}
-            >
-              {item.label}
-            </span>
-          </button>
-        )
-      })}
-
-      {/* Central Hub Button */}
+      {/* Hearst Logo / Home Button */}
       <button
-        onClick={() => setIsExpanded(prev => !prev)}
+        onClick={() => handleNavClick('dashboard')}
+        onMouseEnter={() => setHoveredId('logo')}
+        onMouseLeave={() => setHoveredId(null)}
         style={{
-          position: 'relative',
-          width: '48px',
-          height: '48px',
+          width: '40px',
+          height: '40px',
           borderRadius: '50%',
-          background: isExpanded || isHovered
-            ? TOKENS.colors.accent
-            : TOKENS.colors.bgSurface,
-          border: `2px solid ${isExpanded ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
+          background: hoveredId === 'logo' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+          border: 'none',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          boxShadow: isExpanded
-            ? `0 0 24px ${TOKENS.colors.accentGlow}`
-            : '0 4px 12px rgba(0,0,0,0.3)',
-          transition: 'all 300ms ease',
-          zIndex: 10,
+          transition: 'all 0.2s ease',
         }}
-        aria-label={isExpanded ? 'Close navigation' : 'Open navigation'}
-        aria-expanded={isExpanded}
+        title="Home"
       >
         <svg
-          width="20"
-          height="20"
-          viewBox="0 0 24 24"
-          fill="none"
+          viewBox="572.6 466.9 129.3 142.8"
           style={{
-            color: isExpanded || isHovered ? TOKENS.colors.black : TOKENS.colors.textPrimary,
+            width: '18px',
+            height: '18px',
+            fill: TOKENS.colors.accent,
+            filter: `drop-shadow(0 0 4px ${TOKENS.colors.accent}80)`,
           }}
         >
-          <path
-            d="M4 6h16M4 12h16M4 18h16"
-            stroke="currentColor"
-            strokeWidth="2"
-            strokeLinecap="round"
-          />
+          <polygon points="601.7 466.9 572.6 466.9 572.6 609.7 601.7 609.7 601.7 549.1 633.1 579.4 665.8 579.4 601.7 517.5 601.7 466.9" />
+          <polygon points="672.7 466.9 672.7 528.1 644.6 500.9 612 500.9 672.7 559.7 672.7 609.7 701.9 609.7 701.9 466.9 672.7 466.9" />
         </svg>
       </button>
 
-      {/* Active indicator - always visible when collapsed */}
-      {!isExpanded && (
-        <div
-          style={{
-            position: 'absolute',
-            bottom: '-24px',
-            left: '50%',
-            transform: 'translateX(-50%)',
-            display: 'flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '9px',
-            fontWeight: TOKENS.fontWeights.bold,
-            letterSpacing: '0.1em',
-            textTransform: 'uppercase',
-            color: TOKENS.colors.textGhost,
-            whiteSpace: 'nowrap',
-            opacity: isHovered ? 1 : 0.7,
-            transition: 'opacity 200ms ease',
-          }}
-        >
-          <span
-            style={{
-              width: '6px',
-              height: '6px',
-              borderRadius: '50%',
-              background: currentState === 'dashboard' ? TOKENS.colors.accent : TOKENS.colors.textGhost,
-            }}
-          />
-          <span>{navItems.find(n => n.id === currentState)?.label || 'DASH'}</span>
-          <span style={{ marginLeft: '4px', opacity: 0.5 }}>· Space</span>
-        </div>
-      )}
+      {/* Divider */}
+      <div style={{ width: '1px', height: '24px', background: 'rgba(255, 255, 255, 0.1)' }} />
+
+      {/* Navigation Tabs */}
+      <div style={{ display: 'flex', gap: '4px' }}>
+        {navItems.map((item) => {
+          const isActive = currentState === item.id
+          const isItemHovered = hoveredId === item.id
+
+          return (
+            <button
+              key={item.id}
+              onClick={() => handleNavClick(item.id)}
+              onMouseEnter={() => setHoveredId(item.id)}
+              onMouseLeave={() => setHoveredId(null)}
+              style={{
+                position: 'relative',
+                padding: '8px 16px',
+                background: isActive ? 'rgba(255, 255, 255, 0.1)' : isItemHovered ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
+                border: 'none',
+                borderRadius: '20px',
+                cursor: 'pointer',
+                transition: 'all 0.2s ease',
+                display: 'flex',
+                alignItems: 'center',
+                gap: '6px',
+              }}
+            >
+              {isActive && (
+                <span
+                  style={{
+                    width: '6px',
+                    height: '6px',
+                    borderRadius: '50%',
+                    background: TOKENS.colors.accent,
+                    boxShadow: `0 0 8px ${TOKENS.colors.accent}`,
+                  }}
+                />
+              )}
+              <span
+                style={{
+                  fontSize: '11px',
+                  fontWeight: TOKENS.fontWeights.bold,
+                  letterSpacing: VALUE_LETTER_SPACING,
+                  color: isActive ? TOKENS.colors.white : TOKENS.colors.textSecondary,
+                  textTransform: 'uppercase',
+                }}
+              >
+                {item.label}
+              </span>
+            </button>
+          )
+        })}
+      </div>
     </div>
   )
 }

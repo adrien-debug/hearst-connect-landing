@@ -3,6 +3,7 @@
 import { useState } from 'react'
 import { Label } from '@/components/ui/label'
 import { TOKENS, MONO, fmtUsd, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING } from './constants'
+import { formatVaultName } from './formatting'
 import { MonthlyGauge } from './monthly-gauge'
 import { CompressedMetricsStrip } from './compressed-metrics-strip'
 import { PositionCard } from './position-card'
@@ -11,6 +12,8 @@ import type { ActiveVault, MaturedVault } from './data'
 import { useSmartFit, useShellPadding, fitValue } from './smart-fit'
 import type { SmartFitMode } from './smart-fit'
 import { CockpitGauge } from './cockpit-gauge'
+import { StatCard } from './stat-card'
+import { ActionButton } from './action-button'
 import { usePositionData } from '@/hooks/usePositionData'
 import { useTransaction } from '@/hooks/useTransaction'
 import { Skeleton } from './skeleton'
@@ -125,7 +128,7 @@ export function VaultDetailPanel({
             label="Capital Deployed"
             value={fmtUsd(capitalDeployed)}
             valueCompact={fmtUsdCompact(capitalDeployed)}
-            subtext={vault.name.replace('HashVault ', '')}
+            subtext={formatVaultName(vault.name)}
             mode={mode}
             primary
           />
@@ -370,21 +373,18 @@ export function VaultDetailPanel({
               label="Claim Yield"
               variant="primary"
               onClick={() => setActiveModal('claim')}
-              mode={mode}
             />
           )}
           <ActionButton
             label="Manage"
             variant="secondary"
             onClick={() => setActiveModal('manage')}
-            mode={mode}
           />
           {isPositionReadyForExit && (
             <ActionButton
               label="Exit Position"
               variant="accent"
               onClick={() => setActiveModal('exit')}
-              mode={mode}
             />
           )}
         </div>
@@ -404,7 +404,6 @@ export function VaultDetailPanel({
                 label="Cancel"
                 variant="secondary"
                 onClick={() => setActiveModal(null)}
-                mode={mode}
               />
               <ActionButton
                 label="Confirm Claim"
@@ -417,7 +416,6 @@ export function VaultDetailPanel({
                     error: 'Claim failed. Please try again.',
                   }
                 )}
-                mode={mode}
               />
             </div>
           )
@@ -492,7 +490,6 @@ export function VaultDetailPanel({
                 label="Cancel"
                 variant="secondary"
                 onClick={() => setActiveModal(null)}
-                mode={mode}
               />
               <ActionButton
                 label="Confirm Exit"
@@ -505,7 +502,6 @@ export function VaultDetailPanel({
                     error: 'Exit failed. Please contact support.',
                   }
                 )}
-                mode={mode}
               />
             </div>
           )
@@ -563,57 +559,6 @@ export function VaultDetailPanel({
           <TransactionState state={transaction.status} message={transaction.message} />
         )}
       </Modal>
-    </div>
-  )
-}
-
-function StatCard({ label, value, subtext, mode, accent = false }: {
-  label: string
-  value: string
-  subtext: string
-  mode: SmartFitMode
-  accent?: boolean
-}) {
-  return (
-    <div style={{
-      background: TOKENS.colors.bgSecondary,
-      borderRadius: TOKENS.radius.lg,
-      padding: fitValue(mode, {
-        normal: TOKENS.spacing[3],
-        tight: TOKENS.spacing[2],
-        limit: TOKENS.spacing[2],
-      }),
-    }}>
-      <div style={{
-        fontSize: TOKENS.fontSizes.micro,
-        fontWeight: TOKENS.fontWeights.bold,
-        fontFamily: MONO,
-        letterSpacing: TOKENS.letterSpacing.display,
-        textTransform: 'uppercase',
-        color: TOKENS.colors.textSecondary,
-        marginBottom: TOKENS.spacing[2],
-      }}>
-        {label}
-      </div>
-      <div style={{
-        fontSize: fitValue(mode, {
-          normal: TOKENS.fontSizes.lg,
-          tight: TOKENS.fontSizes.md,
-          limit: TOKENS.fontSizes.md,
-        }),
-        fontWeight: TOKENS.fontWeights.black,
-        letterSpacing: VALUE_LETTER_SPACING,
-        color: accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
-      }}>
-        {value}
-      </div>
-      <div style={{
-        fontSize: TOKENS.fontSizes.xs,
-        color: TOKENS.colors.textGhost,
-        marginTop: TOKENS.spacing[2],
-      }}>
-        {subtext}
-      </div>
     </div>
   )
 }
@@ -869,7 +814,7 @@ function NarrativeBlock({ kicker, body, mode, isMono = false }: {
       }),
       flexShrink: 0,
     }}>
-      <Label id={`narrative-${kicker.toLowerCase().replace(/\s+/g, '-')}`} tone="scene" variant="text">
+      <Label id={`narrative-${kicker.toLowerCase().replace(/\s+/g, '-')}`} tone="scene">
         {kicker}
       </Label>
       <p style={{
@@ -882,55 +827,6 @@ function NarrativeBlock({ kicker, body, mode, isMono = false }: {
         {body}
       </p>
     </div>
-  )
-}
-
-function ActionButton({
-  label,
-  variant,
-  onClick,
-  mode,
-}: {
-  label: string
-  variant: 'primary' | 'secondary' | 'accent'
-  onClick: () => void
-  mode: SmartFitMode
-}) {
-  const styles = {
-    primary: {
-      background: TOKENS.colors.accentSubtle,
-      border: `1px solid ${TOKENS.colors.accent}`,
-      color: TOKENS.colors.accent,
-    },
-    secondary: {
-      background: 'transparent',
-      border: `1px solid ${TOKENS.colors.borderSubtle}`,
-      color: TOKENS.colors.textSecondary,
-    },
-    accent: {
-      background: TOKENS.colors.accent,
-      border: `1px solid ${TOKENS.colors.accent}`,
-      color: TOKENS.colors.black,
-    },
-  }
-
-  return (
-    <button
-      onClick={onClick}
-      style={{
-        padding: `${TOKENS.spacing[3]} ${TOKENS.spacing[4]}`,
-        borderRadius: TOKENS.radius.md,
-        fontSize: TOKENS.fontSizes.sm,
-        fontWeight: TOKENS.fontWeights.black,
-        letterSpacing: TOKENS.letterSpacing.display,
-        textTransform: 'uppercase',
-        cursor: 'pointer',
-        width: '100%',
-        ...styles[variant],
-      }}
-    >
-      {label}
-    </button>
   )
 }
 

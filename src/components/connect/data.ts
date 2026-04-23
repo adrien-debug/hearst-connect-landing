@@ -35,6 +35,16 @@ export interface AvailableVault extends BaseVault {
 
 export type VaultLine = ActiveVault | MaturedVault | AvailableVault
 
+export interface Activity {
+  id: string
+  type: 'deposit' | 'claim' | 'system'
+  title: string
+  vaultName?: string
+  amount?: number
+  timestamp: number
+  status: 'completed' | 'pending'
+}
+
 import {
   type Aggregate as VaultAggregate,
   aggregateVaults,
@@ -44,6 +54,34 @@ import {
 export type Aggregate = VaultAggregate
 
 const NOW = Math.floor(Date.now() / 1000)
+
+export const MOCK_ACTIVITIES: Activity[] = [
+  {
+    id: 'act-1',
+    type: 'claim',
+    title: 'Yield Claimed',
+    vaultName: 'HashVault Yield #1',
+    amount: 8500,
+    timestamp: NOW - 86400 * 2, // 2 days ago
+    status: 'completed'
+  },
+  {
+    id: 'act-2',
+    type: 'deposit',
+    title: 'Capital Deployed',
+    vaultName: 'HashVault Prime #1',
+    amount: 500000,
+    timestamp: NOW - 86400 * 15, // 15 days ago
+    status: 'completed'
+  },
+  {
+    id: 'act-3',
+    type: 'system',
+    title: 'Portfolio Rebalanced',
+    timestamp: NOW - 86400 * 30, // 30 days ago
+    status: 'completed'
+  }
+]
 
 export const VAULTS: VaultLine[] = [
   {

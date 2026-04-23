@@ -3,6 +3,7 @@
 import '@/styles/ui/tokens.css'
 import { Label } from '@/components/ui/label'
 import { TOKENS, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING } from './constants'
+import { formatVaultName } from './formatting'
 import type { VaultLine, ActiveVault, AvailableVault } from './data'
 import { getSidebarWidthPx, useSmartFit, useShellPadding, fitValue } from './smart-fit'
 import { SIMULATION_VIEW_ID } from './view-ids'
@@ -12,10 +13,6 @@ interface SidebarProps {
   selectedId: string | null
   onSelect: (id: string | null) => void
   mobile?: boolean
-}
-
-function formatVaultTitle(name: string) {
-  return name.replace('HashVault ', '')
 }
 
 export function Sidebar({ vaults, selectedId, onSelect, mobile = false }: SidebarProps) {
@@ -45,7 +42,7 @@ export function Sidebar({ vaults, selectedId, onSelect, mobile = false }: Sideba
   const contextTitle = inSimulation
     ? 'Projection Model'
     : selectedVault
-      ? formatVaultTitle(selectedVault.name)
+      ? formatVaultName(selectedVault.name)
       : 'Overview'
 
   return (
@@ -71,17 +68,17 @@ export function Sidebar({ vaults, selectedId, onSelect, mobile = false }: Sideba
           flexShrink: 0,
           background: TOKENS.colors.bgApp,
           display: 'flex',
-          justifyContent: 'center',
+          justifyContent: 'flex-start',
           alignItems: 'center',
         }}
       >
         <img
-          src="/logos/hearst-connect-blackbg.svg"
-          alt="Hearst Connect"
+          src="/logos/hearst.svg"
+          alt="Hearst"
           style={{
-            height: fitValue(mode, { normal: '40px', tight: '36px', limit: '32px' }),
+            height: fitValue(mode, { normal: TOKENS.spacing[10], tight: TOKENS.spacing[8], limit: TOKENS.spacing[6] }),
             width: 'auto',
-            maxWidth: '160px',
+            maxWidth: '140px',
             objectFit: 'contain',
           }}
         />
@@ -432,7 +429,7 @@ function VaultCard({
             textOverflow: 'ellipsis',
             whiteSpace: 'nowrap',
           }}>
-            {vault.name.replace('HashVault ', '')}
+            {formatVaultName(vault.name)}
           </span>
         </div>
 
@@ -541,7 +538,7 @@ function AvailableVaultCard({
           textOverflow: 'ellipsis',
           whiteSpace: 'nowrap',
         }}>
-          {vault.name.replace('HashVault ', '')}
+          {formatVaultName(vault.name)}
         </span>
         <span style={{
           fontSize: TOKENS.fontSizes.micro,

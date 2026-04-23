@@ -57,7 +57,7 @@ export function CockpitGauge({
       }}
     >
       <div style={{
-        fontSize: TOKENS.fontSizes.micro,
+        fontSize: TOKENS.fontSizes.xs,
         fontWeight: TOKENS.fontWeights.bold,
         letterSpacing: TOKENS.letterSpacing.display,
         textTransform: 'uppercase',
@@ -80,7 +80,7 @@ export function CockpitGauge({
         {displayValue}
       </div>
       <div style={{
-        fontSize: TOKENS.fontSizes.micro,
+        fontSize: TOKENS.fontSizes.xs,
         fontWeight: TOKENS.fontWeights.bold,
         color: TOKENS.colors.textGhost,
         letterSpacing: '0.02em',
