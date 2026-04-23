@@ -25,6 +25,7 @@
     "@types/react": "^19.2.14",
     "@types/react-dom": "^19.2.3",
     "kill-port": "^2.0.1",
+    "null-loader": "^4.0.1",
     "postcss": "^8",
     "tailwindcss": "^4.2.0",
     "typescript": "^5.8.3",

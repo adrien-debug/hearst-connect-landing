@@ -60,15 +60,17 @@ const nextConfig = {
     config.resolve.fallback = {
       ...config.resolve.fallback,
       '@react-native-async-storage/async-storage': false,
-      // Fix wagmi v2 webpack issues with tempo/Connectors
-      'accounts': false,
     };
 
-    // Ignore wagmi tempo module that causes webpack issues
-    config.module.rules.push({
-      test: /@wagmi\/core\/dist\/esm\/tempo\/Connectors\.js$/,
-      use: 'null-loader',
-    });
+    // Fix wagmi v2 webpack issues with tempo modules
+    // Replace tempo modules with a mock that exports undefined
+    const path = require('path');
+    config.resolve.alias = {
+      ...config.resolve.alias,
+      '@wagmi/core/tempo': path.resolve(__dirname, 'src/lib/wagmi-tempo-mock.js'),
+      '@wagmi/core/dist/esm/tempo/Connectors.js': path.resolve(__dirname, 'src/lib/wagmi-tempo-mock.js'),
+      '@wagmi/core/dist/esm/tempo/exports.js': path.resolve(__dirname, 'src/lib/wagmi-tempo-mock.js'),
+    };
 
     config.module.rules.forEach((rule) => {
       if (!rule.oneOf) return;
