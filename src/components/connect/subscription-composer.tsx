@@ -1,6 +1,7 @@
 'use client'
 
 import { Label } from '@/components/ui/label'
+import { PreFlightCheck } from './pre-flight-check'
 import { TOKENS, fmtUsd } from './constants'
 import type { AvailableVault } from './data'
 import { fitValue, type SmartFitMode } from './smart-fit'
@@ -18,6 +19,10 @@ type Props = {
   num: number
   yearlyYield: number
   totalYield: number
+  onApprove: () => void
+  isApproving: boolean
+  onDeposit: () => void
+  isDepositing: boolean
 }
 
 export function SubscriptionComposer({
@@ -33,6 +38,10 @@ export function SubscriptionComposer({
   num,
   yearlyYield,
   totalYield,
+  onApprove,
+  isApproving,
+  onDeposit,
+  isDepositing,
 }: Props) {
   const idAmount = 'subscribe-amount'
   const idAgree = 'subscribe-term-confirm'
@@ -90,7 +99,7 @@ export function SubscriptionComposer({
                 </Label>
                 <h1
                   style={{
-                    margin: `${TOKENS.spacing[1]}px 0 0 0`,
+                    margin: `${TOKENS.spacing[2]}px 0 0 0`,
                     fontSize: fitValue(mode, { normal: TOKENS.fontSizes.xxl, tight: TOKENS.fontSizes.xl, limit: TOKENS.fontSizes.lg }),
                     fontWeight: TOKENS.fontWeights.black,
                     letterSpacing: TOKENS.letterSpacing.tight,
@@ -273,6 +282,14 @@ export function SubscriptionComposer({
               </span>
             </div>
 
+            {/* Pre-flight Check */}
+            <PreFlightCheck 
+              vault={vault} 
+              depositAmount={amount}
+              onApprove={onApprove}
+              isApproving={isApproving}
+            />
+
             {/* Checkbox & CTA */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[4] }}>
               <fieldset id={idFieldsetTerms} className="m-0 border-0 p-0">
@@ -310,7 +327,8 @@ export function SubscriptionComposer({
               
               <button
                 type="button"
-                disabled={!isReady}
+                disabled={!isReady || isDepositing}
+                onClick={onDeposit}
                 style={{
                   width: '100%',
                   padding: TOKENS.spacing[4],
@@ -322,14 +340,15 @@ export function SubscriptionComposer({
                   fontWeight: TOKENS.fontWeights.black,
                   letterSpacing: TOKENS.letterSpacing.display,
                   textTransform: 'uppercase',
-                  cursor: isReady ? 'pointer' : 'not-allowed',
+                  cursor: isReady && !isDepositing ? 'pointer' : 'not-allowed',
                   transition: 'all 0.2s ease',
                   boxShadow: isReady ? `0 4px 16px ${TOKENS.colors.accent}40` : 'none',
+                  opacity: isDepositing ? 0.7 : 1,
                 }}
                 aria-label={isReady ? 'Confirm subscription' : 'Complete form to deploy'}
-                aria-disabled={!isReady}
+                aria-disabled={!isReady || isDepositing}
               >
-                {isReady ? 'Deploy Capital' : 'Complete Review'}
+                {isDepositing ? 'Confirming…' : isReady ? 'Deploy Capital' : 'Complete Review'}
               </button>
             </div>
           </div>

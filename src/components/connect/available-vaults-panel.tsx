@@ -32,6 +32,7 @@ export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsP
   return (
     <div
       className="flex-1"
+      suppressHydrationWarning
       style={{
         display: 'flex',
         flexDirection: 'column',

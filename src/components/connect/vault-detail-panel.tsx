@@ -66,6 +66,7 @@ export function VaultDetailPanel({
   return (
     <div
       className="flex-1"
+      suppressHydrationWarning
       style={{
         display: 'flex',
         flexDirection: 'column',

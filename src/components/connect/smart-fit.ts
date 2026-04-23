@@ -54,16 +54,18 @@ function resolveMode(width: number, height: number, options: SmartFitOptions): S
 }
 
 export function useSmartFit(options: SmartFitOptions) {
-  const [mode, setMode] = useState<SmartFitMode>(() => {
-    if (typeof window === 'undefined') return 'normal'
-    return resolveMode(window.innerWidth, window.innerHeight, options)
-  })
+  // Start with 'normal' for SSR, then calculate real mode after hydration
+  const [mode, setMode] = useState<SmartFitMode>('normal')
+  const [isHydrated, setIsHydrated] = useState(false)
 
   // Throttle resize updates to 60fps (16ms)
   const rafRef = useRef<number | null>(null)
-  const lastModeRef = useRef<SmartFitMode>(mode)
+  const lastModeRef = useRef<SmartFitMode>('normal')
 
   useEffect(() => {
+    // Mark as hydrated and calculate initial mode
+    setIsHydrated(true)
+
     const update = () => {
       const newMode = resolveMode(window.innerWidth, window.innerHeight, options)
       if (newMode !== lastModeRef.current) {
@@ -80,6 +82,7 @@ export function useSmartFit(options: SmartFitOptions) {
       })
     }
 
+    // Calculate initial mode
     update()
     window.addEventListener('resize', throttledUpdate)
     return () => {
@@ -105,6 +108,8 @@ export function useSmartFit(options: SmartFitOptions) {
     isLimit: mode === 'limit',
     /** Sidebar lists & metadata: same idea as pre-refactor `isCompactBottom` */
     isCompactBottom: mode !== 'normal',
+    /** Whether hydration has completed - useful for avoiding SSR mismatches */
+    isHydrated,
   }
 }
 

@@ -1,12 +1,10 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Label } from '@/components/ui/label'
 import { TOKENS, MONO, fmtUsd, fmtUsdCompact, VALUE_LETTER_SPACING } from './constants'
 import { useSmartFit, useShellPadding, fitValue } from './smart-fit'
 import { CockpitGauge } from './cockpit-gauge'
 import { RangeSlider } from './range-slider'
-import { MetricTilesRow, MetricTile } from './projection-lens'
 import {
   type ScenarioKey,
   projectScenario,
@@ -85,6 +83,7 @@ export function SimulationPanel() {
   return (
     <div
       className="flex-1"
+      suppressHydrationWarning
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -414,12 +413,12 @@ export function SimulationPanel() {
               <RecapRow label="Duration" value={`${months} Months`} />
               <RecapRow label="BTC Target" value={fmtUsd(active.expectedPrice)} />
               
-              <div style={{ height: 1, background: TOKENS.colors.borderSubtle, margin: `${TOKENS.spacing[1]}px 0`, flexShrink: 0 }} />
+              <div style={{ height: 1, background: TOKENS.colors.borderSubtle, margin: `${TOKENS.spacing[2]}px 0`, flexShrink: 0 }} />
               
               <RecapRow label="Est. APY" value={formatPercent(active.annualApr * 100)} />
               <RecapRow label="Net Yield" value={`+${fmtUsd(active.cumulativeYield)}`} accent />
               
-              <div style={{ height: 1, background: TOKENS.colors.borderSubtle, margin: `${TOKENS.spacing[1]}px 0`, flexShrink: 0 }} />
+              <div style={{ height: 1, background: TOKENS.colors.borderSubtle, margin: `${TOKENS.spacing[2]}px 0`, flexShrink: 0 }} />
               
               {/* Visual Ratio (Principal vs Yield) */}
               <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2], marginTop: TOKENS.spacing[2] }}>

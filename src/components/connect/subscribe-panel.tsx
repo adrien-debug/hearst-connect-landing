@@ -1,14 +1,18 @@
 'use client'
 
 import { useState } from 'react'
-import { Label } from '@/components/ui/label'
 import { SubscriptionComposer } from './subscription-composer'
 import { TOKENS, MONO, fmtUsd, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING } from './constants'
 import type { AvailableVault } from './data'
 import { useSmartFit, useShellPadding, fitValue } from './smart-fit'
-import type { SmartFitMode } from './smart-fit'
 import { CockpitGauge } from './cockpit-gauge'
-import { StatCard } from './stat-card'
+import { useVaultActions } from '@/hooks/useVault'
+import { useTokenAllowance } from '@/hooks/useTokenAllowance'
+import { useAccount } from 'wagmi'
+import { parseUnits } from 'viem'
+
+const USDC_ADDRESS = process.env.NEXT_PUBLIC_USDC_ADDRESS as `0x${string}` | undefined
+const VAULT_ADDRESS = process.env.NEXT_PUBLIC_VAULT_ADDRESS as `0x${string}` | undefined
 
 export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBack?: () => void }) {
   const { mode, isLimit } = useSmartFit({
@@ -21,6 +25,11 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
   })
   const [amount, setAmount] = useState('')
   const [agreed, setAgreed] = useState(false)
+  const [isDepositing, setIsDepositing] = useState(false)
+
+  const { address } = useAccount()
+  const { deposit, isPending: isDepositPending } = useVaultActions(VAULT_ADDRESS)
+  const { approve, isPending: isApprovePending } = useTokenAllowance(USDC_ADDRESS, address, VAULT_ADDRESS)
 
   const num = parseFloat(amount) || 0
   const isValid = num >= vault.minDeposit
@@ -30,6 +39,25 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
   const totalYield = num * (targetPct / 100)
   const { padding: shellPadding, gap: shellGap } = useShellPadding(mode)
 
+  const handleApprove = async () => {
+    if (!amount) return
+    await approve(amount)
+  }
+
+  const handleDeposit = async () => {
+    if (!isReady) return
+    try {
+      setIsDepositing(true)
+      const amountBigInt = parseUnits(amount, 6) // USDC has 6 decimals
+      await deposit(amountBigInt)
+      // Success - could show toast/redirect here
+    } catch (err) {
+      console.error('Deposit failed:', err)
+    } finally {
+      setIsDepositing(false)
+    }
+  }
+
   // Calculate projection details
   const monthlyYield = num * (vault.apr / 100) / 12
   const dailyYield = monthlyYield / 30
@@ -37,6 +65,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
   return (
     <div
       className="flex-1"
+      suppressHydrationWarning
       style={{
         display: 'flex',
         flexDirection: 'column',
@@ -147,6 +176,10 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
           num={num}
           yearlyYield={yearlyYield}
           totalYield={totalYield}
+          onApprove={handleApprove}
+          isApproving={isApprovePending}
+          onDeposit={handleDeposit}
+          isDepositing={isDepositing || isDepositPending}
         />
       </div>
     </div>

@@ -1,7 +1,6 @@
 'use client'
 
 import '@/styles/connect/dashboard-vars.css'
-import { useState } from 'react'
 import { useConnectRouting } from './use-connect-routing'
 import { TOKENS, MONO } from './constants'
 import { PortfolioSummary } from './portfolio-summary'
@@ -9,15 +8,16 @@ import { VaultDetailPanel } from './vault-detail-panel'
 import { SubscribePanel } from './subscribe-panel'
 import { SimulationPanel } from './simulation-panel'
 import { AvailableVaultsPanel } from './available-vaults-panel'
+import { VaultNotConfigured, LoadingState } from './empty-states'
 import type { VaultLine, Aggregate, AvailableVault } from './data'
 import { SIMULATION_VIEW_ID, AVAILABLE_VAULTS_VIEW_ID } from './view-ids'
 import { DockRadial } from './dock-radial'
+import { useAccount, useConnect, useDisconnect } from 'wagmi'
 
-const WALLET = '0x5F…AA57'
 const ON_DARK_GHOST = 'rgba(255,255,255,0.35)'
 
 export function Canvas() {
-  const { vaults, agg, selectedId, setSelectedId, selected, isSimulation } = useConnectRouting()
+  const { vaults, agg, selectedId, setSelectedId, selected, isSimulation, hasVaults, isLoading } = useConnectRouting()
   const isAvailableVaultsList = selectedId === AVAILABLE_VAULTS_VIEW_ID
   const panelKey = isSimulation ? SIMULATION_VIEW_ID : isAvailableVaultsList ? AVAILABLE_VAULTS_VIEW_ID : selected?.id ?? 'portfolio'
 
@@ -26,6 +26,99 @@ export function Canvas() {
   }
 
   const availableVaults = vaults.filter((v): v is AvailableVault => v.type === 'available')
+
+  // Show loading state
+  if (isLoading) {
+    return (
+      <div
+        className="connect-scope fixed inset-0 z-1 flex h-dvh flex-col overflow-hidden antialiased isolate"
+        style={{
+          background: TOKENS.colors.bgApp,
+          color: TOKENS.colors.textPrimary,
+          fontFamily: TOKENS.fonts.sans,
+        }}
+      >
+        <header
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: '64px',
+            width: '100%',
+            background: TOKENS.colors.bgApp,
+            borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
+            paddingLeft: TOKENS.spacing[6],
+            paddingRight: TOKENS.spacing[6],
+            zIndex: 100,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <img
+              src="/logos/hearst.svg"
+              alt="Hearst"
+              style={{
+                height: TOKENS.spacing[8],
+                width: 'auto',
+                display: 'block',
+              }}
+            />
+          </div>
+        </header>
+        <main className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden">
+          <LoadingState />
+        </main>
+      </div>
+    )
+  }
+
+  // Show empty state when no vaults configured
+  if (!hasVaults) {
+    return (
+      <div
+        className="connect-scope fixed inset-0 z-1 flex h-dvh flex-col overflow-hidden antialiased isolate"
+        style={{
+          background: TOKENS.colors.bgApp,
+          color: TOKENS.colors.textPrimary,
+          fontFamily: TOKENS.fonts.sans,
+        }}
+      >
+        <header
+          style={{
+            display: 'flex',
+            flexDirection: 'row',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            height: '64px',
+            width: '100%',
+            background: TOKENS.colors.bgApp,
+            borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
+            paddingLeft: TOKENS.spacing[6],
+            paddingRight: TOKENS.spacing[6],
+            zIndex: 100,
+          }}
+        >
+          <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
+            <img
+              src="/logos/hearst.svg"
+              alt="Hearst"
+              style={{
+                height: TOKENS.spacing[8],
+                width: 'auto',
+                display: 'block',
+              }}
+            />
+          </div>
+          <WalletButton />
+        </header>
+        <main className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden p-8">
+          <div style={{ maxWidth: '500px', width: '100%' }}>
+            <VaultNotConfigured />
+          </div>
+        </main>
+      </div>
+    )
+  }
 
   return (
     <div
@@ -141,20 +234,24 @@ function MainPanel({
 }
 
 function WalletButton() {
-  const [isConnected, setIsConnected] = useState(false)
+  const { address, isConnected } = useAccount()
+  const { connect, isPending: isConnecting } = useConnect()
+  const { disconnect } = useDisconnect()
 
-  const handleConnect = () => {
-    setIsConnected(true)
+  const formatAddress = (addr: string) => {
+    return `${addr.slice(0, 4)}…${addr.slice(-4)}`
   }
 
-  const handleDisconnect = () => {
-    setIsConnected(false)
+  const handleConnect = () => {
+    // @ts-ignore - wagmi v2 connect without args
+    connect()
   }
 
   if (!isConnected) {
     return (
       <button
         onClick={handleConnect}
+        disabled={isConnecting}
         style={{
           display: 'flex',
           alignItems: 'center',
@@ -169,21 +266,22 @@ function WalletButton() {
           fontWeight: TOKENS.fontWeights.bold,
           letterSpacing: TOKENS.letterSpacing.display,
           textTransform: 'uppercase',
-          cursor: 'pointer',
+          cursor: isConnecting ? 'wait' : 'pointer',
+          opacity: isConnecting ? 0.7 : 1,
           transition: 'all 120ms ease-out',
         }}
         onMouseEnter={(e) => {
-          e.currentTarget.style.opacity = '0.9'
+          if (!isConnecting) e.currentTarget.style.opacity = '0.9'
         }}
         onMouseLeave={(e) => {
-          e.currentTarget.style.opacity = '1'
+          if (!isConnecting) e.currentTarget.style.opacity = '1'
         }}
       >
         <svg width={TOKENS.spacing[4]} height={TOKENS.spacing[4]} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
           <path d="M19 7H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z" />
           <path d="M16 11h0" />
         </svg>
-        Connect
+        {isConnecting ? 'Connecting…' : 'Connect'}
       </button>
     )
   }
@@ -200,10 +298,10 @@ function WalletButton() {
           textTransform: 'uppercase',
         }}
       >
-        {WALLET}
+        {address ? formatAddress(address) : 'Connected'}
       </span>
       <button
-        onClick={handleDisconnect}
+        onClick={() => disconnect()}
         style={{
           padding: `${TOKENS.spacing[2]}px`,
           background: 'transparent',

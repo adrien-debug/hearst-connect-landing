@@ -10,7 +10,8 @@ import {
   type ReactNode,
 } from 'react'
 import { SIMULATION_VIEW_ID } from './view-ids'
-import { VAULTS, type VaultLine, aggregate, type Aggregate } from './data'
+import { type VaultLine, type Aggregate } from './data'
+import { useVaultLines } from '@/hooks/useVaultLines'
 
 interface ConnectRoutingContextValue {
   vaults: VaultLine[]
@@ -19,21 +20,23 @@ interface ConnectRoutingContextValue {
   setSelectedId: (id: string | null) => void
   selected: VaultLine | null
   isSimulation: boolean
+  hasVaults: boolean
+  isLoading: boolean
 }
-
-const CONNECT_AGG = aggregate(VAULTS)
 
 const ConnectRoutingContext = createContext<ConnectRoutingContextValue | null>(null)
 
 export function NavigationProvider({ children }: { children: ReactNode }) {
   const [selectedId, setSelectedId] = useState<string | null>(null)
+  const { vaults, agg, hasVaults, isLoading } = useVaultLines()
+
   const isSimulation = selectedId === SIMULATION_VIEW_ID
   const selected = useMemo(
     () =>
       selectedId && !isSimulation
-        ? (VAULTS.find((v) => v.id === selectedId) ?? null)
+        ? (vaults.find((v) => v.id === selectedId) ?? null)
         : null,
-    [isSimulation, selectedId],
+    [isSimulation, selectedId, vaults],
   )
 
   const select = useCallback((id: string | null) => {
@@ -42,14 +45,16 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
 
   const value = useMemo<ConnectRoutingContextValue>(
     () => ({
-      vaults: VAULTS,
-      agg: CONNECT_AGG,
+      vaults,
+      agg,
       selectedId,
       setSelectedId: select,
       selected: selected as VaultLine | null,
       isSimulation,
+      hasVaults,
+      isLoading,
     }),
-    [isSimulation, select, selected, selectedId],
+    [agg, hasVaults, isLoading, isSimulation, select, selected, selectedId, vaults],
   )
 
   return createElement(ConnectRoutingContext.Provider, { value }, children)

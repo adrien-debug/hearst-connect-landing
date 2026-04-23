@@ -1,6 +1,7 @@
 'use client';
 
 import Link from 'next/link';
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { NAV_LINKS, CTA_LINKS, HUB_MAILTO_SALES, HEARST_EMAIL } from '@/config/navigation';
 
@@ -320,9 +321,12 @@ export default function HubPageClient() {
             </ul>
           </nav>
 
+          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <ThemeToggle variant="minimal" size="sm" />
           <Link href={CTA_LINKS.launchApp.href} className="login-btn" prefetch>
             <span>{CTA_LINKS.launchApp.label}</span>
           </Link>
+        </div>
         </header>
       </div>
 

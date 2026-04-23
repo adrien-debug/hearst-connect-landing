@@ -1,7 +1,11 @@
 import { AnalyticsScripts } from '@/components/layout/analytics-scripts';
 import { ClickRipple } from '@/components/ui/click-ripple';
 import { ErrorBoundary } from '@/components/error-boundary';
+import { Web3Provider } from '@/components/providers/web3-provider';
+import { ThemeProvider } from '@/components/theme/theme-provider';
+import { THEME_INLINE_SCRIPT } from '@/components/theme/theme-script';
 import '@/styles/tailwind.css';
+import '@/styles/theme/tokens.css';
 import '@/styles/marketing/hub-font.css';
 import '@/styles/marketing/hub.css';
 import type { Metadata } from 'next';
@@ -27,8 +31,10 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en" suppressHydrationWarning className={`dark antialiased ${inter.variable}`}>
+    <html lang="en" suppressHydrationWarning className={`antialiased ${inter.variable}`}>
       <head>
+        {/* Anti-flash theme script - must run before any stylesheets */}
+        <script dangerouslySetInnerHTML={{ __html: THEME_INLINE_SCRIPT }} />
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap"
@@ -37,7 +43,11 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body>
         <ErrorBoundary>
           <ClickRipple />
-          {children}
+          <Web3Provider>
+            <ThemeProvider defaultTheme="system" enableSystem>
+              {children}
+            </ThemeProvider>
+          </Web3Provider>
         </ErrorBoundary>
         <AnalyticsScripts />
       </body>

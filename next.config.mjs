@@ -55,12 +55,20 @@ const nextConfig = {
       },
     ];
   },
-  webpack(config) {
+  webpack(config, { isServer }) {
     // Silence MetaMask SDK warning about react-native-async-storage (browser-only)
     config.resolve.fallback = {
       ...config.resolve.fallback,
       '@react-native-async-storage/async-storage': false,
+      // Fix wagmi v2 webpack issues with tempo/Connectors
+      'accounts': false,
     };
+
+    // Ignore wagmi tempo module that causes webpack issues
+    config.module.rules.push({
+      test: /@wagmi\/core\/dist\/esm\/tempo\/Connectors\.js$/,
+      use: 'null-loader',
+    });
 
     config.module.rules.forEach((rule) => {
       if (!rule.oneOf) return;

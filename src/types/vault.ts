@@ -1,0 +1,31 @@
+import type { Address, Chain } from 'viem'
+
+export interface VaultConfig {
+  id: string
+  name: string
+  description?: string
+  vaultAddress: Address
+  usdcAddress: Address
+  chain: Chain
+  apr: number
+  target: string
+  lockPeriodDays: number
+  minDeposit: number
+  strategy: string
+  fees: string
+  risk: string
+  image?: string
+  isActive: boolean
+  createdAt: number
+}
+
+export interface VaultRegistryState {
+  vaults: VaultConfig[]
+  activeVaultId: string | null
+}
+
+export type VaultConfigInput = Omit<VaultConfig, 'id' | 'createdAt' | 'isActive'> & {
+  id?: string
+}
+
+export const VAULT_REGISTRY_STORAGE_KEY = 'hearst:vault-registry'

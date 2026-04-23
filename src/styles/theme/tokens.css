@@ -1,0 +1,317 @@
+/**
+ * Theme Tokens — Unified Dark/Light System
+ * 
+ * Usage: data-theme="dark" | data-theme="light" on <html> or container
+ * Marketing scope uses these tokens. Connect scope stays dark (separate vars).
+ */
+
+/* ============================================
+   BASE TOKENS (shared definitions)
+   ============================================ */
+
+:root {
+  /* Neutral palette (11 steps) */
+  --color-gray-50: #fafafa;
+  --color-gray-100: #f5f5f5;
+  --color-gray-200: #e5e5e5;
+  --color-gray-300: #d4d4d4;
+  --color-gray-400: #a3a3a3;
+  --color-gray-500: #737373;
+  --color-gray-600: #525252;
+  --color-gray-700: #404040;
+  --color-gray-800: #262626;
+  --color-gray-900: #171717;
+  --color-gray-950: #0a0a0a;
+
+  /* Typography */
+  --font-sans: 'Satoshi Variable', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: 'IBM Plex Mono', 'SF Mono', ui-monospace, monospace;
+
+  /* Spacing (4px base) */
+  --space-0: 0px;
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 24px;
+  --space-8: 32px;
+  --space-10: 40px;
+  --space-12: 48px;
+  --space-16: 64px;
+  --space-20: 80px;
+  --space-24: 120px;
+  --space-32: 160px;
+
+  /* Radius */
+  --radius-none: 0px;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 20px;
+  --radius-2xl: 24px;
+  --radius-full: 9999px;
+
+  /* Animation */
+  --transition-fast: 120ms ease-out;
+  --transition-base: 150ms ease-out;
+  --transition-slow: 250ms ease-out;
+
+  /* Z-index scale */
+  --z-base: 0;
+  --z-dropdown: 100;
+  --z-sticky: 200;
+  --z-fixed: 300;
+  --z-overlay: 400;
+  --z-modal: 500;
+  --z-toast: 600;
+}
+
+/* ============================================
+   DARK THEME (default for marketing)
+   ============================================ */
+
+[data-theme="dark"] {
+  /* Backgrounds (dark-first) */
+  --color-bg-primary: #050505;
+  --color-bg-secondary: #0a0a0a;
+  --color-bg-tertiary: #141414;
+  --color-bg-elevated: #1a1a1a;
+  --color-bg-overlay: rgba(0, 0, 0, 0.8);
+  --color-bg-input: #1a1a1a;
+
+  /* Text (white opacities on dark) */
+  --color-text-primary: rgba(255, 255, 255, 0.92);
+  --color-text-secondary: rgba(255, 255, 255, 0.60);
+  --color-text-ghost: rgba(255, 255, 255, 0.40);
+  --color-text-disabled: rgba(255, 255, 255, 0.25);
+  --color-text-inverse: #000000;
+
+  /* Borders (white opacities) */
+  --color-border-subtle: rgba(255, 255, 255, 0.08);
+  --color-border-default: rgba(255, 255, 255, 0.12);
+  --color-border-strong: rgba(255, 255, 255, 0.20);
+  --color-border-focus: rgba(255, 255, 255, 0.40);
+
+  /* Accent (neon green - excellent on dark) */
+  --color-accent: #a7fb90;
+  --color-accent-dim: rgba(167, 251, 144, 0.10);
+  --color-accent-subtle: rgba(167, 251, 144, 0.15);
+  --color-accent-glow: rgba(167, 251, 144, 0.25);
+  --color-accent-text: #000000;
+
+  /* Status colors */
+  --color-success: #a7fb90;
+  --color-success-bg: rgba(167, 251, 144, 0.15);
+  --color-success-border: rgba(167, 251, 144, 0.30);
+  
+  --color-error: #ef4444;
+  --color-error-bg: rgba(239, 68, 68, 0.15);
+  --color-error-border: rgba(239, 68, 68, 0.30);
+  
+  --color-warning: #f59e0b;
+  --color-warning-bg: rgba(245, 158, 11, 0.15);
+  --color-warning-border: rgba(245, 158, 11, 0.30);
+  
+  --color-info: #3b82f6;
+  --color-info-bg: rgba(59, 130, 246, 0.15);
+  --color-info-border: rgba(59, 130, 246, 0.30);
+
+  /* Shadows (black for depth on dark) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.40);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.50);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.60);
+  --shadow-glow: 0 0 20px rgba(167, 251, 144, 0.30);
+
+  /* Interactive states */
+  --color-hover: rgba(255, 255, 255, 0.06);
+  --color-active: rgba(255, 255, 255, 0.10);
+  --color-selected: rgba(167, 251, 144, 0.15);
+
+  /* Scrollbar */
+  --scrollbar-thumb: rgba(255, 255, 255, 0.20);
+  --scrollbar-thumb-hover: rgba(255, 255, 255, 0.30);
+  --scrollbar-track: transparent;
+}
+
+/* ============================================
+   LIGHT THEME
+   ============================================ */
+
+[data-theme="light"] {
+  /* Backgrounds (light) */
+  --color-bg-primary: #ffffff;
+  --color-bg-secondary: #fafafa;
+  --color-bg-tertiary: #f5f5f5;
+  --color-bg-elevated: #ffffff;
+  --color-bg-overlay: rgba(0, 0, 0, 0.6);
+  --color-bg-input: #ffffff;
+
+  /* Text (black opacities on light) */
+  --color-text-primary: rgba(0, 0, 0, 0.90);
+  --color-text-secondary: rgba(0, 0, 0, 0.60);
+  --color-text-ghost: rgba(0, 0, 0, 0.45);
+  --color-text-disabled: rgba(0, 0, 0, 0.30);
+  --color-text-inverse: #ffffff;
+
+  /* Borders (black opacities - stronger for visibility) */
+  --color-border-subtle: rgba(0, 0, 0, 0.10);
+  --color-border-default: rgba(0, 0, 0, 0.15);
+  --color-border-strong: rgba(0, 0, 0, 0.25);
+  --color-border-focus: rgba(0, 0, 0, 0.40);
+
+  /* Accent (darker green for contrast on white - 4.5:1 ratio) */
+  --color-accent: #2e7d32;
+  --color-accent-dim: rgba(46, 125, 50, 0.10);
+  --color-accent-subtle: rgba(46, 125, 50, 0.15);
+  --color-accent-glow: rgba(46, 125, 50, 0.25);
+  --color-accent-text: #ffffff;
+
+  /* Status colors (darker variants for light) */
+  --color-success: #2e7d32;
+  --color-success-bg: rgba(46, 125, 50, 0.12);
+  --color-success-border: rgba(46, 125, 50, 0.25);
+  
+  --color-error: #dc2626;
+  --color-error-bg: rgba(220, 38, 38, 0.12);
+  --color-error-border: rgba(220, 38, 38, 0.25);
+  
+  --color-warning: #d97706;
+  --color-warning-bg: rgba(217, 119, 6, 0.12);
+  --color-warning-border: rgba(217, 119, 6, 0.25);
+  
+  --color-info: #2563eb;
+  --color-info-bg: rgba(37, 99, 235, 0.12);
+  --color-info-border: rgba(37, 99, 235, 0.25);
+
+  /* Shadows (softer on light backgrounds) */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+  --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
+  --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.15);
+  --shadow-glow: 0 0 20px rgba(46, 125, 50, 0.25);
+
+  /* Interactive states */
+  --color-hover: rgba(0, 0, 0, 0.04);
+  --color-active: rgba(0, 0, 0, 0.08);
+  --color-selected: rgba(46, 125, 50, 0.12);
+
+  /* Scrollbar (inverted) */
+  --scrollbar-thumb: rgba(0, 0, 0, 0.25);
+  --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
+  --scrollbar-track: transparent;
+}
+
+/* ============================================
+   CONNECT SCOPE (always dark, separate tokens)
+   ============================================ */
+
+.connect-scope {
+  /* Connect stays dark regardless of global theme */
+  --hc-bg-app: #050505;
+  --hc-bg-page: #141414;
+  --hc-bg-sidebar: #050505;
+  --hc-bg-surface: #0a0a0a;
+  --hc-bg-secondary: #0f0f0f;
+  --hc-bg-tertiary: #1a1a1a;
+
+  --hc-text-primary: rgba(255, 255, 255, 0.92);
+  --hc-text-secondary: rgba(255, 255, 255, 0.55);
+  --hc-text-ghost: rgba(255, 255, 255, 0.35);
+
+  --hc-border-subtle: rgba(255, 255, 255, 0.08);
+  --hc-border-default: rgba(255, 255, 255, 0.12);
+  --hc-border-strong: rgba(255, 255, 255, 0.14);
+
+  --hc-accent: #a7fb90;
+  --hc-accent-dim: rgba(167, 251, 144, 0.05);
+  --hc-accent-glow: rgba(167, 251, 144, 0.12);
+
+  /* Shadows for depth */
+  --hc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
+  --hc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.40);
+  --hc-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.50);
+
+  /* Connect scrollbar (dark) */
+  --hc-scrollbar-thumb: rgba(255, 255, 255, 0.15);
+  --hc-scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
+
+  color-scheme: dark;
+}
+
+/* ============================================
+   GLOBAL SCROLLBAR STYLING
+   ============================================ */
+
+/* Dark theme scrollbars */
+[data-theme="dark"] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+[data-theme="dark"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+[data-theme="dark"] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Light theme scrollbars */
+[data-theme="light"] ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-track {
+  background: var(--scrollbar-track);
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb {
+  background: var(--scrollbar-thumb);
+  border-radius: 3px;
+}
+
+[data-theme="light"] ::-webkit-scrollbar-thumb:hover {
+  background: var(--scrollbar-thumb-hover);
+}
+
+[data-theme="light"] {
+  scrollbar-width: thin;
+  scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+}
+
+/* Connect scope scrollbars (always dark) */
+.connect-scope ::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+.connect-scope ::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.connect-scope ::-webkit-scrollbar-thumb {
+  background: var(--hc-scrollbar-thumb);
+  border-radius: 3px;
+}
+
+.connect-scope ::-webkit-scrollbar-thumb:hover {
+  background: var(--hc-scrollbar-thumb-hover);
+}
+
+.connect-scope {
+  scrollbar-width: thin;
+  scrollbar-color: var(--hc-scrollbar-thumb) transparent;
+}

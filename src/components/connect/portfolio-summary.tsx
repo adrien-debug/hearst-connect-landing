@@ -10,10 +10,9 @@ import { formatVaultName } from './formatting'
 import { generateValueHistory } from './utils/mock-data'
 import { getDaysToMaturity } from './utils/date-utils'
 import { CHART_PALETTE } from './constants/theme'
-// import { AllocationDonut } from './charts/allocation-donut'
-// import { LineChartArea } from './charts/line-chart-area'
-import { type VaultLine, type Aggregate, type ActiveVault, type AvailableVault, type Activity, MOCK_ACTIVITIES } from './data'
 import { fitValue, type SmartFitMode, useSmartFit, useShellPadding } from './smart-fit'
+import { type VaultLine, type Aggregate, type ActiveVault, type AvailableVault, type Activity, MOCK_ACTIVITIES } from './data'
+
 import { CockpitGauge } from './cockpit-gauge'
 
 import { AVAILABLE_VAULTS_VIEW_ID } from './view-ids'
@@ -66,6 +65,7 @@ export function PortfolioSummary({
   return (
     <div
       className="flex-1"
+      suppressHydrationWarning
       style={{
         display: 'flex',
         flexDirection: 'column',
