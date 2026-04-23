@@ -38,10 +38,11 @@ export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialPro
   }, [onSelect])
 
   const navItems = [
-    { id: 'dashboard' as const, label: 'Dashboard' },
     { id: 'available' as const, label: 'Available' },
     { id: 'simulation' as const, label: 'Simulation' },
   ]
+
+  const isDashboardActive = currentState === 'dashboard'
 
   return (
     <div
@@ -72,27 +73,44 @@ export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialPro
           width: '40px',
           height: '40px',
           borderRadius: '50%',
-          background: hoveredId === 'logo' ? 'rgba(255, 255, 255, 0.1)' : 'transparent',
+          background: isDashboardActive ? 'rgba(255, 255, 255, 0.1)' : hoveredId === 'logo' ? 'rgba(255, 255, 255, 0.05)' : 'transparent',
           border: 'none',
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
           transition: 'all 0.2s ease',
+          position: 'relative',
         }}
-        title="Home"
+        title="Dashboard"
       >
+        {isDashboardActive && (
+          <span
+            style={{
+              position: 'absolute',
+              bottom: '4px',
+              width: '4px',
+              height: '4px',
+              borderRadius: '50%',
+              background: TOKENS.colors.accent,
+              boxShadow: `0 0 8px ${TOKENS.colors.accent}`,
+            }}
+          />
+        )}
         <svg
-          viewBox="572.6 466.9 129.3 142.8"
+          xmlns="http://www.w3.org/2000/svg"
+          viewBox="0 0 130 143"
           style={{
             width: '18px',
             height: '18px',
-            fill: TOKENS.colors.accent,
-            filter: `drop-shadow(0 0 4px ${TOKENS.colors.accent}80)`,
+            color: isDashboardActive ? TOKENS.colors.accent : TOKENS.colors.white,
+            filter: isDashboardActive ? `drop-shadow(0 0 4px ${TOKENS.colors.accent}80)` : 'none',
+            transition: 'all 0.2s ease',
+            transform: isDashboardActive ? 'translateY(-2px)' : 'translateY(0)',
           }}
         >
-          <polygon points="601.7 466.9 572.6 466.9 572.6 609.7 601.7 609.7 601.7 549.1 633.1 579.4 665.8 579.4 601.7 517.5 601.7 466.9" />
-          <polygon points="672.7 466.9 672.7 528.1 644.6 500.9 612 500.9 672.7 559.7 672.7 609.7 701.9 609.7 701.9 466.9 672.7 466.9" />
+          <polygon fill="currentColor" points="29.1,0 0,0 0,142.8 29.1,142.8 29.1,82.2 60.5,112.5 93.2,112.5 29.1,50.6 29.1,0" />
+          <polygon fill="currentColor" points="100.1,0 100.1,61.2 72.0,34.0 39.4,34.0 100.1,92.8 100.1,142.8 129.3,142.8 129.3,0 100.1,0" />
         </svg>
       </button>
 

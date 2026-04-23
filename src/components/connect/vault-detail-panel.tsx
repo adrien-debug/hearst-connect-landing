@@ -92,13 +92,10 @@ export function VaultDetailPanel({
         {/* Top row — Context */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           marginBottom: TOKENS.spacing[3],
         }}>
-          <Label id="pos-detail" tone="scene" variant="text">
-            Position
-          </Label>
           <div style={{
             fontFamily: MONO,
             fontSize: TOKENS.fontSizes.micro,
@@ -131,6 +128,7 @@ export function VaultDetailPanel({
             subtext={formatVaultName(vault.name)}
             mode={mode}
             primary
+            align="center"
           />
           <CockpitGauge
             label="Accrued Yield"
@@ -139,6 +137,7 @@ export function VaultDetailPanel({
             subtext={`${vault.apr}% APY`}
             mode={mode}
             accent
+            align="center"
           />
           <CockpitGauge
             label="Target Progress"
@@ -146,6 +145,7 @@ export function VaultDetailPanel({
             valueCompact={`${progressToTarget}%`}
             subtext={isTargetReached ? 'Target reached' : `${fmtUsdCompact(remainingToTarget)} remaining`}
             mode={mode}
+            align="center"
           />
         </div>
       </div>

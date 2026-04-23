@@ -63,13 +63,10 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
         {/* Top row — Context */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           marginBottom: TOKENS.spacing[3],
         }}>
-          <Label id="sub-header" tone="scene" variant="text">
-            Subscribe
-          </Label>
           <div style={{
             fontFamily: MONO,
             fontSize: TOKENS.fontSizes.micro,
@@ -101,6 +98,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
             valueCompact={fmtUsdCompact(vault.minDeposit)}
             subtext="Capital required"
             mode={mode}
+            align="center"
           />
           <CockpitGauge
             label="Target Yield"
@@ -110,6 +108,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
             mode={mode}
             primary
             accent
+            align="center"
           />
           <CockpitGauge
             label="Annual APY"
@@ -117,6 +116,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
             valueCompact={`${vault.apr}%`}
             subtext={`${vault.risk} risk profile`}
             mode={mode}
+            align="center"
           />
         </div>
       </div>

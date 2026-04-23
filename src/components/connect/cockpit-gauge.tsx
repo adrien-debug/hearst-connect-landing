@@ -12,6 +12,7 @@ interface CockpitGaugeProps {
   primary?: boolean
   accent?: boolean
   active?: boolean
+  align?: 'left' | 'center' | 'right'
   onClick?: () => void
 }
 
@@ -24,6 +25,7 @@ export function CockpitGauge({
   primary = false,
   accent = false,
   active = false,
+  align = 'left',
   onClick,
 }: CockpitGaugeProps) {
   const displayValue = mode === 'limit' ? valueCompact : value
@@ -37,6 +39,8 @@ export function CockpitGauge({
       style={{
         display: 'flex',
         flexDirection: 'column',
+        alignItems: align === 'center' ? 'center' : align === 'right' ? 'flex-end' : 'flex-start',
+        textAlign: align,
         gap: TOKENS.spacing[2],
         cursor: onClick ? 'pointer' : 'default',
         padding: TOKENS.spacing[2],

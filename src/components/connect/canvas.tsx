@@ -70,7 +70,10 @@ export function Canvas() {
         </div>
       </header>
 
-      <main className="flex min-h-0 min-w-0 flex-1 overflow-hidden">
+      <main 
+        className="flex min-h-0 min-w-0 flex-1 overflow-hidden"
+        style={{ paddingBottom: '96px' }} // Réserve l'espace pour le dock en bas
+      >
         <section
           className="connect-main-scene min-h-0 min-w-0 flex-1 overflow-hidden"
           aria-label="Main scene"

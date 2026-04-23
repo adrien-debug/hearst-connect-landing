@@ -12,7 +12,7 @@ import { getDaysToMaturity } from './utils/date-utils'
 import { CHART_PALETTE } from './constants/theme'
 // import { AllocationDonut } from './charts/allocation-donut'
 // import { LineChartArea } from './charts/line-chart-area'
-import type { VaultLine, Aggregate, ActiveVault, AvailableVault } from './data'
+import { type VaultLine, type Aggregate, type ActiveVault, type AvailableVault, type Activity, MOCK_ACTIVITIES } from './data'
 import { fitValue, type SmartFitMode, useSmartFit, useShellPadding } from './smart-fit'
 import { CockpitGauge } from './cockpit-gauge'
 
@@ -89,28 +89,6 @@ export function PortfolioSummary({
           background: TOKENS.colors.bgApp,
         }}
       >
-        {/* Top row — Context */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'space-between',
-          alignItems: 'center',
-          marginBottom: TOKENS.spacing[3],
-        }}>
-          <Label id="port-overview" tone="scene" variant="text">
-            Dashboard
-          </Label>
-          <div style={{
-            fontFamily: TOKENS.fonts.mono,
-            fontSize: TOKENS.fontSizes.micro,
-            color: TOKENS.colors.textGhost,
-            letterSpacing: TOKENS.letterSpacing.display,
-            textTransform: 'uppercase',
-          }}>
-            {activeVaults.length} Active Position{activeVaults.length !== 1 ? 's' : ''}
-            {nextMaturity && ` · Next: ${daysToNextMaturity}d`}
-          </div>
-        </div>
-
         {/* Main cockpit gauges — Large figures */}
         <div style={{
           display: 'grid',
@@ -133,6 +111,7 @@ export function PortfolioSummary({
             subtext={`${activeVaults.length} position${activeVaults.length !== 1 ? 's' : ''}`}
             mode={mode}
             primary
+            align="center"
           />
 
           {/* Accrued Yield — Accent */}
@@ -143,6 +122,7 @@ export function PortfolioSummary({
             subtext={`${agg.avgApr.toFixed(1)}% avg APY`}
             mode={mode}
             accent
+            align="center"
           />
           
           {/* Performance / Maturity */}
@@ -152,6 +132,7 @@ export function PortfolioSummary({
             valueCompact={`${((agg.totalClaimable / (agg.totalDeposited || 1)) * 100).toFixed(1)}%`}
             subtext={nextMaturity ? `Next maturity: ${nextMaturity}` : 'All positions active'}
             mode={mode}
+            align="center"
           />
         </div>
       </div>
@@ -265,18 +246,14 @@ export function PortfolioSummary({
               
               <div style={{
                 flex: 1,
+                overflowY: 'auto',
                 display: 'flex',
-                alignItems: 'center',
-                justifyContent: 'center',
-                border: `1px dashed ${TOKENS.colors.borderSubtle}`,
-                borderRadius: TOKENS.radius.md,
-                color: TOKENS.colors.textGhost,
-                fontFamily: TOKENS.fonts.mono,
-                fontSize: TOKENS.fontSizes.xs,
-                textTransform: 'uppercase',
-                letterSpacing: '0.1em',
-              }}>
-                [ Activity Feed Placeholder ]
+                flexDirection: 'column',
+                gap: TOKENS.spacing[2],
+              }} className="hide-scrollbar">
+                {MOCK_ACTIVITIES.map((activity) => (
+                  <ActivityItem key={activity.id} activity={activity} />
+                ))}
               </div>
             </div>
 
@@ -466,6 +443,64 @@ export function PortfolioSummary({
   )
 }
 
+/** ActivityItem — Renders a single activity feed item */
+function ActivityItem({ activity }: { activity: Activity }) {
+  const isPositive = activity.type === 'claim'
+  const isNeutral = activity.type === 'system'
+  
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'space-between',
+      padding: TOKENS.spacing[3],
+      background: TOKENS.colors.bgTertiary,
+      borderRadius: TOKENS.radius.sm,
+    }}>
+      <div style={{ display: 'flex', alignItems: 'center', gap: TOKENS.spacing[3] }}>
+        <div style={{
+          width: '32px',
+          height: '32px',
+          borderRadius: '50%',
+          background: TOKENS.colors.black,
+          border: `1px solid ${TOKENS.colors.borderSubtle}`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          color: isPositive ? TOKENS.colors.accent : TOKENS.colors.textSecondary,
+        }}>
+          {activity.type === 'claim' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M12 2v20M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg>}
+          {activity.type === 'deposit' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>}
+          {activity.type === 'system' && <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2"><path d="M22 12h-4l-3 9L9 3l-3 9H2"/></svg>}
+        </div>
+        <div style={{ display: 'flex', flexDirection: 'column', gap: '2px' }}>
+          <span style={{ fontSize: TOKENS.fontSizes.sm, fontWeight: TOKENS.fontWeights.bold, color: TOKENS.colors.textPrimary }}>
+            {activity.title}
+          </span>
+          <span style={{ fontSize: TOKENS.fontSizes.xs, color: TOKENS.colors.textSecondary }}>
+            {activity.vaultName || 'System'}
+          </span>
+        </div>
+      </div>
+      
+      <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: '2px' }}>
+        {activity.amount && (
+          <span style={{ 
+            fontSize: TOKENS.fontSizes.sm, 
+            fontWeight: TOKENS.fontWeights.black, 
+            color: isPositive ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
+            letterSpacing: VALUE_LETTER_SPACING
+          }}>
+            {isPositive ? '+' : ''}{fmtUsdCompact(activity.amount)}
+          </span>
+        )}
+        <span style={{ fontFamily: TOKENS.fonts.mono, fontSize: TOKENS.fontSizes.micro, color: TOKENS.colors.textGhost }}>
+          {Math.floor((Date.now() / 1000 - activity.timestamp) / 86400)}d ago
+        </span>
+      </div>
+    </div>
+  )
+}
 
 type DonutVaultItem = {
   id: string

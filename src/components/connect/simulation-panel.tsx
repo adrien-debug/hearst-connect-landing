@@ -111,13 +111,10 @@ export function SimulationPanel() {
         {/* Top row — Context */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           marginBottom: TOKENS.spacing[3],
         }}>
-          <Label id="sim-title" tone="scene" variant="text">
-            Simulation
-          </Label>
           <div style={{
             fontFamily: MONO,
             fontSize: TOKENS.fontSizes.micro,
@@ -153,6 +150,7 @@ export function SimulationPanel() {
             accent={scenario === 'bear'}
             onClick={() => setScenario('bear')}
             active={scenario === 'bear'}
+            align="center"
           />
           <CockpitGauge
             label="Base"
@@ -164,6 +162,7 @@ export function SimulationPanel() {
             accent={scenario === 'base'}
             onClick={() => setScenario('base')}
             active={scenario === 'base'}
+            align="center"
           />
           <CockpitGauge
             label="Bull"
@@ -175,6 +174,7 @@ export function SimulationPanel() {
             accent={scenario === 'bull'}
             onClick={() => setScenario('bull')}
             active={scenario === 'bull'}
+            align="center"
           />
         </div>
       </div>

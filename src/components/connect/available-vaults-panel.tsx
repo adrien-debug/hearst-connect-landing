@@ -58,13 +58,10 @@ export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsP
         {/* Top row — Context */}
         <div style={{
           display: 'flex',
-          justifyContent: 'space-between',
+          justifyContent: 'flex-end',
           alignItems: 'center',
           marginBottom: TOKENS.spacing[3],
         }}>
-          <Label id="avail-header" tone="scene" variant="text">
-            Opportunities
-          </Label>
           <div style={{
             fontFamily: MONO,
             fontSize: TOKENS.fontSizes.micro,
@@ -101,6 +98,7 @@ export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsP
               primary={index === 0}
               accent={index === 0}
               onClick={vault ? () => onVaultSelect(vault.id) : undefined}
+              align="center"
             />
           ))}
         </div>
