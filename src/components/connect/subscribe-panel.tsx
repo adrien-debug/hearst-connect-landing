@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { SubscriptionComposer } from './subscription-composer'
-import { TOKENS, MONO, fmtUsd, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING } from './constants'
+import { TOKENS, fmtUsd, fmtUsdCompact } from './constants'
 import type { AvailableVault } from './data'
 import { useSmartFit, useShellPadding, fitValue } from './smart-fit'
 import { CockpitGauge } from './cockpit-gauge'
@@ -73,7 +73,8 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
       setAmount('')
       setAgreed(false)
     } catch (err) {
-      console.error('Deposit failed:', err)
+      // Error is logged and can be displayed via UI toast/modal in future
+      console.error('[SubscribePanel] Deposit failed:', err)
     } finally {
       setIsDepositing(false)
     }
@@ -189,7 +190,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
           marginBottom: TOKENS.spacing[3],
         }}>
           <div style={{
-            fontFamily: MONO,
+            fontFamily: TOKENS.fonts.mono,
             fontSize: TOKENS.fontSizes.micro,
             color: TOKENS.colors.textGhost,
             letterSpacing: TOKENS.letterSpacing.display,
@@ -273,62 +274,6 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
           onDeposit={handleDeposit}
           isDepositing={isDepositing || isDepositPending}
         />
-      </div>
-    </div>
-  )
-}
-
-function ProjectionItem({ label, value, accent = false }: {
-  label: string
-  value: string
-  accent?: boolean
-}) {
-  return (
-    <div>
-      <div style={{
-        fontSize: TOKENS.fontSizes.micro,
-        fontWeight: TOKENS.fontWeights.bold,
-        fontFamily: MONO,
-        letterSpacing: TOKENS.letterSpacing.display,
-        textTransform: 'uppercase',
-        color: TOKENS.colors.textSecondary,
-        marginBottom: TOKENS.spacing[2],
-      }}>
-        {label}
-      </div>
-      <div style={{
-        fontSize: TOKENS.fontSizes.md,
-        fontWeight: TOKENS.fontWeights.black,
-        letterSpacing: VALUE_LETTER_SPACING,
-        color: accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
-      }}>
-        {value}
-      </div>
-    </div>
-  )
-}
-
-function TermItem({ label, value }: { label: string; value: string }) {
-  return (
-    <div>
-      <div style={{
-        fontSize: TOKENS.fontSizes.micro,
-        fontWeight: TOKENS.fontWeights.bold,
-        fontFamily: MONO,
-        letterSpacing: TOKENS.letterSpacing.display,
-        textTransform: 'uppercase',
-        color: TOKENS.colors.textSecondary,
-        marginBottom: TOKENS.spacing[2],
-      }}>
-        {label}
-      </div>
-      <div style={{
-        fontSize: TOKENS.fontSizes.sm,
-        fontWeight: TOKENS.fontWeights.black,
-        color: TOKENS.colors.textPrimary,
-        lineHeight: LINE_HEIGHT.tight,
-      }}>
-        {value}
       </div>
     </div>
   )

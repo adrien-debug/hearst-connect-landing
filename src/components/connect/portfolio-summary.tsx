@@ -240,10 +240,25 @@ export function PortfolioSummary({
                   textTransform: 'uppercase',
                   color: TOKENS.colors.textSecondary,
                 }}>
-                  Recent Activity
+                  Available Vaults
                 </span>
+                {availableVaults.length > 3 && (
+                  <button
+                    onClick={onAvailableVaultsClick}
+                    style={{
+                      fontSize: TOKENS.fontSizes.xs,
+                      color: TOKENS.colors.accent,
+                      background: 'none',
+                      border: 'none',
+                      cursor: 'pointer',
+                      textDecoration: 'underline',
+                    }}
+                  >
+                    View all ({availableVaults.length})
+                  </button>
+                )}
               </div>
-              
+
               <div style={{
                 flex: 1,
                 overflowY: 'auto',
@@ -251,9 +266,24 @@ export function PortfolioSummary({
                 flexDirection: 'column',
                 gap: TOKENS.spacing[2],
               }} className="hide-scrollbar">
-                {MOCK_ACTIVITIES.map((activity) => (
-                  <ActivityItem key={activity.id} activity={activity} />
-                ))}
+                {availableVaults.length === 0 ? (
+                  <div style={{
+                    padding: TOKENS.spacing[4],
+                    textAlign: 'center',
+                    color: TOKENS.colors.textGhost,
+                    fontSize: TOKENS.fontSizes.sm,
+                  }}>
+                    No vaults available
+                  </div>
+                ) : (
+                  availableVaults.slice(0, 5).map((vault) => (
+                    <AvailableVaultItem
+                      key={vault.id}
+                      vault={vault}
+                      onClick={() => onVaultSelect?.(vault.id)}
+                    />
+                  ))
+                )}
               </div>
             </div>
 
@@ -343,14 +373,8 @@ export function PortfolioSummary({
                         total={agg.totalDeposited}
                         mode={mode}
                         onClick={() => onVaultSelect?.(vault.id)}
-                        onClaim={() => {
-                          // TODO: Connect to claim functionality
-                          console.log('Claim clicked for vault:', vault.id)
-                        }}
-                        onExit={() => {
-                          // TODO: Connect to exit functionality
-                          console.log('Exit clicked for vault:', vault.id)
-                        }}
+                        onClaim={() => onVaultSelect?.(vault.id)}
+                        onExit={() => onVaultSelect?.(vault.id)}
                       />
                     ))
                   )}

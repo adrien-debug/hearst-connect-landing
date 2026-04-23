@@ -159,7 +159,7 @@ export function VaultDetailPanel({
   // Real claim handler
   const handleClaim = async () => {
     if (!claim) {
-      alert('Claim not available. Check vault configuration.')
+      console.error('[VaultDetailPanel] Claim function not available')
       return
     }
 
@@ -182,7 +182,7 @@ export function VaultDetailPanel({
   // Real exit handler
   const handleExit = async () => {
     if (!withdraw) {
-      alert('Withdraw not available. Check vault configuration.')
+      console.error('[VaultDetailPanel] Withdraw function not available')
       return
     }
 
