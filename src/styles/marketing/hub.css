@@ -1898,9 +1898,7 @@ a.welcome-btn:focus-visible {
   color: var(--dashboard-accent-hover);
 }
 
-/* ─── Modern Carousel ─── */
-
-/* Auto Carousel */
+/* ─── Investment strategies carousel (auto-rotate + peek + overlay copy) ─── */
 :root {
   --slide-width: min(85vw, 1000px);
   --slide-gap: 2rem;
@@ -1939,7 +1937,6 @@ a.welcome-btn:focus-visible {
   height: auto;
 }
 
-/* Rounded shell + shadow; intrinsic height from media only (no crop on video/img). */
 .hub-slide-stack {
   position: relative;
   isolation: isolate;
@@ -1972,7 +1969,6 @@ a.welcome-btn:focus-visible {
   z-index: 1;
   inset-inline: 0;
   bottom: 0;
-  /* Taller + darker: screenshots (dashboard UI) need a strong band so copy never fights the image */
   height: min(82%, 36rem);
   min-height: min(56%, 22rem);
   pointer-events: none;
@@ -1990,7 +1986,6 @@ a.welcome-btn:focus-visible {
 .hub-slide-content {
   position: absolute;
   z-index: 2;
-  /* Stacking context so ::before (z-index: -1) stays above sibling .hub-slide-scrim */
   isolation: isolate;
   inset-inline: 0;
   bottom: 0;
@@ -2003,7 +1998,6 @@ a.welcome-btn:focus-visible {
   box-sizing: border-box;
 }
 
-/* Extra local dim behind typography only (above scrim) — fixes busy video/UI under the title */
 .hub-slide-content::before {
   content: '';
   position: absolute;
@@ -2078,7 +2072,6 @@ a.welcome-btn:focus-visible {
     0 1px 2px rgba(0, 0, 0, 0.55);
 }
 
-/* CTA — readable on dark scrim */
 .hub-slide-cta {
   display: inline-flex;
   align-items: center;
@@ -2113,7 +2106,6 @@ a.welcome-btn:focus-visible {
   transform: translateX(3px);
 }
 
-/* Indicators */
 .hub-carousel-auto-indicators {
   display: flex;
   justify-content: center;
@@ -2125,7 +2117,7 @@ a.welcome-btn:focus-visible {
   width: 8px;
   height: 8px;
   border-radius: 50%;
-  background: rgba(0,0,0,0.1);
+  background: rgba(0, 0, 0, 0.1);
   border: none;
   padding: 0;
   cursor: pointer;
@@ -2138,23 +2130,6 @@ a.welcome-btn:focus-visible {
   background: var(--dashboard-accent);
 }
 
-/* ─── Fix min-height sections ─── */
-#intro,
-#developers {
-  min-height: min(80vh, 640px);
-}
-
-/* ─── Lead subtitle (intro section) ─── */
-.hub-section-lead .hub-lead-subtitle {
-  font-size: var(--dashboard-text-lg);
-  color: var(--dashboard-text-secondary);
-  max-width: var(--hub-measure-prose);
-  margin-top: var(--hub-space-md);
-  line-height: 1.6;
-}
-
-
-/* Arrows */
 .hub-carousel-arrow {
   position: absolute;
   top: 40%;
@@ -2172,7 +2147,7 @@ a.welcome-btn:focus-visible {
   z-index: 10;
   opacity: 0;
   transition: opacity 0.3s ease, transform 0.2s ease, background 0.2s ease;
-  color: #0A0A0A;
+  color: #0a0a0a;
 }
 
 @media (max-width: 768px) {
@@ -2187,7 +2162,7 @@ a.welcome-btn:focus-visible {
 
 .hub-carousel-arrow:hover {
   transform: translateY(-50%) scale(1.05);
-  background: #FFFFFF;
+  background: #ffffff;
 }
 
 .hub-carousel-arrow svg {
@@ -2201,4 +2176,19 @@ a.welcome-btn:focus-visible {
 
 .hub-carousel-arrow-next {
   right: 2rem;
+}
+
+/* ─── Fix min-height sections ─── */
+#intro,
+#developers {
+  min-height: min(80vh, 640px);
+}
+
+/* ─── Lead subtitle (intro section) ─── */
+.hub-section-lead .hub-lead-subtitle {
+  font-size: var(--dashboard-text-lg);
+  color: var(--dashboard-text-secondary);
+  max-width: var(--hub-measure-prose);
+  margin-top: var(--hub-space-md);
+  line-height: 1.6;
 }
