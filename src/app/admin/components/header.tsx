@@ -1,6 +1,7 @@
 'use client'
 
 import { TOKENS, MONO } from '@/components/connect/constants'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 interface AdminHeaderProps {
   title: string
@@ -15,6 +16,7 @@ export function AdminHeader({ title, subtitle }: AdminHeaderProps) {
         <p style={styles.subtitle}>{subtitle}</p>
       </div>
       <div style={styles.meta}>
+        <ThemeToggle variant="minimal" size="sm" />
         <span style={styles.version}>v1.0.0</span>
         <div style={styles.status}>
           <span style={styles.statusDot} />

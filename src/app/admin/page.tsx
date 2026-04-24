@@ -10,6 +10,7 @@ import { ActivitySection } from './sections/activity'
 import { SettingsSection } from './sections/settings'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { TOKENS } from '@/components/connect/constants'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 const SECTIONS: Record<string, React.ComponentType> = {
   dashboard: DashboardSection,

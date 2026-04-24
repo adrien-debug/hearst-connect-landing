@@ -16,6 +16,7 @@ import { DockRadial } from './dock-radial'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { useAppMode } from '@/hooks/useAppMode'
 import { useDemoPortfolio } from '@/hooks/useDemoPortfolio'
+import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 
 export function Canvas() {
@@ -219,6 +220,7 @@ export function Canvas() {
               </button>
             </>
           )}
+          <ThemeToggle variant="minimal" size="sm" />
           <WalletButton />
         </div>
       </header>
