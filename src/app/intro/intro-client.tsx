@@ -22,8 +22,14 @@ export function IntroClient() {
       {/* ── Split ── */}
       <main className="intro-main">
 
-        {/* LEFT — bullets + CTA only */}
+        {/* LEFT — wordmark + bullets + CTA */}
         <div className="intro-left">
+          <img
+            src="/logos/hearst-connect-blackbg.svg"
+            alt="Hearst Connect"
+            className="intro-wordmark"
+          />
+
           <ul className="intro-pillars">
             {PILLARS.map((label) => (
               <li key={label} className="intro-pillar">
