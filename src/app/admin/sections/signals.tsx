@@ -153,7 +153,7 @@ const s: Record<string, React.CSSProperties> = {
   filterRow: { display: 'flex', gap: T.spacing[2], marginBottom: T.spacing[4], flexWrap: 'wrap' },
   filterBtn: {
     padding: `${T.spacing[2]} ${T.spacing[3]}`,
-    border: `${T.borders.thin} solid ${T.colors.borderSubtle}`,
+    border: `1px solid ${T.colors.borderSubtle}`,
     borderRadius: T.radius.md, fontSize: T.fontSizes.xs,
     fontWeight: T.fontWeights.bold, cursor: 'pointer',
     textTransform: 'capitalize', transition: `all ${T.transitions.fast}`,
@@ -161,7 +161,7 @@ const s: Record<string, React.CSSProperties> = {
   empty: { color: T.colors.textSecondary, fontSize: T.fontSizes.sm, padding: T.spacing[8], textAlign: 'center' },
   list: { display: 'flex', flexDirection: 'column', gap: T.spacing[3] },
   card: {
-    background: T.colors.bgSurface, border: `${T.borders.thin} solid ${T.colors.borderSubtle}`,
+    background: T.colors.bgSurface, border: `1px solid ${T.colors.borderSubtle}`,
     borderRadius: T.radius.lg, padding: T.spacing[4],
   },
   cardHeader: { display: 'flex', alignItems: 'center', gap: T.spacing[2], marginBottom: T.spacing[2] },
@@ -170,7 +170,7 @@ const s: Record<string, React.CSSProperties> = {
   statusBadge: {
     padding: `${T.spacing[1]} ${T.spacing[2]}`, borderRadius: T.radius.sm,
     fontSize: T.fontSizes.micro, fontWeight: T.fontWeights.bold, textTransform: 'uppercase',
-    border: `${T.borders.thin} solid transparent`,
+    border: `1px solid transparent`,
   },
   agent: { fontSize: T.fontSizes.xs, color: T.colors.textSecondary, marginLeft: 'auto' },
   desc: { fontSize: T.fontSizes.sm, color: T.colors.textPrimary, margin: `${T.spacing[0]} ${T.spacing[0]} ${T.spacing[2]}`, lineHeight: T.lineHeights.base },
@@ -185,7 +185,7 @@ const s: Record<string, React.CSSProperties> = {
   },
   actions: { display: 'flex', gap: T.spacing[2], marginTop: T.spacing[3] },
   actionBtn: {
-    padding: `${T.spacing[2]} ${T.spacing[4]}`, border: T.borders.none, borderRadius: T.radius.md,
+    padding: `${T.spacing[2]} ${T.spacing[4]}`, border: 'none', borderRadius: T.radius.md,
     fontSize: T.fontSizes.xs, fontWeight: T.fontWeights.bold, cursor: 'pointer',
     textTransform: 'uppercase', transition: `all ${T.transitions.fast}`,
   },

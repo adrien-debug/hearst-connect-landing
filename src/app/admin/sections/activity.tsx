@@ -361,7 +361,7 @@ const styles: Record<string, React.CSSProperties> = {
   spinner: {
     width: TOKENS.spacing[5],
     height: TOKENS.spacing[5],
-    border: `${TOKENS.borders.thick} solid ${TOKENS.colors.bgTertiary}`,
+    border: `2px solid ${TOKENS.colors.bgTertiary}`,
     borderTopColor: TOKENS.colors.accent,
     borderRadius: TOKENS.radius.full,
     animation: 'spin 1s linear infinite',

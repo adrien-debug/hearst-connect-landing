@@ -245,7 +245,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   statCard: {
     background: TOKENS.colors.bgSidebar,
-    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+    border: `1px solid ${TOKENS.colors.borderSubtle}`,
     borderRadius: TOKENS.radius.lg,
     padding: TOKENS.spacing[5],
     display: 'flex',
@@ -286,7 +286,7 @@ const styles: Record<string, React.CSSProperties> = {
   },
   card: {
     background: TOKENS.colors.bgSidebar,
-    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+    border: `1px solid ${TOKENS.colors.borderSubtle}`,
     borderRadius: TOKENS.radius.lg,
     padding: TOKENS.spacing[5],
   },
@@ -320,7 +320,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: TOKENS.spacing[3],
     padding: `${TOKENS.spacing[3]} ${TOKENS.spacing[4]}`,
     background: TOKENS.colors.bgTertiary,
-    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+    border: `1px solid ${TOKENS.colors.borderSubtle}`,
     borderRadius: TOKENS.radius.md,
     color: TOKENS.colors.textPrimary,
     fontSize: TOKENS.fontSizes.sm,
@@ -439,7 +439,7 @@ const styles: Record<string, React.CSSProperties> = {
   spinner: {
     width: TOKENS.spacing[6],
     height: TOKENS.spacing[6],
-    border: `${TOKENS.borders.thick} solid ${TOKENS.colors.bgTertiary}`,
+    border: `2px solid ${TOKENS.colors.bgTertiary}`,
     borderTopColor: TOKENS.colors.accent,
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',
