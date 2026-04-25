@@ -1,12 +1,12 @@
 'use client'
 
 import { useMemo } from 'react'
-import type { VaultLine, ActiveVault, AvailableVault, Aggregate } from '@/components/connect/data'
+import type { VaultLine, ActiveVault, Aggregate } from '@/components/connect/data'
 import { useVaultRegistry } from './useVaultRegistry'
 import { useDemoPortfolio, useSystemVaults } from './useDemoPortfolio'
 import { useAppMode } from './useAppMode'
+import { toAvailableVault } from '@/lib/default-vaults'
 import { DAYS_PER_YEAR } from '@/lib/constants'
-
 
 function calculateAggregate(vaults: VaultLine[]): Aggregate {
   const active = vaults.filter((v): v is ActiveVault => v.type === 'active')
@@ -61,7 +61,7 @@ export function useVaultLines() {
         const lockLabel = years >= 1 ? `${Math.floor(years)} Years` : `${sysVault.meta.lockPeriodDays} Days`
         const termLabel = years >= 1 ? `${Math.floor(years)}Y` : `${sysVault.meta.lockPeriodDays}D`
 
-        const availableVault: AvailableVault = {
+        return {
           type: 'available',
           id: sysVault.id,
           name: sysVault.meta.name,
@@ -76,7 +76,6 @@ export function useVaultLines() {
           risk: sysVault.meta.risk,
           fees: sysVault.meta.fees,
         }
-        return availableVault
       })
 
       const activeForAgg = demoVaultLines
@@ -87,15 +86,9 @@ export function useVaultLines() {
         ? activeForAgg.reduce((sum, v) => sum + v.apr * v.deposited, 0) / stats.totalDeployed
         : 0
 
-      const agg: Aggregate = {
-        totalDeposited: stats.totalDeployed,
-        totalClaimable: stats.totalUnclaimedYield,
-        avgApr,
-      }
-
       return {
         vaults: demoVaultLines,
-        agg,
+        agg: { totalDeposited: stats.totalDeployed, totalClaimable: stats.totalUnclaimedYield, avgApr },
         hasVaults: true,
         isLoading: false,
         mode: 'demo' as const,
@@ -103,41 +96,13 @@ export function useVaultLines() {
     }
 
     // MODE BLOCKCHAIN: Live
-    const configuredLines: AvailableVault[] = activeVaults.map((config) => {
-      const years = config.lockPeriodDays / DAYS_PER_YEAR
-      const lockLabel = years >= 1 ? `${Math.floor(years)} Years` : `${config.lockPeriodDays} Days`
-      const termLabel = years >= 1 ? `${Math.floor(years)}Y` : `${config.lockPeriodDays}D`
-      return {
-        id: config.id,
-        name: config.name,
-        type: 'available',
-        apr: config.apr,
-        target: config.target,
-        strategy: config.strategy,
-        image: config.image,
-        minDeposit: config.minDeposit,
-        lockPeriod: lockLabel,
-        term: termLabel,
-        token: 'USDC',
-        risk: config.risk,
-        fees: config.fees,
-      }
-    })
-
-    if (configuredLines.length === 0) {
-      return {
-        vaults: [],
-        agg: { totalDeposited: 0, totalClaimable: 0, avgApr: 0 },
-        hasVaults: false,
-        isLoading: isRegistryLoading,
-        mode: 'live' as const,
-      }
-    }
+    // activeVaults already includes fallback to marketing vaults via useVaultRegistry
+    const configuredLines = activeVaults.map(toAvailableVault)
 
     return {
       vaults: configuredLines,
       agg: calculateAggregate(configuredLines),
-      hasVaults: true,
+      hasVaults: configuredLines.length > 0,
       isLoading: isRegistryLoading,
       mode: 'live' as const,
     }

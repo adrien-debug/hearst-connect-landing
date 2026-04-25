@@ -8,6 +8,7 @@ import { useVaultRegistry } from '@/hooks/useVaultRegistry'
 import { fmtUsdCompact } from '@/components/connect/constants'
 import { formatVaultName } from '@/components/connect/formatting'
 import type { AvailableVault } from '@/components/connect/data'
+import { toAvailableVault } from '@/lib/default-vaults'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 const PILLARS = [
@@ -22,6 +23,85 @@ function formatShortAddress(addr: string) {
   return `${addr.slice(0, 6)}…${addr.slice(-4)}`
 }
 
+// Header Wallet - Top right like standard DeFi apps
+function HeaderWallet() {
+  const [mounted, setMounted] = useState(false)
+  const { address, isConnected } = useAccount()
+  const chainId = useChainId()
+  const { connect, connectors, isPending, reset } = useConnect()
+  const { disconnect } = useDisconnect()
+  const { switchChain, isPending: isSwitching } = useSwitchChain()
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  const wrongChain = isConnected && chainId !== base.id
+
+  if (!mounted) {
+    return (
+      <button className="vaults-header-btn" disabled>
+        <span className="vaults-header-btn-text">Connect</span>
+      </button>
+    )
+  }
+
+  if (!isConnected) {
+    return (
+      <button
+        type="button"
+        className="vaults-header-btn vaults-header-btn--primary"
+        disabled={isPending}
+        onClick={() => {
+          const connector = connectors[0]
+          if (connector) {
+            reset()
+            connect({ connector })
+          }
+        }}
+      >
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M19 7H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z" />
+          <path d="M16 11h0" />
+        </svg>
+        <span className="vaults-header-btn-text">{isPending ? '…' : 'Connect'}</span>
+      </button>
+    )
+  }
+
+  if (wrongChain) {
+    return (
+      <button
+        type="button"
+        className="vaults-header-btn vaults-header-btn--warning"
+        disabled={isSwitching}
+        onClick={() => switchChain({ chainId: base.id })}
+      >
+        <span className="vaults-header-btn-text">{isSwitching ? '…' : 'Switch Network'}</span>
+      </button>
+    )
+  }
+
+  return (
+    <div className="vaults-header-wallet">
+      <span className="vaults-header-address">{formatShortAddress(address)}</span>
+      <button
+        type="button"
+        className="vaults-header-btn vaults-header-btn--ghost"
+        onClick={() => disconnect()}
+        title="Disconnect"
+      >
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
+      </button>
+    </div>
+  )
+}
+
+// Sidebar Wallet Section
 function WalletSection() {
   const [mounted, setMounted] = useState(false)
   const { address, isConnected } = useAccount()
@@ -198,7 +278,7 @@ export function VaultsClient() {
   const { vaults, isLoading } = useVaultRegistry()
 
   const availableVaults = useMemo(() => {
-    return vaults.filter((v): v is AvailableVault => v.status === 'available')
+    return vaults.filter((v) => v.isActive !== false).map(toAvailableVault)
   }, [vaults])
 
   return (
@@ -215,6 +295,7 @@ export function VaultsClient() {
         </div>
         <div className="vaults-header-right">
           <ThemeToggle variant="minimal" size="sm" />
+          <HeaderWallet />
         </div>
       </header>
 

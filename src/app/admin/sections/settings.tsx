@@ -3,10 +3,12 @@
 import { useState } from 'react'
 import { TOKENS, MONO } from '@/components/connect/constants'
 import { useAppMode } from '@/hooks/useAppMode'
+import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { STORAGE_KEYS } from '@/config/storage-keys'
 
 export function SettingsSection() {
-  const { isDemo, setMode } = useAppMode()
+  const { isDemo, setMode, hasAdminSession } = useAppMode()
+  const { isAuthenticated } = useAdminAuth()
   const [showResetConfirm, setShowResetConfirm] = useState(false)
   const [settings, setSettings] = useState({
     maintenanceMode: false,
@@ -14,6 +16,9 @@ export function SettingsSection() {
     enableAnalytics: true,
     sessionTimeout: 24,
   })
+
+  // Demo mode can only be toggled with valid admin session
+  const canToggleDemo = isAuthenticated && hasAdminSession
 
   const handleResetDemo = () => {
     if (typeof window !== 'undefined') {
@@ -77,8 +82,14 @@ export function SettingsSection() {
           </div>
           <div style={styles.demoActions}>
             <button
-              onClick={() => setMode(isDemo ? 'live' : 'demo')}
-              style={styles.demoBtn}
+              onClick={() => canToggleDemo && setMode(isDemo ? 'live' : 'demo')}
+              style={{
+                ...styles.demoBtn,
+                opacity: canToggleDemo ? 1 : 0.5,
+                cursor: canToggleDemo ? 'pointer' : 'not-allowed',
+              }}
+              disabled={!canToggleDemo}
+              title={canToggleDemo ? undefined : 'Admin session required'}
             >
               {isDemo ? 'Switch to Live' : 'Switch to Demo'}
             </button>

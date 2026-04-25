@@ -1,13 +1,17 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
 import { useVaultRegistry } from '@/hooks/useVaultRegistry'
-import { useDemoPortfolio } from '@/hooks/useDemoPortfolio'
+import { useDemoPortfolio, seedDemoPortfolio } from '@/hooks/useDemoPortfolio'
+import { useAppMode } from '@/hooks/useAppMode'
 import { TOKENS, MONO, fmtUsd, fmtUsdCompact } from '@/components/connect/constants'
 import Link from 'next/link'
 
 export function DashboardSection() {
+  const router = useRouter()
   const { vaults, isLoading } = useVaultRegistry()
   const { stats } = useDemoPortfolio()
+  const { setMode } = useAppMode()
 
   const totalVaults = vaults.length
   const activeVaults = vaults.filter((v) => v.isActive !== false).length
@@ -59,10 +63,18 @@ export function DashboardSection() {
               <PlusIcon />
               <span>Create New Vault</span>
             </Link>
-            <Link href="/app?demo=true" style={styles.actionButton}>
+            <button
+              style={styles.actionButton}
+              onClick={() => {
+                // Explicitly activate demo mode, seed data, and redirect to app
+                seedDemoPortfolio('demo')
+                setMode('demo')
+                router.push('/app')
+              }}
+            >
               <DemoIcon />
               <span>Launch Demo Mode</span>
-            </Link>
+            </button>
             <button style={styles.actionButton}>
               <ExportIcon />
               <span>Export Data</span>

@@ -6,20 +6,21 @@ Onchain access to institutional Bitcoin mining cash flows.
 
 | Route | Description |
 |-------|-------------|
-| `/` | Landing page — marketing, investment strategies carousel (copy overlaid on media + gradient scrim), CTA |
-| `/vaults` | **Product page** — browse available vaults without wallet connection. Connect wallet here to unlock platform access. |
-| `/app` | **Cinematic Financial OS** — portfolio dashboard, vault subscription & projection. Requires wallet connection or demo mode. |
+| `/` | Landing page — marketing, investment strategies carousel, CTA |
+| `/intro` | **Entry page** — value proposition, wallet connect (top-right), "Invest in Vaults" CTA |
+| `/vaults` | **Product page** — browse vaults, wallet connect (top-right), enter platform when connected |
+| `/app` | **Dashboard** — portfolio, vault subscription. Requires wallet connection or demo mode. |
 | `/admin` | Vault registry management (add/edit/remove vaults) |
 
-> **Redirects:** `/launch-app` → `/vaults`, `/intro` → `/vaults`, `/hub` → `/`, `/vault` → `/vaults`.
+> **Redirects:** `/launch-app` → `/intro`, `/hub` → `/`, `/vault` → `/vaults`.
 
 ## User Flow
 
-1. **Landing** (`/`) → "Launch App" button
-2. **Product Page** (`/vaults`) → Browse vaults, connect wallet
-3. **Dashboard** (`/app`) → Full platform access after wallet connection
+1. **Landing** (`/`) → "Launch App" → **Intro** (`/intro`)
+2. **Intro** (`/intro`) → Connect wallet (top-right) → "Invest in Vaults" → **Vaults** (`/vaults`)
+3. **Vaults** (`/vaults`) → Browse products, wallet ready → "Enter Platform" → **Dashboard** (`/app`)
 
-The flow follows DeFi best practices: users can explore products before committing to wallet connection.
+Classic DeFi flow: landing → entry → products → platform.
 
 ## Tech Stack
 
@@ -56,8 +57,19 @@ NEXT_PUBLIC_GOOGLE_ADS_ID=             # Optional — Google Ads
 
 Two modes (`hearst:app-mode` in localStorage; switching reloads the page):
 
+- **Live** (default) — Registry-driven list + on-chain flows when addresses exist. If registry is empty, public pages show **marketing vaults** from `src/lib/default-vaults.ts` (non-functional, for demonstration only).
 - **Demo** — System vaults in `src/lib/demo-data.ts`, portfolio in localStorage. Accessible **only via Admin panel** (after email/password auth). Header: **DÉMO** toggle (→ Live, one-way), **Reset**.
-- **Live** (default) — Registry-driven list + on-chain flows when addresses exist. No demo entry in UI. Missing registry → explicit empty state (`hasVaults: false`).
+
+### Demo Mode Access Control
+
+Demo mode is **strictly coupled to admin session**:
+
+1. **Public users** (no admin session): Always see live mode, even if `demo` is in localStorage
+2. **Admin users**: Can activate demo mode via "Launch Demo Mode" button in admin dashboard
+3. **On admin logout or session expiry**: Demo mode automatically falls back to live
+4. **No auto-seeding**: Demo data is only seeded when admin explicitly clicks "Launch Demo Mode"
+
+This ensures demo data never leaks into the public experience.
 
 ## Admin Access
 

@@ -240,12 +240,10 @@ export function useDemoPortfolio() {
     const listener = () => setTick((t) => t + 1)
     listeners.add(listener)
 
+    // Load existing store but DO NOT auto-seed
+    // Demo data seeding must be explicit (via admin "Launch Demo Mode")
     globalStore = loadStore()
-    if (!globalStore.initialized && globalStore.positions.length === 0) {
-      seedDemoPortfolio('demo')
-    } else {
-      emit()
-    }
+    emit()
 
     return () => {
       listeners.delete(listener)

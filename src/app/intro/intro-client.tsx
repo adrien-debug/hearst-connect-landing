@@ -54,7 +54,9 @@ function IntroHeaderWallet() {
   if (!mounted) {
     return (
       <div className="intro-header-wallet" aria-busy="true">
-        <span className="intro-wallet-address">…</span>
+        <button className="intro-btn-wallet intro-btn-wallet--primary" disabled>
+          Connect Wallet
+        </button>
       </div>
     )
   }
@@ -62,20 +64,24 @@ function IntroHeaderWallet() {
   if (!isConnected) {
     return (
       <div className="intro-header-wallet">
-        {connectors.map((connector) => (
-            <button
-              key={connector.uid}
-              type="button"
-              className="intro-btn-wallet intro-btn-wallet--primary"
-              disabled={isPending || !connector.ready}
-              onClick={() => {
-                reset()
-                connect({ connector })
-              }}
-            >
-              {isPending ? 'Connexion…' : connector.name}
-            </button>
-          ))}
+        <button
+          type="button"
+          className="intro-btn-wallet intro-btn-wallet--primary"
+          disabled={isPending}
+          onClick={() => {
+            const connector = connectors[0]
+            if (connector) {
+              reset()
+              connect({ connector })
+            }
+          }}
+        >
+          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <path d="M19 7H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z" />
+            <path d="M16 11h0" />
+          </svg>
+          {isPending ? 'Connecting…' : 'Connect Wallet'}
+        </button>
         {error ? (
           <p className="intro-connect-error" role="alert">
             {error.message.length > 120 ? `${error.message.slice(0, 120)}…` : error.message}
@@ -88,14 +94,13 @@ function IntroHeaderWallet() {
   if (wrongChain) {
     return (
       <div className="intro-header-wallet">
-        <span className="intro-wallet-address">Réseau actuel · {chainId}</span>
         <button
           type="button"
           className="intro-btn-wallet intro-btn-wallet--accent-outline"
           disabled={isSwitching}
           onClick={() => switchChain({ chainId: base.id })}
         >
-          {isSwitching ? 'Changement…' : 'Passer sur Base'}
+          Switch to Base
         </button>
       </div>
     )
@@ -103,16 +108,21 @@ function IntroHeaderWallet() {
 
   return (
     <div className="intro-header-wallet">
-      {address ? <span className="intro-wallet-address">{formatShortAddress(address)}</span> : null}
+      <span className="intro-wallet-address">{formatShortAddress(address)}</span>
       <Link href="/app" className="intro-btn-wallet intro-btn-wallet--primary">
-        Ouvrir la plateforme
+        Enter Platform
       </Link>
       <button
         type="button"
         className="intro-btn-wallet intro-btn-wallet--ghost"
         onClick={() => disconnect()}
+        title="Disconnect"
       >
-        Déconnecter
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+          <polyline points="16 17 21 12 16 7" />
+          <line x1="21" y1="12" x2="9" y2="12" />
+        </svg>
       </button>
     </div>
   )
@@ -125,9 +135,14 @@ export function IntroClient() {
   return (
     <div className="intro-shell" data-theme="dark">
       <header className="intro-header">
-        <Link href="/" className="intro-back">
-          ← Back to Home
-        </Link>
+        <div className="intro-header-left">
+          <Link href="/" className="intro-back">
+            ← Back to Home
+          </Link>
+          <nav className="intro-nav">
+            <Link href="/vaults" className="intro-nav-link">Vaults</Link>
+          </nav>
+        </div>
         <IntroHeaderWallet />
       </header>
 
@@ -172,14 +187,14 @@ export function IntroClient() {
           </section>
 
           <div className="intro-cta-group">
-            <Link href="/app" className="intro-cta-primary">
-              <span>Accéder à la plateforme</span>
+            <Link href="/vaults" className="intro-cta-primary">
+              <span>Invest in Vaults</span>
               <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden>
                 <path d="M5 12h14M12 5l7 7-7 7" />
               </svg>
             </Link>
             <p className="intro-cta-hint">
-              Connectez un wallet en haut à droite (injected, Coinbase…), puis ouvrez la plateforme sur Base.
+              Connect your wallet above to access vaults on Base, or browse available strategies.
             </p>
           </div>
         </div>

@@ -25,7 +25,9 @@ function AccessGate({ children }: { children: React.ReactNode }) {
     )
   }
 
-  // Allow access if in demo mode OR wallet is connected
+  // Access rules:
+  // - Live mode: wallet connection required
+  // - Demo mode: allowed only if valid admin session exists (enforced by useAppMode.isDemo)
   const hasAccess = isDemo || isConnected
 
   if (!hasAccess) {

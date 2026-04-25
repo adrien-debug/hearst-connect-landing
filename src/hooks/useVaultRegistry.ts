@@ -1,29 +1,9 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { Address } from 'viem'
-import { base } from 'wagmi/chains'
 import type { VaultConfig, VaultConfigInput, VaultRegistryState } from '@/types/vault'
 import { STORAGE_KEYS } from '@/config/storage-keys'
-
-const SEED_VAULT: VaultConfig = {
-  id: 'seed-hashvault-test',
-  name: 'HashVault Test',
-  description: 'Vault de test pour souscription',
-  vaultAddress: '0x0000000000000000000000000000000000000001' as Address,
-  usdcAddress: '0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913' as Address,
-  chain: base,
-  apr: 8.5,
-  target: '25%',
-  lockPeriodDays: 180,
-  minDeposit: 1000,
-  strategy: 'Stablecoin Yield · Low Risk',
-  fees: '1.0% Mgmt · 10% Perf',
-  risk: 'Low',
-  image: '/logos/hearst.svg',
-  isActive: true,
-  createdAt: Date.now(),
-}
+import { DEFAULT_MARKETING_VAULTS } from '@/lib/default-vaults'
 
 function generateVaultId(): string {
   return `vault-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
@@ -43,12 +23,9 @@ function loadFromStorage(): VaultRegistryState {
     const stored = localStorage.getItem(STORAGE_KEYS.VAULT_REGISTRY)
 
     if (!stored) {
-      const seeded: VaultRegistryState = {
-        vaults: [SEED_VAULT],
-        activeVaultId: SEED_VAULT.id,
-      }
-      saveToStorage(seeded)
-      return seeded
+      // First visit - start with empty registry (no auto-seed)
+      // Demo vaults are only seeded when admin explicitly activates demo mode
+      return getInitialState()
     }
 
     const parsed = JSON.parse(stored) as VaultRegistryState
@@ -192,11 +169,21 @@ export function useVaultRegistry() {
     },
   })
 
+  // Fall back to marketing vaults if registry is empty (for public pages)
+  const effectiveVaults = currentState.vaults.length > 0
+    ? currentState.vaults
+    : DEFAULT_MARKETING_VAULTS.map((v, i) => ({
+        ...v,
+        id: `default-vault-${i}`,
+        createdAt: Date.now(),
+        isActive: true,
+      }))
+
   const activeVault = currentState.activeVaultId
     ? currentState.vaults.find((v) => v.id === currentState.activeVaultId)
     : null
 
-  const activeVaults = currentState.vaults.filter((v) => v.isActive)
+  const activeVaults = effectiveVaults.filter((v) => v.isActive)
 
   return {
     vaults: currentState.vaults,

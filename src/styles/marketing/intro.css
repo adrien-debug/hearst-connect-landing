@@ -26,7 +26,7 @@
     radial-gradient(ellipse 50% 40% at 20% 15%, rgba(255, 255, 255, 0.03) 0%, transparent 65%);
 }
 
-/* ── Header — back link only ── */
+/* ── Header — back link + nav + wallet ── */
 .intro-header {
   position: relative;
   z-index: 20;
@@ -36,6 +36,31 @@
   gap: 1rem;
   padding: 1.25rem 2.5rem;
   border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.intro-header-left {
+  display: flex;
+  align-items: center;
+  gap: 2rem;
+}
+
+.intro-nav {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+}
+
+.intro-nav-link {
+  font-size: 0.8125rem;
+  font-weight: 500;
+  color: rgba(230, 234, 240, 0.7);
+  text-decoration: none;
+  transition: color 0.2s ease;
+  letter-spacing: 0.01em;
+}
+
+.intro-nav-link:hover {
+  color: #a7fb90;
 }
 
 .intro-header-wallet {
@@ -528,6 +553,80 @@ a.intro-btn-wallet {
   display: flex;
   align-items: center;
   gap: 1rem;
+}
+
+/* Header Wallet Button - DeFi style */
+.vaults-header-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  padding: 0.6rem 1.1rem;
+  border-radius: 9999px;
+  font-size: 0.8rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  border: none;
+  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.08);
+  color: var(--text-primary);
+  border: 1px solid var(--border-subtle);
+}
+
+.vaults-header-btn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.vaults-header-btn--primary {
+  background: var(--accent);
+  color: var(--black);
+  border-color: var(--accent);
+}
+
+.vaults-header-btn--primary:hover:not(:disabled) {
+  background: #c4ffa8;
+  transform: translateY(-1px);
+}
+
+.vaults-header-btn--warning {
+  background: rgba(248, 113, 113, 0.15);
+  color: var(--danger);
+  border-color: rgba(248, 113, 113, 0.3);
+}
+
+.vaults-header-btn--warning:hover:not(:disabled) {
+  background: rgba(248, 113, 113, 0.25);
+}
+
+.vaults-header-btn--ghost {
+  padding: 0.6rem;
+  background: transparent;
+  border-color: var(--border-subtle);
+}
+
+.vaults-header-btn--ghost:hover:not(:disabled) {
+  border-color: var(--text-secondary);
+  color: var(--text-primary);
+}
+
+.vaults-header-wallet {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.vaults-header-address {
+  font-family: ui-monospace, 'IBM Plex Mono', monospace;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.02em;
+  color: var(--text-primary);
+  padding: 0.4rem 0.8rem;
+  background: rgba(255, 255, 255, 0.05);
+  border-radius: 9999px;
+  border: 1px solid var(--border-subtle);
 }
 
 /* ── Main Layout ── */
