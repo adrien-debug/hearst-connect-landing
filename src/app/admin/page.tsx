@@ -1,7 +1,6 @@
 'use client'
 
 import { useState } from 'react'
-import { AdminProvider } from '@/contexts/admin-context'
 import { AdminSidebar } from './components/sidebar'
 import { AdminHeader } from './components/header'
 import { DashboardSection } from './sections/dashboard'
@@ -10,7 +9,7 @@ import { ActivitySection } from './sections/activity'
 import { SettingsSection } from './sections/settings'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { ADMIN_TOKENS as TOKENS } from './constants'
-import { ThemeToggle } from '@/components/theme/theme-toggle'
+
 
 const SECTIONS: Record<string, React.ComponentType> = {
   dashboard: DashboardSection,
@@ -27,11 +26,7 @@ const SECTION_TITLES: Record<string, { title: string; subtitle: string }> = {
 }
 
 export default function AdminPage() {
-  return (
-    <AdminProvider>
-      <AdminContent />
-    </AdminProvider>
-  )
+  return <AdminContent />
 }
 
 function AdminContent() {

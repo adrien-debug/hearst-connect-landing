@@ -7,28 +7,29 @@ Onchain access to institutional Bitcoin mining cash flows.
 | Route | Description |
 |-------|-------------|
 | `/` | Landing page — marketing, investment strategies carousel, CTA |
-| `/intro` | **Legacy entry** — server-side redirect to `/vaults` |
-| `/vaults` | **Entry page** — browse vaults, wallet connect, "Enter Platform" CTA when connected |
-| `/app` | **Dashboard** — portfolio, vault subscription. Requires wallet connection or demo mode. |
-| `/admin` | Vault registry management (add/edit/remove vaults) |
+| `/app` | **Dashboard** — portfolio, vault subscription. Requires SIWE authentication. |
+| `/admin` | Admin panel — vault registry management, activity logs, settings |
 
-> **Redirects:** `/launch-app` → `/vaults`, `/hub` → `/`, `/vault` → `/vaults`, `/intro` → `/vaults`.
+> **Redirects:** `/launch-app` → `/app`, `/hub` → `/`, `/vault` → `/app`, `/intro` → `/app`.
 
-## User Flow
+## User Flow (SIWE)
 
-1. **Landing** (`/`) → "Launch App" → **Vaults** (`/vaults`)
-2. **Vaults** (`/vaults`) → Browse products + connect wallet → "Enter Platform" → **Dashboard** (`/app`)
+1. **Landing** (`/`) → "Launch App" → **AccessGate** (`/app`)
+2. **AccessGate** → Connect Wallet → Sign In with Ethereum (SIWE EIP-4361)
+3. **Dashboard** — Authenticated view with vaults, portfolio, activity
 
-Streamlined DeFi flow: landing → products (with wallet) → platform.
+Streamlined DeFi flow: landing → wallet connect → SIWE auth → platform.
 
 ## Tech Stack
 
-- **Next.js 16** (App Router, webpack)
+- **Next.js 16.2.4** (App Router, Turbopack)
 - **React 19** + TypeScript (strict mode)
 - **Tailwind CSS v4** (via `@tailwindcss/webpack`)
 - **wagmi v3** + **viem** — wallet connection & on-chain vault interactions (Base chain)
 - **TanStack React Query** — async state management
-- **Vitest** — unit tests for vault math and projection helpers (`npm test`)
+- **jose** — JWT library for SIWE session management
+- **better-sqlite3** — SQLite database for users, vaults, positions, activity
+- **Vitest** — unit tests for vault math, projection, and database repositories (`npm test`)
 - **Satoshi Variable** (brand font) + **IBM Plex Mono** (data) + **Inter** (fallback)
 
 ## Getting Started
@@ -42,41 +43,54 @@ npm run dev           # http://localhost:8100
 
 ## Environment Variables
 
-Copy `.env.example` if present. Common keys:
+Copy `.env.example` and configure required variables:
 
+```bash
+# REQUIRED - Authentication
+JWT_SECRET=your-super-secret-jwt-key-min-32-chars-long  # REQUIRED in production
+ADMIN_ADDRESSES=0x1234...,0x5678...                     # Comma-separated Ethereum addresses
+
+# OPTIONAL - Web3
+NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=                   # WalletConnect project ID
+
+# OPTIONAL - Analytics
+NEXT_PUBLIC_GA_ID=                                      # Google Analytics
+NEXT_PUBLIC_GOOGLE_ADS_ID=                              # Google Ads
 ```
-NEXT_PUBLIC_WALLETCONNECT_PROJECT_ID=  # WalletConnect (optional for demo mode)
-NEXT_PUBLIC_VAULT_ADDRESS=             # Vault contract address
-NEXT_PUBLIC_USDC_ADDRESS=              # USDC contract address
-NEXT_PUBLIC_GA_ID=                     # Optional — Google Analytics
-NEXT_PUBLIC_GOOGLE_ADS_ID=             # Optional — Google Ads
-```
 
-## App Modes
+**Production requirements:**
+- `JWT_SECRET` is mandatory (32+ character secret key)
+- `ADMIN_ADDRESSES` should be set to authorized wallet addresses
+- The app will throw an error if `JWT_SECRET` is missing in production
 
-Two modes (`hearst:app-mode` in localStorage; switching reloads the page):
+## Authentication (SIWE)
 
-- **Live** (default) — Registry-driven list + on-chain flows when addresses exist. If registry is empty, public pages show **marketing vaults** from `src/lib/default-vaults.ts` (non-functional, for demonstration only).
-- **Demo** — System vaults in `src/lib/demo-data.ts`, portfolio in localStorage. Accessible **only via Admin panel** (after email/password auth). Header: **DÉMO** toggle (→ Live, one-way), **Reset**.
+**Sign-In with Ethereum (EIP-4361)**:
 
-### Demo Mode Access Control
+1. **Landing** (`/`) → **Launch App** → `/app`
+2. **AccessGate** (`src/app/app/app-client.tsx`) shows marketing + wallet connect
+3. **Connect Wallet** (wagmi injected connector) → popup MetaMask
+4. **Sign In with Wallet** → Sign EIP-4361 message
+   - `POST /api/auth/nonce` — HMAC stateless nonce (5min TTL)
+   - Wallet signs the SIWE message
+   - `POST /api/auth/verify` — viem.verifyMessage + JWT cookie
+5. **JWT Session** — `hearst-session` cookie (HTTP-only, SameSite=Strict, 24h)
+6. **Session Check** — `GET /api/auth/me` (only on mount, no spam 401)
+7. **Disconnect** → `POST /api/auth/logout` + redirect to `/` with spinner (no flash)
 
-Demo mode is **strictly coupled to admin session**:
+**Admin Authentication:**
+- Admin addresses configured via `ADMIN_ADDRESSES` env variable
+- JWT session includes `isAdmin` flag for admin wallets
+- Admin API routes check `requireAdminAccess()` (JWT admin OR `x-admin-key` header)
+- `/admin` panel shows: Dashboard, Vaults, Activity, Settings
 
-1. **Public users** (no admin session): Always see live mode, even if `demo` is in localStorage
-2. **Admin users**: Can activate demo mode via "Launch Demo Mode" button in admin dashboard
-3. **On admin logout or session expiry**: Demo mode automatically falls back to live
-4. **No auto-seeding**: Demo data is only seeded when admin explicitly clicks "Launch Demo Mode"
-
-This ensures demo data never leaks into the public experience.
-
-## Admin Access
-
-Navigate to `/admin` → email/password authentication required. Default: `admin@hearst.app` / `hearst2024`. Session stored in localStorage (24h).
-
-From Admin panel, authorized users can:
-- Manage vault registry (CRUD)
-- Enter Demo Mode via "Demo Mode" button
+**Security Features:**
+- HTTP-only cookies (XSS protection)
+- SameSite=Strict (CSRF protection)
+- HMAC stateless nonces (no server storage needed)
+- JWT verification on all protected endpoints
+- Soft-delete for vaults to preserve position history
+- Row-level isolation: users only see their own positions/activity
 
 ## UI / Design System (Cinematic Financial OS)
 
@@ -88,50 +102,118 @@ From Admin panel, authorized users can:
 - **Tests**: `npm test` (Vitest) — `src/lib/*.test.ts` for `vault-math` and `projection-simulation`.
 - **Typecheck**: `npm run lint` → `tsc -p . --noEmit`.
 
+## Database & Backend
+
+**SQLite** (`better-sqlite3`) at `data/hearst.db`:
+
+| Table | Purpose |
+|-------|---------|
+| `users` | Wallet addresses, timestamps |
+| `vaults` | Investment products (name, APR, target, addresses, etc.) |
+| `user_positions` | User deposits, yields, maturity dates, state |
+| `activity_events` | Deposit/claim/withdraw events with timestamps |
+
+**Schema Features:**
+- Foreign keys: `user_positions.user_id → users.id`, `user_positions.vault_id → vaults.id`
+- ON DELETE CASCADE for referential integrity
+- Soft-delete vaults (`is_active = 0`) preserve position history
+- Check constraints on enums (`state`, `type`)
+
+**Performance Indexes:**
+```
+idx_users_wallet — wallet_address lookups
+idx_vaults_active — active vault filtering
+idx_vaults_address — address lookups
+idx_positions_user — user position queries
+idx_positions_vault — vault position queries
+idx_positions_state — state filtering
+idx_positions_user_vault — user+vault compound
+idx_activity_user — user activity queries
+idx_activity_timestamp — time-based sorting
+idx_activity_user_time — user+time compound
+```
+
+**API Routes** (`/api/*`):
+| Route | Auth | Description |
+|-------|------|-------------|
+| `POST /api/auth/nonce` | Public | Generate HMAC-signed nonce |
+| `POST /api/auth/verify` | Public | Verify SIWE signature, set cookie |
+| `GET /api/auth/me` | Cookie | Check session, return address + isAdmin |
+| `POST /api/auth/logout` | Cookie | Clear session cookie |
+| `GET /api/users` | JWT | Get current user |
+| `POST /api/users` | JWT | Find or create user (address from session) |
+| `GET /api/vaults` | Public | List vaults (optionally `?active=true`) |
+| `POST /api/vaults` | Admin | Create vault |
+| `GET /api/vaults/[id]` | Public | Get vault by ID |
+| `PATCH /api/vaults/[id]` | Admin | Update vault |
+| `DELETE /api/vaults/[id]` | Admin | Soft-delete vault |
+| `GET /api/positions` | JWT | List positions for authenticated user |
+| `POST /api/positions` | JWT | Create/add to position (user from session) |
+| `PATCH /api/positions` | JWT | Update position (ownership verified) |
+| `GET /api/activity` | JWT | List activity for authenticated user |
+| `POST /api/activity` | JWT | Create activity event |
+| `GET /api/admin/activity` | Admin | List all user activities (admin only) |
+
 ## Project Structure
 
 ```
 src/
 ├── app/
 │   ├── page.tsx, landing-client.tsx, layout.tsx, not-found.tsx
-│   ├── app/           # /app route — Cinematic OS shell (wallet required)
-│   ├── vaults/        # /vaults route — Product page (public)
-│   ├── admin/         # /admin route — vault registry
-│   └── intro/         # /intro route — (redirects to /vaults)
+│   ├── app/              # /app route — AccessGate + Canvas (SIWE required)
+│   ├── admin/            # /admin route — Admin panel (SIWE + admin check)
+│   ├── api/              # API routes
+│   │   ├── auth/         # SIWE endpoints (nonce, verify, me, logout)
+│   │   ├── users/        # User management
+│   │   ├── vaults/       # Vault CRUD
+│   │   ├── positions/    # Position management
+│   │   ├── activity/     # User activity
+│   │   └── admin/        # Admin-only endpoints
+│   ├── globals.css
+│   └── layout.tsx
 ├── components/
-│   ├── connect/       # Canvas, panels, constants.ts (TOKENS + chart palette), utils/portfolio-chart-utils
-│   ├── ui/            # Label, click-ripple
-│   ├── layout/        # Analytics scripts
-│   ├── providers/     # Web3Provider (wagmi)
-│   └── theme/         # Theme provider, toggle, script
-├── config/
-│   ├── wagmi.ts       # Wagmi config (Base chain)
-│   ├── abi/vault.ts   # Vault contract ABI
-│   └── navigation.ts
+│   ├── connect/          # Canvas, panels, vault UI
+│   │   ├── canvas.tsx
+│   │   ├── constants.ts  # TOKENS design system
+│   │   ├── modal.tsx
+│   │   ├── portfolio-summary.tsx
+│   │   ├── subscribe-panel.tsx
+│   │   └── ...
+│   ├── ui/               # shadcn/ui components
+│   └── providers/        # Web3Provider, wagmi config
 ├── hooks/
-│   ├── useAppMode.ts        # Demo/live toggle (localStorage)
-│   ├── useDemoPortfolio.ts  # Demo positions + actions (seed/claim/withdraw)
-│   ├── useVaultLines.ts     # Unified vault data (demo ↔ live)
-│   ├── useVaultRegistry.ts  # Admin vault CRUD (localStorage + React Query)
-│   ├── usePositionData.ts   # On-chain position data
-│   ├── useVault.ts          # Vault contract reads (position, global) + writes
-│   ├── useTokenAllowance.ts # ERC-20 approve flow
-│   ├── useTransaction.ts    # Transaction lifecycle
-│   ├── useMonthProgress.ts  # Monthly yield gauge
-│   └── useAdminAuth.ts      # Admin authentication (email/password)
+│   ├── useSiweAuth.ts     # SIWE authentication hook
+│   ├── useBackendUser.ts  # Backend user fetch/create
+│   ├── useVaultLines.ts   # Vault data loading
+│   ├── useLiveActions.ts  # On-chain interactions
+│   ├── useUserData.ts     # User data management
+│   └── useMonthProgress.ts
 ├── lib/
-│   ├── vault-math.ts              # Aggregate + monthly yield
-│   ├── projection-simulation.ts   # Scenario projection
-│   ├── demo-data.ts               # System demo vaults + yield calculation
-│   └── wagmi-tempo-mock.js        # Webpack shim for optional wagmi deps
-├── styles/
-│   ├── connect/dashboard-vars.css
-│   ├── tailwind.css
-│   └── marketing/
-└── types/
-    ├── vault.ts       # VaultConfig, VaultRegistryState
-    ├── position.ts    # PositionData, PositionError
-    └── demo.ts        # DemoPosition, HydratedDemoPosition
+│   ├── auth/
+│   │   └── session.ts     # JWT, nonce HMAC, admin check
+│   ├── db/
+│   │   ├── connection.ts  # SQLite singleton
+│   │   ├── repositories.ts # CRUD operations
+│   │   └── __tests__/     # Database tests
+│   ├── api-client.ts      # API client utilities
+│   ├── vault-math.ts      # Yield calculations
+│   └── projection-simulation.ts
+├── types/
+│   └── vault.ts
+└── config/
+    └── storage-keys.ts
+
+data/
+├── hearst.db              # SQLite database (gitignored)
+├── hearst.db-shm
+└── hearst.db-wal
+
+migrations/
+└── 001_add_performance_indexes.sql
+
+.env.example
+next.config.mjs
+package.json
 ```
 
 ## Deployment

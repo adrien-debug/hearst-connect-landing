@@ -1,7 +1,7 @@
 /**
  * API Client for Hearst Connect backend
  * HTTP client utilities for the SQLite-backed API
- * Includes wallet-based authentication headers
+ * Uses session cookies for authentication (set by SIWE /api/auth/verify)
  */
 
 import type { Address, Chain } from 'viem'
@@ -16,13 +16,16 @@ import type {
 } from './db/schema'
 
 const API_BASE = '/api'
-const WALLET_HEADER = 'x-wallet-address'
 
-// Current wallet address for authenticated requests
-let currentWalletAddress: Address | null = null
+// Track auth state for conditional logic
+let isAuthenticated = false
 
-export function setApiWalletAddress(address: Address | null) {
-  currentWalletAddress = address
+export function setApiAuthenticated(value: boolean) {
+  isAuthenticated = value
+}
+
+export function getApiAuthenticated(): boolean {
+  return isAuthenticated
 }
 
 // Error handling helper
@@ -33,22 +36,18 @@ class ApiError extends Error {
   }
 }
 
-async function fetchApi<T>(endpoint: string, options?: RequestInit, requireAuth = false): Promise<T> {
-  const headers: Record<string, string> = {
-    'Content-Type': 'application/json',
-  }
+const ADMIN_KEY = 'hearst-admin-dev-key'
 
-  // Add wallet authentication header if available
-  if (currentWalletAddress) {
-    headers[WALLET_HEADER] = currentWalletAddress
-  } else if (requireAuth) {
-    throw new ApiError(401, 'Wallet not connected. Authentication required.')
+async function fetchApi<T>(endpoint: string, options?: RequestInit, requireAuth = false): Promise<T> {
+  if (requireAuth && !isAuthenticated) {
+    throw new ApiError(401, 'Authentication required. Please sign in.')
   }
 
   const response = await fetch(`${API_BASE}${endpoint}`, {
     ...options,
+    credentials: 'include',
     headers: {
-      ...headers,
+      'Content-Type': 'application/json',
       ...options?.headers,
     },
   })
@@ -63,20 +62,11 @@ async function fetchApi<T>(endpoint: string, options?: RequestInit, requireAuth 
 
 // Users API
 export const UsersApi = {
-  async findByWallet(walletAddress: Address): Promise<{ user: DbUser } | null> {
-    try {
-      return await fetchApi<{ user: DbUser }>(`/users?wallet=${encodeURIComponent(walletAddress)}`)
-    } catch (e) {
-      if (e instanceof ApiError && e.status === 404) return null
-      throw e
-    }
-  },
-
-  async findOrCreate(walletAddress: Address): Promise<{ user: DbUser; isNew: boolean }> {
+  async findOrCreate(): Promise<{ user: DbUser; isNew: boolean }> {
     return fetchApi<{ user: DbUser; isNew: boolean }>('/users', {
       method: 'POST',
-      body: JSON.stringify({ walletAddress }),
-    })
+      body: JSON.stringify({}), // Address comes from session cookie
+    }, true)
   },
 }
 
@@ -99,6 +89,7 @@ export const VaultsApi = {
     return fetchApi<{ vault: DbVault }>('/vaults', {
       method: 'POST',
       body: JSON.stringify(input),
+      headers: { 'x-admin-key': ADMIN_KEY },
     })
   },
 
@@ -106,22 +97,26 @@ export const VaultsApi = {
     return fetchApi<{ vault: DbVault }>(`/vaults/${id}`, {
       method: 'PATCH',
       body: JSON.stringify(updates),
+      headers: { 'x-admin-key': ADMIN_KEY },
     })
   },
 
   async delete(id: string): Promise<void> {
-    await fetchApi<void>(`/vaults/${id}`, { method: 'DELETE' })
+    await fetchApi<void>(`/vaults/${id}`, {
+      method: 'DELETE',
+      headers: { 'x-admin-key': ADMIN_KEY },
+    })
   },
 }
 
-// Positions API - All require authentication
+// Positions API - All require authentication via session cookie
 export const PositionsApi = {
-  // GET /positions - lists positions for authenticated wallet (no userId param needed)
+  // GET /positions - lists positions for authenticated user (from session)
   async listByUser(): Promise<{ positions: DbUserPositionWithVault[] }> {
     return fetchApi<{ positions: DbUserPositionWithVault[] }>('/positions', undefined, true)
   },
 
-  // POST /positions - creates position for authenticated wallet
+  // POST /positions - creates position for authenticated user
   async create(
     vaultId: string,
     deposited: number,
@@ -139,7 +134,7 @@ export const PositionsApi = {
     )
   },
 
-  // PATCH /positions - updates position for authenticated wallet
+  // PATCH /positions - updates position for authenticated user
   async update(
     positionId: string,
     updates: {
@@ -181,9 +176,9 @@ export const PositionsApi = {
   },
 }
 
-// Activity API - All require authentication
+// Activity API - All require authentication via session cookie
 export const ActivityApi = {
-  // GET /activity - lists activity for authenticated wallet
+  // GET /activity - lists activity for authenticated user
   async listByUser(limit = 50): Promise<{ events: DbActivityEvent[] }> {
     return fetchApi<{ events: DbActivityEvent[] }>(
       `/activity?limit=${limit}`,
@@ -192,7 +187,7 @@ export const ActivityApi = {
     )
   },
 
-  // POST /activity - creates activity event for authenticated wallet
+  // POST /activity - creates activity event for authenticated user
   async create(input: Omit<DbActivityEventInput, 'userId'> & { txHash?: string }): Promise<{ event: DbActivityEvent }> {
     return fetchApi<{ event: DbActivityEvent }>(
       '/activity',

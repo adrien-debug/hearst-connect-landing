@@ -203,6 +203,15 @@ export const VaultRepository = {
     return this.findById(id)
   },
 
+  softDelete(id: string): DbVault | null {
+    const db = getDb()
+    const now = Date.now()
+    const stmt = db.prepare('UPDATE vaults SET is_active = 0, updated_at = ? WHERE id = ?')
+    const result = stmt.run(now, id)
+    if (result.changes === 0) return null
+    return this.findById(id)
+  },
+
   delete(id: string): boolean {
     const db = getDb()
     const stmt = db.prepare('DELETE FROM vaults WHERE id = ?')
@@ -342,6 +351,17 @@ export const ActivityRepository = {
       LIMIT ?
     `)
     const rows = stmt.all(userId, limit) as Record<string, unknown>[]
+    return rows.map(mapActivityRow)
+  },
+
+  findAll(limit = 100): DbActivityEvent[] {
+    const db = getDb()
+    const stmt = db.prepare(`
+      SELECT * FROM activity_events
+      ORDER BY timestamp DESC
+      LIMIT ?
+    `)
+    const rows = stmt.all(limit) as Record<string, unknown>[]
     return rows.map(mapActivityRow)
   },
 

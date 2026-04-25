@@ -1,9 +1,3 @@
-/**
- * User Data Hook
- * Loads and manages user's positions and activity from the backend
- * Replaces useDemoPortfolio for real user data
- */
-
 'use client'
 
 import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
@@ -88,7 +82,7 @@ export function useUserData() {
   const { isAuthenticated } = useBackendUser()
   const queryClient = useQueryClient()
 
-  // Query positions - now derived from authenticated wallet header
+  // Query positions - derived from JWT session cookie (set by SIWE)
   const {
     data: positions = [],
     isLoading: isPositionsLoading,
@@ -103,7 +97,7 @@ export function useUserData() {
     staleTime: 1000 * 30, // 30 seconds
   })
 
-  // Query activity - now derived from authenticated wallet header
+  // Query activity - derived from JWT session cookie (set by SIWE)
   const {
     data: activity = [],
     isLoading: isActivityLoading,
@@ -129,7 +123,7 @@ export function useUserData() {
     activePositionsCount: hydratedPositions.filter(p => p.state !== 'withdrawn').length,
   }
 
-  // Mutations - no userId needed, derived from wallet header
+  // Mutations - no userId needed, derived from JWT session cookie
   const depositMutation = useMutation({
     mutationFn: async ({
       vaultId,

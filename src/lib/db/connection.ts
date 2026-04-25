@@ -9,6 +9,11 @@ import { join } from 'path'
 
 let db: Database.Database | null = null
 
+/** Test-only: inject an in-memory DB so tests never touch production data */
+export function _setTestDb(testDb: Database.Database): void {
+  db = testDb
+}
+
 export function getDb(): Database.Database {
   if (db) return db
 
@@ -126,5 +131,12 @@ export function initDb(): void {
     CREATE INDEX IF NOT EXISTS idx_activity_timestamp ON activity_events(timestamp);
   `)
 
-  console.log('[DB] Tables initialized')
+  // Apply performance indexes
+  database.exec(`
+    CREATE INDEX IF NOT EXISTS idx_vaults_address ON vaults(vault_address);
+    CREATE INDEX IF NOT EXISTS idx_positions_user_vault ON user_positions(user_id, vault_id);
+    CREATE INDEX IF NOT EXISTS idx_activity_user_time ON activity_events(user_id, timestamp DESC);
+  `)
+
+  console.log('[DB] Tables and indexes initialized')
 }

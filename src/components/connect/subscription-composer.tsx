@@ -10,7 +10,6 @@ type Props = {
   vault: AvailableVault
   mode: SmartFitMode
   isLimit: boolean
-  isDemo?: boolean
   amount: string
   onAmountChange: (v: string) => void
   agreed: boolean
@@ -32,7 +31,6 @@ export function SubscriptionComposer({
   vault,
   mode,
   isLimit,
-  isDemo = false,
   amount,
   onAmountChange,
   agreed,

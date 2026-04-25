@@ -1,77 +1,63 @@
 /**
- * Users API Route - SECURED
- * GET: Find user by wallet address (from header or query param)
- * POST: Create or find user by wallet address (from header)
+ * Users API Route - SECURED with JWT
+ * GET: Get current user from session
+ * POST: Create or find user (requires valid session)
  *
- * Security: Prioritizes wallet address from x-wallet-address header
+ * Security: Uses JWT session from cookie (set by /api/auth/verify)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { initDb } from '@/lib/db/connection'
 import { UserRepository } from '@/lib/db/repositories'
-import { getAuthFromRequest, requireAuth } from '@/lib/auth/wallet-auth'
-import type { Address } from 'viem'
+import { getSessionFromRequest, requireSession, AuthError } from '@/lib/auth/session'
 
 initDb()
 
 export async function GET(request: NextRequest) {
   try {
-    // Try to get wallet from auth header first, then fall back to query param
-    const auth = getAuthFromRequest(request)
-    const { searchParams } = new URL(request.url)
-    const queryWallet = searchParams.get('wallet') as Address | null
+    const session = await getSessionFromRequest(request)
+    requireSession(session)
 
-    const walletAddress = auth?.walletAddress || queryWallet
-
-    if (!walletAddress) {
-      return NextResponse.json(
-        { error: 'Wallet address required (header x-wallet-address or query param wallet)' },
-        { status: 400 }
-      )
-    }
-
-    const user = UserRepository.findByWalletAddress(walletAddress)
+    const user = UserRepository.findByWalletAddress(session.address)
 
     if (!user) {
-      return NextResponse.json(
-        { error: 'User not found' },
-        { status: 404 }
-      )
+      return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
 
     return NextResponse.json({ user })
   } catch (error) {
-    console.error('[API Users GET] Error fetching user:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch user' },
-      { status: 500 }
-    )
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode })
+    }
+    console.error('[API Users GET] Error:', error)
+    return NextResponse.json({ error: 'Failed to fetch user' }, { status: 500 })
   }
 }
 
 export async function POST(request: NextRequest) {
   try {
-    // Require auth header for creating/finding user
-    const auth = requireAuth(request)
-    if (!auth) {
-      return NextResponse.json({ error: 'Authentication required. Provide x-wallet-address header.' }, { status: 401 })
+    const session = await getSessionFromRequest(request)
+    requireSession(session)
+
+    // Verify the request body address matches session
+    const body = await request.json() as { walletAddress?: string }
+    if (body.walletAddress && body.walletAddress.toLowerCase() !== session.address.toLowerCase()) {
+      console.error('[API Users POST] Address mismatch:', body.walletAddress, 'vs session:', session.address)
+      return NextResponse.json({ error: 'Address mismatch with session' }, { status: 403 })
     }
 
-    // Find or create user by wallet address from header
-    const user = UserRepository.findOrCreateByWallet(auth.walletAddress)
+    // Find or create user by wallet address from session
+    const user = UserRepository.findOrCreateByWallet(session.address)
     const isNew = user.createdAt === user.updatedAt
 
     console.log(`[API Users POST] ${isNew ? 'Created' : 'Found'} user:`, user.id, user.walletAddress)
 
     return NextResponse.json({ user, isNew }, { status: isNew ? 201 : 200 })
   } catch (error) {
-    console.error('[API Users POST] Error creating/finding user:', error)
-    if (error instanceof Error && error.message.includes('Authentication')) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode })
     }
-    return NextResponse.json(
-      { error: 'Failed to create/find user' },
-      { status: 500 }
-    )
+    console.error('[API Users POST] Error:', error)
+    return NextResponse.json({ error: 'Failed to create/find user' }, { status: 500 })
   }
 }

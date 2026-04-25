@@ -19,13 +19,6 @@ export interface VaultConfig {
   createdAt: number
 }
 
-export interface VaultRegistryState {
-  vaults: VaultConfig[]
-  activeVaultId: string | null
-}
-
 export type VaultConfigInput = Omit<VaultConfig, 'id' | 'createdAt' | 'isActive'> & {
   id?: string
 }
-
-export const VAULT_REGISTRY_STORAGE_KEY = 'hearst:vault-registry'

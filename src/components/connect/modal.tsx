@@ -60,9 +60,9 @@ export function Modal({
   if (!isOpen) return null
 
   const sizeStyles = {
-    sm: { maxWidth: '400px' },
-    md: { maxWidth: '520px' },
-    lg: { maxWidth: '720px' },
+    sm: { maxWidth: TOKENS.spacing[32] },
+    md: { maxWidth: `${Number(TOKENS.spacing[32].replace('px', '')) + 120}px` },
+    lg: { maxWidth: `${Number(TOKENS.spacing[32].replace('px', '')) + 320}px` },
   }
 
   return (
@@ -141,8 +141,8 @@ export function Modal({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              width: '32px',
-              height: '32px',
+              width: TOKENS.spacing[8],
+              height: TOKENS.spacing[8],
               background: 'transparent',
               border: 'none',
               borderRadius: TOKENS.radius.md,
@@ -233,9 +233,9 @@ export function TransactionState({
         <>
           <div
             style={{
-              width: '48px',
-              height: '48px',
-              border: `3px solid ${TOKENS.colors.borderSubtle}`,
+              width: TOKENS.spacing[12],
+              height: TOKENS.spacing[12],
+              border: `${TOKENS.borders.heavy} solid ${TOKENS.colors.borderSubtle}`,
               borderTopColor: TOKENS.colors.accent,
               borderRadius: '50%',
               animation: 'spin 1s linear infinite',
@@ -249,8 +249,8 @@ export function TransactionState({
         <>
           <div
             style={{
-              width: '48px',
-              height: '48px',
+              width: TOKENS.spacing[12],
+              height: TOKENS.spacing[12],
               borderRadius: '50%',
               background: TOKENS.colors.accent,
               display: 'flex',
@@ -259,7 +259,7 @@ export function TransactionState({
               animation: 'scaleIn 300ms ease-out',
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg width={TOKENS.spacing[6]} height={TOKENS.spacing[6]} viewBox="0 0 24 24" fill="none">
               <path
                 d="M5 12l5 5L20 7"
                 stroke={TOKENS.colors.black}
@@ -279,8 +279,8 @@ export function TransactionState({
         <>
           <div
             style={{
-              width: '48px',
-              height: '48px',
+              width: TOKENS.spacing[12],
+              height: TOKENS.spacing[12],
               borderRadius: '50%',
               background: TOKENS.colors.danger,
               display: 'flex',
@@ -288,7 +288,7 @@ export function TransactionState({
               justifyContent: 'center',
             }}
           >
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
+            <svg width={TOKENS.spacing[6]} height={TOKENS.spacing[6]} viewBox="0 0 24 24" fill="none">
               <path
                 d="M6 6l12 12M18 6L6 18"
                 stroke={TOKENS.colors.white}

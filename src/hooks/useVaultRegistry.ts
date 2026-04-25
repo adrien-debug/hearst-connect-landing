@@ -1,22 +1,11 @@
 'use client'
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
-import type { VaultConfig, VaultConfigInput, VaultRegistryState } from '@/types/vault'
+import type { VaultConfig, VaultConfigInput } from '@/types/vault'
 import { VaultsApi, dbVaultToConfig } from '@/lib/api-client'
 import type { DbVaultInput } from '@/lib/db/schema'
 
 const VAULT_REGISTRY_QUERY_KEY = 'vault-registry'
-
-function generateVaultId(): string {
-  return `vault-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
-}
-
-function getInitialState(): VaultRegistryState {
-  return {
-    vaults: [],
-    activeVaultId: null,
-  }
-}
 
 // Convert VaultConfigInput to DbVaultInput for API
 function toDbVaultInput(input: VaultConfigInput): DbVaultInput {

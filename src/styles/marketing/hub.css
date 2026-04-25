@@ -179,7 +179,6 @@
 						position: fixed;
 						position-anchor: --carousel;
 						position-visibility: always;
-						font-family: "Material Symbols Outlined";
 
 						color: var(--dashboard-text-primary);
 						background: var(--dashboard-surface);
@@ -208,11 +207,11 @@
 					/* @note: We deviate from the antigravity site here, because CSS carousel does not offer a wrapper around both scroll buttons … */
 					&::scroll-button(left) {
 						translate: -50% 0;
-						content: 'arrow_back' / 'Previous';
+						content: '←' / 'Previous';
 					}
 					&::scroll-button(right) {
 						translate: 50% 0;
-						content: 'arrow_forward' / 'Next';
+						content: '→' / 'Next';
 					}
 
 					@media (width < 930px) {
@@ -410,11 +409,11 @@
 			cursor: pointer;
 			transition: .15s background ease-out;
 
-			&:has(span + .material-symbols-outlined) {
+			&:has(span + svg) {
 				padding-inline-end: 1em;
 			}
 
-			&:has(.material-symbols-outlined + span) {
+			&:has(svg + span) {
 				padding-inline-start: 1em;
 			}
 		}
@@ -882,21 +881,10 @@
 						}
 
 						&::after {
-							font-family: 'Material Symbols Outlined';
-							font-weight: normal;
-							font-style: normal;
+							content: '→';
 							font-size: var(--dashboard-text-xl);
 							line-height: 1;
-							letter-spacing: normal;
-							text-transform: none;
 							display: inline-block;
-							white-space: nowrap;
-							word-wrap: normal;
-							direction: ltr;
-							-webkit-font-feature-settings: 'liga';
-							-webkit-font-smoothing: antialiased;
-
-							content: "\f46a";
 						}
 					}
 				}
@@ -1578,21 +1566,11 @@ a.welcome-btn:focus-visible {
   background: var(--dashboard-overlay-12);
 }
 
-/* Material Symbols: icon font must win over `.hub-font-scope *` (Satoshi) */
-.hub-font-scope .material-symbols-outlined {
-  font-family: 'Material Symbols Outlined';
-  font-weight: normal;
-  font-style: normal;
-  font-size: var(--dashboard-text-xl);
-  line-height: 1;
-  letter-spacing: normal;
-  text-transform: none;
-  display: inline-block;
-  white-space: nowrap;
-  word-wrap: normal;
-  direction: ltr;
-  -webkit-font-smoothing: antialiased;
-  font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+/* Menu button SVG icons inherit color from parent */
+.hub-font-scope .menu-button svg {
+  display: block;
+  width: var(--dashboard-text-xl);
+  height: var(--dashboard-text-xl);
 }
 
 #who h3 {

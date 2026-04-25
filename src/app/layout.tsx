@@ -6,9 +6,6 @@ import { ThemeProvider } from '@/components/theme/theme-provider';
 import { THEME_INLINE_SCRIPT } from '@/components/theme/theme-script';
 import '@/styles/tailwind.css';
 import '@/styles/theme/tokens.css';
-import '@/styles/marketing/hub-font.css';
-import '@/styles/marketing/hub.css';
-import '@/styles/marketing/intro.css';
 import '@/styles/components/subscription.css';
 import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
@@ -40,10 +37,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           suppressHydrationWarning
           dangerouslySetInnerHTML={{ __html: THEME_INLINE_SCRIPT }}
         />
-        <link
-          rel="stylesheet"
-          href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined&display=swap"
-        />
+        <link rel="dns-prefetch" href="https://www.googletagmanager.com" />
       </head>
       <body>
         <ErrorBoundary>

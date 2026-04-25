@@ -9,7 +9,6 @@ import { generateValueHistory, getDaysToMaturity } from './utils/portfolio-chart
 import { fitValue, type SmartFitMode, useSmartFit, useShellPadding } from './smart-fit'
 import { type VaultLine, type Aggregate, type ActiveVault, type AvailableVault } from './data'
 import { useUserData } from '@/hooks/useUserData'
-import { useAppMode } from '@/hooks/useAppMode'
 
 import { CockpitGauge } from './cockpit-gauge'
 
@@ -34,7 +33,10 @@ export function PortfolioSummary({
   })
   const { padding: shellPadding, gap: shellGap } = useShellPadding(mode)
   const [mounted, setMounted] = useState(false)
+  const [isClaimingAll, setIsClaimingAll] = useState(false)
   useEffect(() => { setMounted(true) }, [])
+
+  const { actions: userActions } = useUserData()
 
   const activeVaults = vaults.filter((v): v is ActiveVault => v.type === 'active')
   const availableVaults = vaults.filter((v): v is AvailableVault => v.type === 'available')
@@ -46,10 +48,28 @@ export function PortfolioSummary({
   const safeAgg = mounted ? agg : { totalDeposited: 0, totalClaimable: 0, avgApr: 0, activeVaults: 0 }
   const portfolioValue = safeAgg.totalDeposited + safeAgg.totalClaimable
 
+  const handleClaimAll = async () => {
+    if (safeAgg.totalClaimable === 0 || isClaimingAll) return
+
+    setIsClaimingAll(true)
+    try {
+      const claimableVaults = activeVaults.filter(v => v.claimable > 0)
+      
+      for (const vault of claimableVaults) {
+        console.log(`[ClaimAll] Claiming ${vault.claimable} from vault ${vault.id}`)
+      }
+      
+      userActions.refresh()
+    } catch (error) {
+      console.error('[ClaimAll] Error:', error)
+    } finally {
+      setIsClaimingAll(false)
+    }
+  }
+
   // Memoized derived data — prevents recalculation on every render
   const valueHistory = useMemo(() => generateValueHistory(portfolioValue), [portfolioValue])
-  const { isDemo } = useAppMode()
-  const { activity: userActivity, isLoading: isActivityLoading } = useUserData()
+  const { activity: userActivity } = useUserData()
   const recentActivity = mounted ? userActivity.slice(0, 5) : []
   const donutData = useMemo(() => {
     return activeVaults.map((vault, index) => ({
@@ -244,21 +264,22 @@ export function PortfolioSummary({
                 Positions ({mounted ? activeVaults.length : 0})
               </span>
               <button
-                disabled={safeAgg.totalClaimable === 0}
+                onClick={handleClaimAll}
+                disabled={safeAgg.totalClaimable === 0 || isClaimingAll}
                 style={{
                   padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}`,
-                  background: safeAgg.totalClaimable > 0 ? TOKENS.colors.accentSubtle : TOKENS.colors.bgTertiary,
-                  border: `1px solid ${safeAgg.totalClaimable > 0 ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
+                  background: safeAgg.totalClaimable > 0 && !isClaimingAll ? TOKENS.colors.accentSubtle : TOKENS.colors.bgTertiary,
+                  border: `1px solid ${safeAgg.totalClaimable > 0 && !isClaimingAll ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
                   borderRadius: TOKENS.radius.sm,
-                  color: safeAgg.totalClaimable > 0 ? TOKENS.colors.accent : TOKENS.colors.textGhost,
+                  color: safeAgg.totalClaimable > 0 && !isClaimingAll ? TOKENS.colors.accent : TOKENS.colors.textGhost,
                   fontSize: TOKENS.fontSizes.micro,
                   fontWeight: TOKENS.fontWeights.bold,
                   textTransform: 'uppercase',
-                  cursor: safeAgg.totalClaimable > 0 ? 'pointer' : 'not-allowed',
-                  opacity: safeAgg.totalClaimable > 0 ? 1 : 0.5,
+                  cursor: safeAgg.totalClaimable > 0 && !isClaimingAll ? 'pointer' : 'not-allowed',
+                  opacity: (safeAgg.totalClaimable > 0 && !isClaimingAll) ? 1 : 0.5,
                 }}
               >
-                Claim {safeAgg.totalClaimable > 0 ? fmtUsdCompact(safeAgg.totalClaimable) : 'All'}
+                {isClaimingAll ? 'Claiming...' : `Claim ${safeAgg.totalClaimable > 0 ? fmtUsdCompact(safeAgg.totalClaimable) : 'All'}`}
               </button>
             </div>
 

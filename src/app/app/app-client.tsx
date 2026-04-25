@@ -1,32 +1,53 @@
 'use client'
 
-import { useEffect, useState, useCallback, useMemo } from 'react'
-import Link from 'next/link'
+import { useEffect, useState, useCallback, useRef } from 'react'
 import { useAccount, useConnect } from 'wagmi'
+import { useRouter } from 'next/navigation'
 import { Canvas } from '@/components/connect/canvas'
 import { NavigationProvider } from '@/components/connect/use-connect-routing'
-import { useAppMode } from '@/hooks/useAppMode'
-import { toAvailableVault } from '@/lib/default-vaults'
-import { TOKENS, fmtUsdCompact, MONO } from '@/components/connect/constants'
-import { useVaultRegistry } from '@/hooks/useVaultRegistry'
+import { useSiweAuth } from '@/hooks/useSiweAuth'
+import { TOKENS, MONO } from '@/components/connect/constants'
 
-const VAULT_ACCENT_COLORS = [
-  TOKENS.colors.accent,
-  TOKENS.colors.gray500,
-  TOKENS.colors.textSecondary,
+const WALLET_ICONS = [
+  { name: 'MetaMask', icon: '/icons/wallets/metamask.svg' },
+  { name: 'WalletConnect', icon: '/icons/wallets/walletconnect.svg' },
+  { name: 'Coinbase', icon: '/icons/wallets/coinbase.svg' },
+  { name: 'Fireblocks', icon: '/icons/wallets/fireblocks.svg' },
+  { name: 'Ledger', icon: '/icons/wallets/ledger.svg' },
+  { name: 'Safe', icon: '/icons/wallets/safe.svg' },
 ]
 
 function AccessGate({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
+  const [isRedirecting, setIsRedirecting] = useState(false)
   const { isConnected } = useAccount()
-  const { isDemo } = useAppMode()
   const { connect, connectors, isPending, reset } = useConnect()
-  const { activeVaults } = useVaultRegistry()
-  const availableVaults = useMemo(() => activeVaults.map(toAvailableVault), [activeVaults])
+  const router = useRouter()
+  const wasAuthenticated = useRef(false)
+  const {
+    isAuthenticated,
+    isLoading: authLoading,
+    sessionChecked,
+    error: authError,
+    hasRejected,
+    retry: retryAuth,
+    authenticate,
+  } = useSiweAuth()
 
   useEffect(() => {
     setMounted(true)
   }, [])
+
+  useEffect(() => {
+    if (isAuthenticated) {
+      wasAuthenticated.current = true
+    }
+    if (wasAuthenticated.current && !isAuthenticated && !authLoading && mounted) {
+      wasAuthenticated.current = false
+      router.push('/')
+      setIsRedirecting(true)
+    }
+  }, [isAuthenticated, authLoading, mounted, router])
 
   const handleConnect = useCallback(() => {
     const connector = connectors[0]
@@ -36,7 +57,7 @@ function AccessGate({ children }: { children: React.ReactNode }) {
     }
   }, [connectors, connect, reset])
 
-  if (!mounted) {
+  if (!mounted || isRedirecting || !sessionChecked) {
     return (
       <div 
         className="connect-scope"
@@ -66,47 +87,62 @@ function AccessGate({ children }: { children: React.ReactNode }) {
     )
   }
 
-  const hasAccess = isDemo || isConnected
+  const hasAccess = isConnected && isAuthenticated
 
   if (!hasAccess) {
     return (
       <div 
-        className="connect-scope"
+        className="connect-scope access-gate-layout"
         style={{
           position: 'fixed',
           inset: 0,
           display: 'flex',
+          flexDirection: 'column',
           background: TOKENS.colors.bgApp,
+          overflow: 'auto',
         }}
       >
-        {/* LEFT - 1/3 Marketing */}
+        <style>{`
+          @media (min-width: 768px) {
+            .access-gate-layout { flex-direction: row !important; overflow: hidden !important; }
+            .access-gate-left { width: 50%; border-right: ${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}; border-bottom: none !important; max-height: none !important; }
+            .access-gate-right { width: 50%; }
+          }
+        `}</style>
+        {/* LEFT - Marketing */}
         <div 
+          className="access-gate-left"
           style={{
-            width: '33.333%',
-            minWidth: '380px',
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'center',
             justifyContent: 'center',
+            textAlign: 'center',
             padding: TOKENS.spacing[8],
-            borderRight: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
             background: TOKENS.colors.black,
+            borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+            maxHeight: '45vh',
+            overflow: 'auto',
           }}
         >
-          {/* Logo */}
-          <div style={{ display: 'flex', alignItems: 'center', gap: TOKENS.spacing[3], marginBottom: TOKENS.spacing[8] }}>
-            <img src="/logos/hearst.svg" alt="Hearst" style={{ width: '40px', height: '40px' }} />
-            <span style={{ fontSize: TOKENS.fontSizes.lg, fontWeight: TOKENS.fontWeights.black, color: TOKENS.colors.textPrimary }}>
-              Hearst
-            </span>
+          {/* Logo - Solo */}
+          <div style={{ marginBottom: TOKENS.spacing[10] }}>
+            <img 
+              src="/logos/hearst-connect.svg" 
+              alt="Hearst Connect" 
+              style={{ width: '72px', height: '72px', filter: 'drop-shadow(0 0 30px rgba(167, 251, 144, 0.15))' }} 
+            />
           </div>
 
-          {/* Title */}
+          {/* Refined Title */}
           <h1 style={{
-            fontSize: TOKENS.fontSizes.xxxl,
+            fontSize: 'clamp(36px, 5vw, 56px)',
             fontWeight: TOKENS.fontWeights.black,
-            lineHeight: 1.1,
+            lineHeight: 1.08,
             color: TOKENS.colors.textPrimary,
             margin: `0 0 ${TOKENS.spacing[4]} 0`,
+            maxWidth: '520px',
+            letterSpacing: '-0.03em',
           }}>
             Institutional
             <br />
@@ -115,37 +151,62 @@ function AccessGate({ children }: { children: React.ReactNode }) {
             Vaults
           </h1>
 
-          {/* Description */}
+          {/* Subtle Description */}
           <p style={{
             fontSize: TOKENS.fontSizes.md,
-            lineHeight: 1.6,
+            lineHeight: 1.8,
             color: TOKENS.colors.textSecondary,
             margin: `0 0 ${TOKENS.spacing[8]} 0`,
-            maxWidth: '320px',
+            maxWidth: '380px',
+            fontWeight: TOKENS.fontWeights.regular,
           }}>
-            Access industrial-grade Bitcoin mining yields through transparent, audited on-chain vaults.
+            Bitcoin mining yields, on-chain. Transparent. Audited. Institutional-grade.
           </p>
 
-          {/* Features */}
-          <ul style={{ listStyle: 'none', padding: 0, margin: `0 0 ${TOKENS.spacing[8]} 0`, display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[3] }}>
+          {/* Minimal Features */}
+          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: TOKENS.spacing[3], marginBottom: TOKENS.spacing[8] }}>
             {[
-              'Real mining infrastructure',
-              'Monthly distributions',
-              'On-chain proof of reserves',
-              'Audited smart contracts',
-            ].map((feature) => (
-              <li key={feature} style={{ display: 'flex', alignItems: 'center', gap: TOKENS.spacing[3], fontSize: TOKENS.fontSizes.sm, color: TOKENS.colors.textSecondary }}>
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={TOKENS.colors.accent} strokeWidth="2">
-                  <polyline points="20 6 9 17 4 12" />
-                </svg>
-                {feature}
-              </li>
+              { label: 'Real infrastructure', value: 'Mining operations' },
+              { label: 'Monthly distributions', value: 'USDC yield' },
+              { label: 'On-chain proof', value: 'Verified reserves' },
+            ].map((item) => (
+              <div key={item.label} style={{ 
+                display: 'flex', 
+                alignItems: 'center', 
+                justifyContent: 'center', 
+                gap: TOKENS.spacing[2],
+              }}>
+                <span style={{ 
+                  fontFamily: MONO, 
+                  fontSize: TOKENS.fontSizes.xs, 
+                  color: TOKENS.colors.accent,
+                  fontWeight: TOKENS.fontWeights.bold,
+                  letterSpacing: TOKENS.letterSpacing.display,
+                }}>
+                  {item.label}
+                </span>
+                <span style={{ color: TOKENS.colors.borderSubtle }}>—</span>
+                <span style={{ 
+                  fontSize: TOKENS.fontSizes.xs, 
+                  color: TOKENS.colors.textGhost,
+                  fontWeight: TOKENS.fontWeights.medium,
+                }}>
+                  {item.value}
+                </span>
+              </div>
             ))}
-          </ul>
+          </div>
 
-          {/* Trust badges */}
-          <div style={{ display: 'flex', gap: TOKENS.spacing[3] }}>
-            {['Audited', 'On-Chain', 'Base'].map((badge) => (
+          {/* Minimal Trust Badges */}
+          <div style={{ 
+            display: 'flex', 
+            justifyContent: 'center', 
+            gap: TOKENS.spacing[6],
+            borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+            paddingTop: TOKENS.spacing[6],
+            marginTop: TOKENS.spacing[4],
+          }}>
+            {['Audited', 'Base', 'Institutional'].map((badge) => (
               <span 
                 key={badge}
                 style={{
@@ -155,9 +216,6 @@ function AccessGate({ children }: { children: React.ReactNode }) {
                   letterSpacing: TOKENS.letterSpacing.display,
                   textTransform: 'uppercase',
                   color: TOKENS.colors.textGhost,
-                  padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}`,
-                  border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-                  borderRadius: TOKENS.radius.sm,
                 }}
               >
                 {badge}
@@ -166,238 +224,219 @@ function AccessGate({ children }: { children: React.ReactNode }) {
           </div>
         </div>
 
-        {/* RIGHT - 2/3 Vaults */}
+        {/* RIGHT - Wallet Connect */}
         <div 
+          className="access-gate-right"
           style={{
-            flex: 1,
+            width: '50%',
             display: 'flex',
             flexDirection: 'column',
+            alignItems: 'center',
+            justifyContent: 'center',
             padding: TOKENS.spacing[8],
             background: TOKENS.colors.bgApp,
             overflow: 'auto',
+            minHeight: 0,
           }}
         >
-          {/* Header with Connect */}
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            alignItems: 'center',
-            marginBottom: TOKENS.spacing[6],
-            paddingBottom: TOKENS.spacing[6],
-            borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-          }}>
-            <span style={{
-              fontFamily: MONO,
-              fontSize: TOKENS.fontSizes.micro,
-              fontWeight: TOKENS.fontWeights.bold,
-              letterSpacing: TOKENS.letterSpacing.display,
-              textTransform: 'uppercase',
-              color: TOKENS.colors.textSecondary,
-            }}>
-              Available Vaults ({availableVaults.length})
-            </span>
-            <button
-              onClick={handleConnect}
-              disabled={isPending}
-              style={{
-                display: 'flex',
-                alignItems: 'center',
-                gap: TOKENS.spacing[2],
-                padding: `${TOKENS.spacing[3]} ${TOKENS.spacing[5]}`,
-                background: TOKENS.colors.accent,
-                color: TOKENS.colors.black,
-                border: TOKENS.borders.none,
-                borderRadius: TOKENS.radius.md,
-                fontSize: TOKENS.fontSizes.sm,
-                fontWeight: TOKENS.fontWeights.bold,
-                letterSpacing: TOKENS.letterSpacing.display,
+          {/* Wallet Connect Box */}
+          <div
+            style={{
+              width: '100%',
+              maxWidth: '440px',
+              background: TOKENS.colors.bgSurface,
+              border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+              borderRadius: TOKENS.radius.xl,
+              padding: `${TOKENS.spacing[10]} ${TOKENS.spacing[8]}`,
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+              gap: TOKENS.spacing[8],
+              boxShadow: `0 0 60px ${TOKENS.colors.accent}10`,
+            }}
+          >
+            {/* Title */}
+            <div style={{ textAlign: 'center' }}>
+              <h2 style={{
+                fontSize: TOKENS.fontSizes.xxl,
+                fontWeight: TOKENS.fontWeights.black,
+                color: TOKENS.colors.textPrimary,
+                margin: `0 0 ${TOKENS.spacing[3]} 0`,
                 textTransform: 'uppercase',
-                cursor: isPending ? 'wait' : 'pointer',
-                opacity: isPending ? 0.7 : 1,
+                letterSpacing: TOKENS.letterSpacing.tight,
+              }}>
+                Connect Wallet
+              </h2>
+              <p style={{
+                fontSize: TOKENS.fontSizes.md,
+                color: TOKENS.colors.textSecondary,
+                margin: 0,
+                lineHeight: 1.6,
+              }}>
+                Access your vaults and portfolio
+              </p>
+            </div>
+
+            {/* Wallet Icons Grid */}
+            <div
+              style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(3, 1fr)',
+                gap: TOKENS.spacing[4],
+                width: '100%',
               }}
             >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                <path d="M19 7H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z" />
-                <path d="M16 11h0" />
-              </svg>
-              {isPending ? 'Connecting…' : 'Connect Wallet'}
-            </button>
-          </div>
-
-          {/* Vault Cards */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[4] }}>
-            {availableVaults.length === 0 ? (
-              <div
-                style={{
-                  background: TOKENS.colors.bgSurface,
-                  border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-                  borderRadius: TOKENS.radius.lg,
-                  padding: TOKENS.spacing[6],
-                  textAlign: 'center',
-                  color: TOKENS.colors.textSecondary,
-                }}
-              >
+              {WALLET_ICONS.map((wallet) => (
                 <div
+                  key={wallet.name}
                   style={{
-                    fontFamily: MONO,
-                    fontSize: TOKENS.fontSizes.micro,
-                    fontWeight: TOKENS.fontWeights.bold,
-                    letterSpacing: TOKENS.letterSpacing.display,
-                    textTransform: 'uppercase',
-                    color: TOKENS.colors.textGhost,
-                    marginBottom: TOKENS.spacing[3],
-                  }}
-                >
-                  No vaults configured
-                </div>
-                <p style={{ margin: 0, fontSize: TOKENS.fontSizes.sm, lineHeight: 1.6 }}>
-                  Create vaults in the admin console to make them available in the app.
-                </p>
-              </div>
-            ) : availableVaults.map((vault, index) => (
-              <div 
-                key={vault.id}
-                style={{
-                  background: TOKENS.colors.bgSurface,
-                  border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-                  borderRadius: TOKENS.radius.lg,
-                  overflow: 'hidden',
-                }}
-              >
-                {/* Card Header */}
-                <div style={{
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  alignItems: 'center',
-                  padding: `${TOKENS.spacing[4]} ${TOKENS.spacing[5]}`,
-                  background: TOKENS.colors.bgSecondary,
-                  borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-                }}>
-                  <div style={{
                     display: 'flex',
+                    flexDirection: 'column',
                     alignItems: 'center',
                     gap: TOKENS.spacing[3],
-                  }}>
-                    <div style={{
-                      width: '40px',
-                      height: '40px',
-                      background: VAULT_ACCENT_COLORS[index % VAULT_ACCENT_COLORS.length],
-                      borderRadius: TOKENS.radius.md,
+                    padding: `${TOKENS.spacing[4]} ${TOKENS.spacing[3]}`,
+                    borderRadius: TOKENS.radius.lg,
+                    background: TOKENS.colors.bgTertiary,
+                    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+                    transition: 'all 0.2s ease',
+                  }}
+                >
+                  <div
+                    style={{
+                      width: '48px',
+                      height: '48px',
                       display: 'flex',
                       alignItems: 'center',
                       justifyContent: 'center',
-                      fontSize: TOKENS.fontSizes.lg,
-                      fontWeight: TOKENS.fontWeights.black,
-                      color: TOKENS.colors.black,
-                    }}>
-                      {vault.name.charAt(7)}
-                    </div>
-                    <div>
-                      <h3 style={{
-                        fontSize: TOKENS.fontSizes.lg,
-                        fontWeight: TOKENS.fontWeights.black,
-                        color: TOKENS.colors.textPrimary,
-                        margin: 0,
-                        textTransform: 'uppercase',
-                        letterSpacing: TOKENS.letterSpacing.tight,
-                      }}>
-                        {vault.name}
-                      </h3>
-                      <p style={{
-                        fontSize: TOKENS.fontSizes.xs,
-                        color: TOKENS.colors.textSecondary,
-                        margin: 0,
-                      }}>
-                        {vault.strategy}
-                      </p>
-                    </div>
+                      borderRadius: TOKENS.radius.md,
+                      background: TOKENS.colors.bgApp,
+                      border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+                    }}
+                  >
+                    <img
+                      src={wallet.icon}
+                      alt={wallet.name}
+                      style={{
+                        width: '28px',
+                        height: '28px',
+                        objectFit: 'contain',
+                      }}
+                      onError={(e) => {
+                        // Fallback if icon not found
+                        (e.target as HTMLImageElement).style.display = 'none'
+                      }}
+                    />
                   </div>
-                  <span style={{
-                    fontFamily: MONO,
-                    fontSize: TOKENS.fontSizes.micro,
-                    fontWeight: TOKENS.fontWeights.bold,
-                    letterSpacing: TOKENS.letterSpacing.display,
-                    textTransform: 'uppercase',
-                    color: TOKENS.colors.textGhost,
-                    padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}`,
-                    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-                    borderRadius: TOKENS.radius.full,
-                  }}>
-                    {vault.risk} Risk
+                  <span
+                    style={{
+                      fontFamily: MONO,
+                      fontSize: TOKENS.fontSizes.xs,
+                      fontWeight: TOKENS.fontWeights.bold,
+                      letterSpacing: TOKENS.letterSpacing.display,
+                      textTransform: 'uppercase',
+                      color: TOKENS.colors.textSecondary,
+                    }}
+                  >
+                    {wallet.name}
                   </span>
                 </div>
+              ))}
+            </div>
 
-                {/* Card Stats */}
-                <div style={{
-                  display: 'grid',
-                  gridTemplateColumns: 'repeat(4, 1fr)',
-                  gap: TOKENS.spacing[4],
-                  padding: TOKENS.spacing[5],
-                }}>
-                  {[
-                    { label: 'APR', value: `${vault.apr}%`, accent: true },
-                    { label: 'Target', value: vault.target },
-                    { label: 'Min', value: fmtUsdCompact(vault.minDeposit) },
-                      { label: 'Lock', value: vault.term },
-                  ].map((stat) => (
-                    <div key={stat.label} style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2] }}>
-                      <span style={{
-                        fontFamily: MONO,
-                        fontSize: TOKENS.fontSizes.micro,
-                        fontWeight: TOKENS.fontWeights.bold,
-                        letterSpacing: TOKENS.letterSpacing.display,
-                        textTransform: 'uppercase',
-                        color: TOKENS.colors.textGhost,
-                      }}>
-                        {stat.label}
-                      </span>
-                      <span style={{
-                        fontSize: TOKENS.fontSizes.md,
-                        fontWeight: TOKENS.fontWeights.black,
-                        color: stat.accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
-                        letterSpacing: TOKENS.letterSpacing.tight,
-                      }}>
-                        {stat.value}
-                      </span>
-                    </div>
-                  ))}
-                </div>
+            {/* Auth error */}
+            {authError && (
+              <p style={{
+                fontSize: TOKENS.fontSizes.sm,
+                color: '#f87171',
+                margin: 0,
+                textAlign: 'center',
+              }}>
+                {authError}
+              </p>
+            )}
 
-                {/* Card Footer */}
-                <div style={{
+            {/* Connect / Sign-in Button */}
+            {isConnected && !isAuthenticated ? (
+              <button
+                onClick={() => { retryAuth(); authenticate(); }}
+                disabled={authLoading}
+                style={{
+                  width: '100%',
                   display: 'flex',
-                  justifyContent: 'space-between',
                   alignItems: 'center',
-                  padding: `${TOKENS.spacing[3]} ${TOKENS.spacing[5]}`,
-                  borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-                  background: TOKENS.colors.bgTertiary,
-                }}>
-                  <span style={{
-                    fontFamily: MONO,
-                    fontSize: TOKENS.fontSizes.xs,
-                    color: TOKENS.colors.textGhost,
-                  }}>
-                    {vault.fees}
-                  </span>
-                </div>
-              </div>
-            ))}
-          </div>
+                  justifyContent: 'center',
+                  gap: TOKENS.spacing[3],
+                  padding: `${TOKENS.spacing[5]} ${TOKENS.spacing[6]}`,
+                  background: TOKENS.colors.accent,
+                  color: TOKENS.colors.black,
+                  border: TOKENS.borders.none,
+                  borderRadius: TOKENS.radius.md,
+                  fontSize: TOKENS.fontSizes.lg,
+                  fontWeight: TOKENS.fontWeights.black,
+                  letterSpacing: TOKENS.letterSpacing.display,
+                  textTransform: 'uppercase',
+                  cursor: authLoading ? 'wait' : 'pointer',
+                  opacity: authLoading ? 0.7 : 1,
+                  transition: 'all 0.2s ease',
+                  boxShadow: `0 4px 24px ${TOKENS.colors.accent}40`,
+                }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+                </svg>
+                {authLoading ? 'Signing…' : hasRejected ? 'Retry Sign In' : 'Sign In with Wallet'}
+              </button>
+            ) : (
+              <button
+                onClick={handleConnect}
+                disabled={isPending}
+                style={{
+                  width: '100%',
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'center',
+                  gap: TOKENS.spacing[3],
+                  padding: `${TOKENS.spacing[5]} ${TOKENS.spacing[6]}`,
+                  background: TOKENS.colors.accent,
+                  color: TOKENS.colors.black,
+                  border: TOKENS.borders.none,
+                  borderRadius: TOKENS.radius.md,
+                  fontSize: TOKENS.fontSizes.lg,
+                  fontWeight: TOKENS.fontWeights.black,
+                  letterSpacing: TOKENS.letterSpacing.display,
+                  textTransform: 'uppercase',
+                  cursor: isPending ? 'wait' : 'pointer',
+                  opacity: isPending ? 0.7 : 1,
+                  transition: 'all 0.2s ease',
+                  boxShadow: `0 4px 24px ${TOKENS.colors.accent}40`,
+                }}
+              >
+                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                  <path d="M19 7H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z" />
+                  <path d="M16 11h0" />
+                </svg>
+                {isPending ? 'Connecting…' : 'Connect Wallet'}
+              </button>
+            )}
 
-          {/* Footer hint */}
-          <div style={{
-            marginTop: 'auto',
-            paddingTop: TOKENS.spacing[6],
-            borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-            textAlign: 'center',
-          }}>
-            <p style={{
-              fontSize: TOKENS.fontSizes.sm,
-              color: TOKENS.colors.textSecondary,
-              margin: 0,
+            {/* Security Note */}
+            <div style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: TOKENS.spacing[2],
             }}>
-              Connect your wallet to view detailed metrics and subscribe to vaults.
-            </p>
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.colors.accent} strokeWidth="2">
+                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+              </svg>
+              <p style={{
+                fontSize: TOKENS.fontSizes.xs,
+                color: TOKENS.colors.textGhost,
+                margin: 0,
+                textAlign: 'center',
+              }}>
+                Secure connection. We never store your keys.
+              </p>
+            </div>
           </div>
         </div>
       </div>

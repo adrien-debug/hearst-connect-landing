@@ -21,8 +21,6 @@ import { useVaultById } from '@/hooks/useVaultRegistry'
 import { useTransaction } from '@/hooks/useTransaction'
 import { Skeleton } from './skeleton'
 import { WalletNotConnected, VaultNotConfigured, OnChainError } from './empty-states'
-import { useAppMode } from '@/hooks/useAppMode'
-import { useDemoPortfolio } from '@/hooks/useDemoPortfolio'
 import { useLiveActions } from '@/hooks/useLiveActions'
 
 type ModalType = 'claim' | 'manage' | 'exit' | null
@@ -35,8 +33,6 @@ export function VaultDetailPanel({
   onBack?: () => void
 }) {
   const { address: connectedAddress, isConnected } = useAccount()
-  const { isDemo } = useAppMode()
-  const { positions, actions: demoActions } = useDemoPortfolio()
   const { mode, isLimit } = useSmartFit({
     tightHeight: 760,
     limitHeight: 680,
@@ -69,7 +65,7 @@ export function VaultDetailPanel({
   const [activeModal, setActiveModal] = useState<ModalType>(null)
   const transaction = useTransaction()
 
-  if (!isDemo && !isVaultConfigured) {
+  if (!isVaultConfigured) {
     return (
       <div
         style={{
@@ -105,7 +101,7 @@ export function VaultDetailPanel({
     )
   }
 
-  if (!isDemo && !isWalletConnected) {
+  if (!isWalletConnected) {
     return (
       <div
         style={{
@@ -140,28 +136,22 @@ export function VaultDetailPanel({
     )
   }
 
-  const demoPosition = isDemo ? positions.find((p) => p.vaultId === vault.id && p.state !== 'withdrawn') : null
-
-  const capitalDeployed = isDemo ? vault.deposited : (positionData?.capitalDeployed ?? 0)
-  const accruedYield = isDemo ? vault.claimable : (positionData?.accruedYield ?? 0)
-  const currentValue = isDemo ? (vault.deposited + vault.claimable) : (positionData?.positionValue ?? 0)
-  const demoDaysRemaining = isDemo && 'lockedUntil' in vault
-    ? Math.max(0, Math.ceil((vault.lockedUntil - Date.now()) / (1000 * 60 * 60 * 24)))
-    : 0
-  const daysRemaining = isDemo ? demoDaysRemaining : (positionData?.unlockTimeline.daysRemaining ?? vaultConfig?.lockPeriodDays ?? 0)
-  const progressToTarget = isDemo ? vault.progress : (positionData?.unlockTimeline.progressPercent ?? 0)
+  const capitalDeployed = positionData?.capitalDeployed ?? 0
+  const accruedYield = positionData?.accruedYield ?? 0
+  const currentValue = positionData?.positionValue ?? 0
+  const daysRemaining = positionData?.unlockTimeline.daysRemaining ?? vaultConfig?.lockPeriodDays ?? 0
+  const progressToTarget = positionData?.unlockTimeline.progressPercent ?? 0
   const isMatured = vault.type === 'matured'
   const unlockDays = Math.max(0, daysRemaining)
-  const isTargetReached = isDemo ? (vault.progress >= 100) : (positionData?.isTargetReached ?? false)
-  const canWithdrawVault = 'canWithdraw' in vault ? vault.canWithdraw : false
-  const isPositionReadyForExit = isDemo ? canWithdrawVault : (positionData?.canWithdraw ?? false)
-  const statusLabel = isPositionReadyForExit ? 'Ready for exit' : (isDemo ? 'Demo' : 'Active')
+  const isTargetReached = positionData?.isTargetReached ?? false
+  const isPositionReadyForExit = positionData?.canWithdraw ?? false
+  const statusLabel = isPositionReadyForExit ? 'Ready for exit' : 'Active'
 
   const totalTargetYield = capitalDeployed * (parseFloat(vault.target) / 100)
   const remainingToTarget = Math.max(0, totalTargetYield - accruedYield)
 
   // Use live actions for claim/withdraw with backend persistence
-  const { claim: liveClaim, withdraw: liveWithdraw, isPending: isLivePending } = useLiveActions(vault.id)
+  const { claim: liveClaim, withdraw: liveWithdraw } = useLiveActions(vault.id)
 
   const handleClaim = async () => {
     // Both demo and live modes now use liveClaim which handles both on-chain and backend
@@ -171,16 +161,13 @@ export function VaultDetailPanel({
         if (!result.success) {
           throw new Error(result.error || 'Claim failed')
         }
-        // Refresh on-chain data after backend persistence
-        if (!isDemo) {
-          await new Promise((resolve) => setTimeout(resolve, 2000))
-          refresh()
-        }
+        await new Promise((resolve) => setTimeout(resolve, 2000))
+        refresh()
       },
       {
         pending: 'Processing claim...',
         success: `Claimed ${fmtUsdCompact(accruedYield)} successfully!`,
-        error: isDemo ? 'Nothing to claim right now.' : 'Claim failed. Please try again.',
+        error: 'Claim failed. Please try again.',
       }
     )
   }
@@ -193,21 +180,18 @@ export function VaultDetailPanel({
         if (!result.success) {
           throw new Error(result.error || 'Withdraw failed')
         }
-        // Refresh on-chain data after backend persistence
-        if (!isDemo) {
-          await new Promise((resolve) => setTimeout(resolve, 3000))
-          refresh()
-        }
+        await new Promise((resolve) => setTimeout(resolve, 3000))
+        refresh()
       },
       {
         pending: 'Processing exit...',
         success: 'Position exited successfully!',
-        error: isDemo ? 'Position not matured yet — cannot exit.' : 'Exit failed. Please contact support.',
+        error: 'Exit failed. Please contact support.',
       }
     )
   }
 
-  if (!isDemo && error && error.code !== 'WALLET_NOT_CONNECTED' && error.code !== 'VAULT_NOT_FOUND') {
+  if (error && error.code !== 'WALLET_NOT_CONNECTED' && error.code !== 'VAULT_NOT_FOUND') {
     return (
       <div
         style={{

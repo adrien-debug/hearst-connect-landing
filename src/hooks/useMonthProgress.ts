@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { MS_PER_MINUTE } from '@/lib/constants'
+const MS_PER_MINUTE = 60_000
 
 const INITIAL_DAY = 12
 const INITIAL_DAYS_IN_MONTH = 30

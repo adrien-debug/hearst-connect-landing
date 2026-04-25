@@ -1,29 +1,26 @@
 /**
- * Activity API Route - SECURED
- * GET: List activity for authenticated user (from wallet header)
+ * Activity API Route - SECURED with JWT
+ * GET: List activity for authenticated user (from JWT session)
  * POST: Create activity event for authenticated user
  *
- * Security: userId is derived from authenticated wallet header, never from client body
+ * Security: userId is derived from JWT session, never from client body
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { initDb } from '@/lib/db/connection'
 import { ActivityRepository, UserRepository } from '@/lib/db/repositories'
-import { requireAuth } from '@/lib/auth/wallet-auth'
+import { getSessionFromRequest, requireSession, AuthError } from '@/lib/auth/session'
 
 initDb()
 
 // GET /api/activity - List activity for authenticated user
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate request
-    const auth = requireAuth(request)
-    if (!auth) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
+    const session = await getSessionFromRequest(request)
+    requireSession(session)
 
-    // Find user by wallet
-    const user = UserRepository.findByWalletAddress(auth.walletAddress)
+    // Find user by wallet from session
+    const user = UserRepository.findByWalletAddress(session.address)
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
@@ -37,8 +34,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ events })
   } catch (error) {
     console.error('[API Activity GET] Error:', error)
-    if (error instanceof Error && error.message.includes('Authentication')) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode })
     }
     return NextResponse.json({ error: 'Failed to fetch activity' }, { status: 500 })
   }
@@ -47,14 +44,11 @@ export async function GET(request: NextRequest) {
 // POST /api/activity - Create activity event for authenticated user
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate request
-    const auth = requireAuth(request)
-    if (!auth) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
+    const session = await getSessionFromRequest(request)
+    requireSession(session)
 
-    // Find user by wallet
-    const user = UserRepository.findByWalletAddress(auth.walletAddress)
+    // Find user by wallet from session
+    const user = UserRepository.findByWalletAddress(session.address)
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
@@ -83,6 +77,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate txHash if provided
+    if (body.txHash && body.txHash !== 'pending') {
+      if (!/^0x([A-Fa-f0-9]{64})$/.test(body.txHash)) {
+        return NextResponse.json({ error: 'Invalid txHash format' }, { status: 400 })
+      }
+    }
+
     // Create activity event with server-derived userId
     const event = ActivityRepository.create({
       userId: user.id,
@@ -92,12 +93,14 @@ export async function POST(request: NextRequest) {
       amount: body.amount,
     })
 
-    console.log('[API Activity POST] Created activity:', event.id, 'type:', event.type, 'wallet:', auth.walletAddress, 'txHash:', body.txHash)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[API Activity POST] Created activity:', event.id, 'type:', event.type, 'wallet:', session.address, 'txHash:', body.txHash)
+    }
     return NextResponse.json({ event }, { status: 201 })
   } catch (error) {
     console.error('[API Activity POST] Error:', error)
-    if (error instanceof Error && error.message.includes('Authentication')) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode })
     }
     return NextResponse.json({ error: 'Failed to create activity event' }, { status: 500 })
   }

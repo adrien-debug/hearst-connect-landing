@@ -28,7 +28,7 @@ const variantStyles: Record<ActionButtonVariant, React.CSSProperties> = {
     border: `1px solid ${TOKENS.colors.borderSubtle}`,
   },
   danger: {
-    background: 'color-mix(in srgb, var(--color-error) 15%, transparent)',
+    background: `${TOKENS.colors.danger}15`,
     color: TOKENS.colors.danger,
     border: `1px solid ${TOKENS.colors.danger}`,
   },

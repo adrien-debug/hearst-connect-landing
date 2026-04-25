@@ -1,74 +1,72 @@
 /**
  * Backend User Hook
- * Manages the backend user entity tied to the connected wallet
- * Creates/finds user in backend when wallet connects
+ * Manages the backend user entity tied to the authenticated wallet
+ * Uses SIWE session cookie for authentication (HTTP-only, set by /api/auth/verify)
  */
 
 'use client'
 
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { useAccount } from 'wagmi'
 import { useEffect } from 'react'
-import { UsersApi, setApiWalletAddress } from '@/lib/api-client'
+import { UsersApi, setApiAuthenticated } from '@/lib/api-client'
+import { useSiweAuth } from './useSiweAuth'
 import type { DbUser } from '@/lib/db/schema'
 
 const USER_QUERY_KEY = 'backend-user'
 
 export function useBackendUser() {
-  const { address, isConnected } = useAccount()
+  const { address } = useAccount()
+  const { isAuthenticated: isSiweAuthenticated, isLoading: isSiweLoading } = useSiweAuth()
   const queryClient = useQueryClient()
 
-  // Sync wallet address with API client for authenticated requests
-  useEffect(() => {
-    if (isConnected && address) {
-      setApiWalletAddress(address)
-    } else {
-      setApiWalletAddress(null)
-    }
-  }, [isConnected, address])
-
-  // Query to get user by wallet
+  // Query to get/create user (only when SIWE authenticated)
   const {
     data: user,
-    isLoading,
+    isLoading: isUserLoading,
     error,
     refetch,
   } = useQuery<DbUser | null>({
-    queryKey: [USER_QUERY_KEY, address],
+    queryKey: [USER_QUERY_KEY],
     queryFn: async () => {
-      if (!address) return null
+      if (!isSiweAuthenticated) return null
       try {
-        // This will now use the x-wallet-address header
-        const result = await UsersApi.findOrCreate(address)
+        const result = await UsersApi.findOrCreate()
         return result.user
       } catch (e) {
-        console.error('[useBackendUser] Failed to find/create user:', e)
+        if (process.env.NODE_ENV !== 'production') {
+          console.error('[useBackendUser] Failed to find/create user:', e)
+        }
+        // If API returns 401, mark as not authenticated
+        if (e instanceof Error && e.message.includes('401')) {
+          setApiAuthenticated(false)
+        }
         return null
       }
     },
-    enabled: isConnected && !!address,
-    staleTime: 1000 * 60 * 5, // 5 minutes
-    gcTime: 1000 * 60 * 10, // 10 minutes
+    enabled: isSiweAuthenticated,
+    staleTime: 1000 * 60 * 5,
+    gcTime: 1000 * 60 * 10,
   })
 
-  // Auto-create user when wallet connects
+  // Auto-create user when SIWE authenticated
   useEffect(() => {
-    if (isConnected && address && !user && !isLoading) {
+    if (isSiweAuthenticated && !user && !isUserLoading) {
       refetch()
     }
-  }, [isConnected, address, user, isLoading, refetch])
+  }, [isSiweAuthenticated, user, isUserLoading, refetch])
 
   const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY, address] })
+    queryClient.invalidateQueries({ queryKey: [USER_QUERY_KEY] })
   }
 
   return {
     user,
     userId: user?.id ?? null,
     walletAddress: user?.walletAddress ?? address ?? null,
-    isLoading,
+    isLoading: isSiweLoading || isUserLoading,
     error,
-    isAuthenticated: !!user,
+    isAuthenticated: isSiweAuthenticated && !!user,
     refresh,
   }
 }

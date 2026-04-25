@@ -1,9 +1,30 @@
 'use client';
 
+import '@/styles/marketing/hub-font.css';
+import '@/styles/marketing/hub.css';
+import '@/styles/marketing/intro.css';
+
 import Link from 'next/link';
+import Image from 'next/image';
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 import { useEffect, useRef, useState, useCallback } from 'react';
 import { NAV_LINKS, CTA_LINKS, HUB_MAILTO_SALES, HEARST_EMAIL } from '@/config/navigation';
+
+function MenuIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" />
+    </svg>
+  );
+}
+
+function CloseIcon() {
+  return (
+    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
+    </svg>
+  );
+}
 
 /** Scroll-driven fade + parallax for `.hub-chapter` nodes (reliable vs CSS view timelines). */
 function updateHubChapterStyles(scope: HTMLElement): void {
@@ -57,46 +78,42 @@ const FEATURE_PILLARS = [
 const INVESTMENT_STRATEGY_SLIDES = [
   {
     type: 'video',
-    src: '/view-1.mp4',
+    src: '/videos/view-1.mp4',
     caption: 'Flagship — stable income',
     title: 'Hearst Prime Yield',
     desc: 'Target ~12% annual yield. $250K min, monthly USDC distributions, 3-year lock. Diversified mining income with volatility hedging for predictable returns.',
   },
   {
     type: 'video',
-    src: '/view-2.mp4',
+    src: '/videos/view-2.mp4',
     caption: 'Growth — BTC upside',
     title: 'Hearst Growth',
     desc: 'Target 16–22% annual yield. $250K min, monthly distributions, 3-year lock. Forward BTC mining exposure plus spot price upside with USDC buffer.',
   },
   {
     type: 'video',
-    src: '/view-3.mp4',
+    src: '/videos/view-3.mp4',
     caption: 'Yield mechanics',
     title: 'How yield is generated',
     desc: 'USDC is deployed into industrial mining operations. BTC rewards are converted via OTC desks. Net yield is distributed monthly, auditable end to end.',
   },
 ] as const;
 
-/** Top ~14 crypto by market cap (typical ranking). Icons: spothq/cryptocurrency-icons via jsDelivr. */
-const CRYPTO_ICON_BASE =
-  'https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@0.18.1/128/color';
-
 const ICONS = [
-  { name: 'Bitcoin', src: `${CRYPTO_ICON_BASE}/btc.png` },
-  { name: 'Ethereum', src: `${CRYPTO_ICON_BASE}/eth.png` },
-  { name: 'Tether', src: `${CRYPTO_ICON_BASE}/usdt.png` },
-  { name: 'BNB', src: `${CRYPTO_ICON_BASE}/bnb.png` },
-  { name: 'Solana', src: `${CRYPTO_ICON_BASE}/sol.png` },
-  { name: 'XRP', src: `${CRYPTO_ICON_BASE}/xrp.png` },
-  { name: 'USDC', src: `${CRYPTO_ICON_BASE}/usdc.png` },
-  { name: 'Cardano', src: `${CRYPTO_ICON_BASE}/ada.png` },
-  { name: 'Avalanche', src: `${CRYPTO_ICON_BASE}/avax.png` },
-  { name: 'Dogecoin', src: `${CRYPTO_ICON_BASE}/doge.png` },
-  { name: 'TRON', src: `${CRYPTO_ICON_BASE}/trx.png` },
-  { name: 'Chainlink', src: `${CRYPTO_ICON_BASE}/link.png` },
-  { name: 'Polygon', src: `${CRYPTO_ICON_BASE}/matic.png` },
-  { name: 'Polkadot', src: `${CRYPTO_ICON_BASE}/dot.png` },
+  { name: 'Bitcoin', src: '/icons/crypto/btc.png' },
+  { name: 'Ethereum', src: '/icons/crypto/eth.png' },
+  { name: 'Tether', src: '/icons/crypto/usdt.png' },
+  { name: 'BNB', src: '/icons/crypto/bnb.png' },
+  { name: 'Solana', src: '/icons/crypto/sol.png' },
+  { name: 'XRP', src: '/icons/crypto/xrp.png' },
+  { name: 'USDC', src: '/icons/crypto/usdc.png' },
+  { name: 'Cardano', src: '/icons/crypto/ada.png' },
+  { name: 'Avalanche', src: '/icons/crypto/avax.png' },
+  { name: 'Dogecoin', src: '/icons/crypto/doge.png' },
+  { name: 'TRON', src: '/icons/crypto/trx.png' },
+  { name: 'Chainlink', src: '/icons/crypto/link.png' },
+  { name: 'Polygon', src: '/icons/crypto/matic.png' },
+  { name: 'Polkadot', src: '/icons/crypto/dot.png' },
 ] as const;
 
 function useAutoCarousel(itemCount: number, intervalMs = 5000) {
@@ -232,11 +249,11 @@ export default function HubPageClient() {
             aria-controls="hub-site-nav"
           />
           <label className="menu-button" htmlFor="menu-checkbox" lang="fr">
-            <span className="material-symbols-outlined not-sr-only" data-show-when="closed">
-              dehaze
+            <span className="not-sr-only" data-show-when="closed">
+              <MenuIcon />
             </span>
-            <span className="material-symbols-outlined not-sr-only" data-show-when="open">
-              close
+            <span className="not-sr-only" data-show-when="open">
+              <CloseIcon />
             </span>
             <span className="sr-only">Ouvrir ou fermer le menu de navigation</span>
           </label>
@@ -262,7 +279,7 @@ export default function HubPageClient() {
 
       {/* Welcome */}
       <section id="welcome" className="center" lang="en">
-        <img src="/logos/hearst-connect.svg" alt="Hearst Connect" className="welcome-logo" />
+        <Image src="/logos/hearst-connect.svg" alt="Hearst Connect" className="welcome-logo" width={416} height={110} style={{ height: 'auto' }} priority />
         <h1 className="welcome-title hub-chapter">
           Turn Bitcoin Mining
           <br />
@@ -291,14 +308,13 @@ export default function HubPageClient() {
           <div className="icons-track" aria-hidden="false">
             {ICONS.map((icon, i) => (
               <div key={`${icon.name}-${i}`} className="icon">
-                <img
+                <Image
                   src={icon.src}
                   alt={i < ICONS.length ? icon.name : ''}
                   className="icon-img"
                   width={40}
                   height={40}
                   loading="lazy"
-                  decoding="async"
                 />
               </div>
             ))}
@@ -323,7 +339,7 @@ export default function HubPageClient() {
           </div>
           <div className="features-tablet">
             <div className="tablet-mockup">
-              <img src="/platform-screenshot.svg" alt="Hearst vault strategies preview" />
+              <Image src="/platform-screenshot.svg" alt="Hearst vault strategies preview" width={500} height={320} sizes="(max-width: 930px) 90vw, 45vw" loading="lazy" />
             </div>
           </div>
         </div>
@@ -359,16 +375,29 @@ export default function HubPageClient() {
                   <div className="hub-slide-stack">
                     <figure className="hub-slide-media">
                       {slide.type === 'video' ? (
-                        <video
-                          src={slide.src}
-                          autoPlay
-                          loop
-                          muted
-                          playsInline
-                          draggable={false}
-                        />
+                        i === activeIndex ? (
+                          <video
+                            key={slide.src}
+                            src={slide.src}
+                            autoPlay
+                            loop
+                            muted
+                            playsInline
+                            draggable={false}
+                            preload="auto"
+                          />
+                        ) : (
+                          <video
+                            key={`${slide.src}-idle`}
+                            src={slide.src}
+                            muted
+                            playsInline
+                            draggable={false}
+                            preload="none"
+                          />
+                        )
                       ) : (
-                        <img src={slide.src} alt="" draggable={false} />
+                        <Image src={slide.src} alt="" width={1000} height={562} draggable={false} loading="lazy" />
                       )}
                     </figure>
                     <div className="hub-slide-scrim" aria-hidden={true} />
@@ -471,12 +500,14 @@ export default function HubPageClient() {
         <div className="hub-footer-accent" aria-hidden />
         <div className="hub-footer-inner">
           <div className="hub-footer-brand">
-            <img
+            <Image
               src="/logos/hearst-connect.svg"
               alt="Hearst Connect"
               className="hub-footer-logo"
               width={120}
               height={32}
+              style={{ height: 'auto' }}
+              loading="lazy"
             />
             <p className="hub-footer-tagline" lang="en">
               Onchain access to industrial Bitcoin mining cash flows. Institutional controls,

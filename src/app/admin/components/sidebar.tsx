@@ -142,7 +142,7 @@ const styles: Record<string, React.CSSProperties> = {
     borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
   },
   logo: {
-    height: '28px',
+    height: TOKENS.spacing[8],
   },
   adminBadge: {
     fontFamily: MONO,
@@ -181,8 +181,8 @@ const styles: Record<string, React.CSSProperties> = {
     flex: 1,
   },
   activeIndicator: {
-    width: '4px',
-    height: '4px',
+    width: TOKENS.spacing[1],
+    height: TOKENS.spacing[1],
     borderRadius: '50%',
     background: TOKENS.colors.accent,
   },

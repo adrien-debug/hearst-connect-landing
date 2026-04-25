@@ -36,8 +36,8 @@ export function Skeleton({ mode }: SkeletonProps) {
         }}
       >
         <div style={{ marginBottom: TOKENS.spacing[4], display: 'flex', justifyContent: 'space-between' }}>
-          <div style={{ ...basePulse, width: '120px', height: '20px' }} />
-          <div style={{ ...basePulse, width: '60px', height: '20px' }} />
+          <div style={{ ...basePulse, width: TOKENS.spacing[20], height: TOKENS.spacing[5] }} />
+          <div style={{ ...basePulse, width: TOKENS.spacing[16], height: TOKENS.spacing[5] }} />
         </div>
         <div style={{ ...basePulse, width: '70%', height: '40px', marginBottom: TOKENS.spacing[4] }} />
         <div
@@ -51,8 +51,8 @@ export function Skeleton({ mode }: SkeletonProps) {
           <div style={{ ...basePulse, width: '60%', height: '100%' }} />
         </div>
         <div style={{ display: 'flex', justifyContent: 'space-between', marginTop: TOKENS.spacing[3] }}>
-          <div style={{ ...basePulse, width: '80px', height: '12px' }} />
-          <div style={{ ...basePulse, width: '80px', height: '12px' }} />
+          <div style={{ ...basePulse, width: TOKENS.spacing[16], height: TOKENS.spacing[3] }} />
+          <div style={{ ...basePulse, width: TOKENS.spacing[16], height: TOKENS.spacing[3] }} />
         </div>
       </div>
     </>

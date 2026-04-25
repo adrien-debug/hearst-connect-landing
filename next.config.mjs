@@ -13,7 +13,11 @@ const nextConfig = {
   poweredByHeader: false,
   typescript: { ignoreBuildErrors: true },
   devIndicators: false,
-  images: { unoptimized: true },
+  images: {
+    formats: ['image/avif', 'image/webp'],
+    deviceSizes: [640, 750, 828, 1080, 1200],
+    imageSizes: [16, 32, 48, 64, 96, 128, 256],
+  },
   async headers() {
     return [
       {
@@ -31,6 +35,42 @@ const nextConfig = {
           {
             key: 'Cache-Control',
             value: isProd ? 'public, max-age=31536000, immutable' : 'no-store, must-revalidate',
+          },
+        ],
+      },
+      {
+        source: '/videos/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: isProd ? 'public, max-age=2592000, stale-while-revalidate=86400' : 'no-store',
+          },
+        ],
+      },
+      {
+        source: '/images/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: isProd ? 'public, max-age=2592000, stale-while-revalidate=86400' : 'no-store',
+          },
+        ],
+      },
+      {
+        source: '/fonts/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: isProd ? 'public, max-age=31536000, immutable' : 'no-store',
+          },
+        ],
+      },
+      {
+        source: '/logos/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: isProd ? 'public, max-age=2592000, stale-while-revalidate=86400' : 'no-store',
           },
         ],
       },
@@ -65,6 +105,7 @@ const nextConfig = {
       },
     ];
   },
+  turbopack: {},
   webpack(config, { isServer }) {
     // Silence MetaMask SDK warning about react-native-async-storage (browser-only)
     config.resolve.fallback = {

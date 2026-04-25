@@ -495,8 +495,8 @@ const styles: Record<string, React.CSSProperties> = {
     gap: TOKENS.spacing[3],
   },
   vaultImage: {
-    width: '40px',
-    height: '40px',
+    width: TOKENS.spacing[10],
+    height: TOKENS.spacing[10],
     borderRadius: TOKENS.radius.md,
     objectFit: 'cover',
   },
@@ -587,8 +587,8 @@ const styles: Record<string, React.CSSProperties> = {
     margin: 0,
   },
   closeBtn: {
-    width: '32px',
-    height: '32px',
+    width: TOKENS.spacing[8],
+    height: TOKENS.spacing[8],
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
@@ -596,7 +596,7 @@ const styles: Record<string, React.CSSProperties> = {
     border: `1px solid ${TOKENS.colors.borderSubtle}`,
     borderRadius: TOKENS.radius.md,
     color: TOKENS.colors.textSecondary,
-    fontSize: '20px',
+    fontSize: TOKENS.fontSizes.lg,
     cursor: 'pointer',
   },
   form: {
@@ -668,9 +668,9 @@ const styles: Record<string, React.CSSProperties> = {
     padding: TOKENS.spacing[12],
   },
   spinner: {
-    width: '24px',
-    height: '24px',
-    border: `2px solid ${TOKENS.colors.bgTertiary}`,
+    width: TOKENS.spacing[6],
+    height: TOKENS.spacing[6],
+    border: `${TOKENS.borders.thick} solid ${TOKENS.colors.bgTertiary}`,
     borderTopColor: TOKENS.colors.accent,
     borderRadius: '50%',
     animation: 'spin 1s linear infinite',

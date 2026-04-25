@@ -6,7 +6,7 @@ const BASE_APR = 0.12
 const MAX_MONTHS = 120
 const MAX_PRICE = 1_000_000
 
-export const SCENARIOS: Record<ScenarioKey, { label: string; multiplier: number; futureMove: number }> = {
+const SCENARIOS: Record<ScenarioKey, { label: string; multiplier: number; futureMove: number }> = {
   bear: { label: 'Bear', multiplier: 0.72, futureMove: -0.22 },
   base: { label: 'Base', multiplier: 1, futureMove: 0.08 },
   bull: { label: 'Bull', multiplier: 1.34, futureMove: 0.34 },
@@ -46,6 +46,4 @@ export function projectScenario(price: number, months: number, scenario: Scenari
   }
 }
 
-export const PROJECTION_SIM_TICKET = TICKET
 export const PROJECTION_SIM_BASE_PRICE = BASE_PRICE
-export const PROJECTION_SIM_BASE_APR = BASE_APR

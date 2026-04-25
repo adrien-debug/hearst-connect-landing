@@ -1,16 +1,16 @@
 /**
- * Positions API Route - SECURED
- * GET: List positions for authenticated user (from wallet header)
+ * Positions API Route - SECURED with JWT
+ * GET: List positions for authenticated user (from JWT session)
  * POST: Create or update position for authenticated user
  * PATCH: Update position for authenticated user
  *
- * Security: userId is derived from authenticated wallet header, never from client body
+ * Security: userId is derived from JWT session, never from client body
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { initDb } from '@/lib/db/connection'
 import { PositionRepository, ActivityRepository, UserRepository } from '@/lib/db/repositories'
-import { requireAuth, type AuthContext } from '@/lib/auth/wallet-auth'
+import { getSessionFromRequest, requireSession, AuthError } from '@/lib/auth/session'
 import type { DbUserPositionUpdate } from '@/lib/db/schema'
 
 initDb()
@@ -18,14 +18,11 @@ initDb()
 // GET /api/positions - List positions for authenticated user
 export async function GET(request: NextRequest) {
   try {
-    // Authenticate request
-    const auth = requireAuth(request)
-    if (!auth) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
+    const session = await getSessionFromRequest(request)
+    requireSession(session)
 
-    // Find user by wallet address
-    const user = UserRepository.findByWalletAddress(auth.walletAddress)
+    // Find user by wallet address from session
+    const user = UserRepository.findByWalletAddress(session.address)
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
@@ -35,8 +32,8 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ positions })
   } catch (error) {
     console.error('[API Positions GET] Error:', error)
-    if (error instanceof Error && error.message.includes('Authentication')) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode })
     }
     return NextResponse.json({ error: 'Failed to fetch positions' }, { status: 500 })
   }
@@ -45,14 +42,11 @@ export async function GET(request: NextRequest) {
 // POST /api/positions - Create or add to position for authenticated user
 export async function POST(request: NextRequest) {
   try {
-    // Authenticate request
-    const auth = requireAuth(request)
-    if (!auth) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
+    const session = await getSessionFromRequest(request)
+    requireSession(session)
 
-    // Find or create user by wallet
-    const user = UserRepository.findOrCreateByWallet(auth.walletAddress)
+    // Find or create user by wallet from session
+    const user = UserRepository.findOrCreateByWallet(session.address)
 
     // Parse body (no userId accepted from client)
     const body = await request.json() as {
@@ -71,6 +65,13 @@ export async function POST(request: NextRequest) {
       )
     }
 
+    // Validate txHash if provided (must be valid hex)
+    if (body.txHash && body.txHash !== 'pending') {
+      if (!/^0x([A-Fa-f0-9]{64})$/.test(body.txHash)) {
+        return NextResponse.json({ error: 'Invalid txHash format' }, { status: 400 })
+      }
+    }
+
     // Check if user already has an active position for this vault
     const existing = PositionRepository.findByUserAndVault(user.id, body.vaultId)
     if (existing) {
@@ -80,7 +81,7 @@ export async function POST(request: NextRequest) {
         return NextResponse.json({ error: 'Failed to update position' }, { status: 500 })
       }
 
-      // Log activity with txHash if provided
+      // Log activity with txHash
       ActivityRepository.create({
         userId: user.id,
         vaultId: body.vaultId,
@@ -89,7 +90,9 @@ export async function POST(request: NextRequest) {
         amount: body.deposited,
       })
 
-      console.log('[API Positions POST] Added deposit to existing position:', updated.id, 'wallet:', auth.walletAddress, 'txHash:', body.txHash)
+      if (process.env.NODE_ENV !== 'production') {
+        console.log('[API Positions POST] Added deposit to existing position:', updated.id, 'wallet:', session.address, 'txHash:', body.txHash)
+      }
       return NextResponse.json({ position: updated, isNew: false })
     }
 
@@ -98,10 +101,10 @@ export async function POST(request: NextRequest) {
       userId: user.id,
       vaultId: body.vaultId,
       deposited: body.deposited,
-      maturityDate: body.maturityDate || Date.now() + 365 * 24 * 60 * 60 * 1000, // Default 1 year
+      maturityDate: body.maturityDate || Date.now() + 365 * 24 * 60 * 60 * 1000,
     })
 
-    // Log activity with txHash if provided
+    // Log activity with txHash
     ActivityRepository.create({
       userId: user.id,
       vaultId: body.vaultId,
@@ -110,12 +113,14 @@ export async function POST(request: NextRequest) {
       amount: body.deposited,
     })
 
-    console.log('[API Positions POST] Created position:', position.id, 'wallet:', auth.walletAddress, 'txHash:', body.txHash)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[API Positions POST] Created position:', position.id, 'wallet:', session.address, 'txHash:', body.txHash)
+    }
     return NextResponse.json({ position, isNew: true }, { status: 201 })
   } catch (error) {
     console.error('[API Positions POST] Error:', error)
-    if (error instanceof Error && error.message.includes('Authentication')) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode })
     }
     return NextResponse.json({ error: 'Failed to create position' }, { status: 500 })
   }
@@ -124,14 +129,11 @@ export async function POST(request: NextRequest) {
 // PATCH /api/positions - Update position for authenticated user
 export async function PATCH(request: NextRequest) {
   try {
-    // Authenticate request
-    const auth = requireAuth(request)
-    if (!auth) {
-      return NextResponse.json({ error: 'Authentication required' }, { status: 401 })
-    }
+    const session = await getSessionFromRequest(request)
+    requireSession(session)
 
     // Find user
-    const user = UserRepository.findByWalletAddress(auth.walletAddress)
+    const user = UserRepository.findByWalletAddress(session.address)
     if (!user) {
       return NextResponse.json({ error: 'User not found' }, { status: 404 })
     }
@@ -152,13 +154,20 @@ export async function PATCH(request: NextRequest) {
       return NextResponse.json({ error: 'Position ID is required' }, { status: 400 })
     }
 
+    // Validate txHash if provided
+    if (body.txHash && body.txHash !== 'pending') {
+      if (!/^0x([A-Fa-f0-9]{64})$/.test(body.txHash)) {
+        return NextResponse.json({ error: 'Invalid txHash format' }, { status: 400 })
+      }
+    }
+
     // Verify the position belongs to this user
     const existing = PositionRepository.findById(body.positionId)
     if (!existing) {
       return NextResponse.json({ error: 'Position not found' }, { status: 404 })
     }
     if (existing.userId !== user.id) {
-      console.error('[API Positions PATCH] Unauthorized access attempt:', body.positionId, 'by wallet:', auth.walletAddress)
+      console.error('[API Positions PATCH] Unauthorized access attempt:', body.positionId, 'by wallet:', session.address)
       return NextResponse.json({ error: 'Unauthorized' }, { status: 403 })
     }
 
@@ -177,12 +186,14 @@ export async function PATCH(request: NextRequest) {
       })
     }
 
-    console.log('[API Positions PATCH] Updated position:', positionId, 'wallet:', auth.walletAddress, 'txHash:', txHash)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[API Positions PATCH] Updated position:', positionId, 'wallet:', session.address, 'txHash:', txHash)
+    }
     return NextResponse.json({ position })
   } catch (error) {
     console.error('[API Positions PATCH] Error:', error)
-    if (error instanceof Error && error.message.includes('Authentication')) {
-      return NextResponse.json({ error: error.message }, { status: 401 })
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode })
     }
     return NextResponse.json({ error: 'Failed to update position' }, { status: 500 })
   }

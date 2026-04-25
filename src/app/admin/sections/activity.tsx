@@ -1,49 +1,115 @@
 'use client'
 
+import { useState } from 'react'
+import { useQuery } from '@tanstack/react-query'
 import { ADMIN_TOKENS as TOKENS, MONO } from '../constants'
-import { useDemoPortfolio } from '@/hooks/useDemoPortfolio'
+import type { DbActivityEvent } from '@/lib/db/schema'
 
-const SYSTEM_EVENTS = [
-  { id: 1, type: 'system', message: 'System initialized', time: '2026-04-24 08:00:00', level: 'info' },
-  { id: 2, type: 'vault', message: 'Vault "HashVault Prime #1" registered', time: '2026-04-24 08:15:00', level: 'success' },
-  { id: 3, type: 'config', message: 'APR configuration updated', time: '2026-04-24 09:30:00', level: 'info' },
-  { id: 4, type: 'user', message: 'Admin login from 192.168.1.100', time: '2026-04-24 10:00:00', level: 'info' },
-]
+const SYSTEM_EVENTS: { id: string; type: string; message: string; time: string; level: string }[] = []
+
+interface ActivityEvent {
+  id: string | number
+  type: string
+  message: string
+  time: string
+  level: string
+  source?: 'system' | 'live'
+}
 
 export function ActivitySection() {
-  const { history } = useDemoPortfolio()
+  const [activeFilter, setActiveFilter] = useState<'all' | 'system' | 'live'>('all')
 
-  // Generate activity from portfolio history
-  const positionActivity = history.slice(0, 10).map((h, i) => ({
-    id: `hist-${i}`,
-    type: h.type === 'deposit' ? 'deposit' : h.type,
-    message: `${h.type === 'deposit' ? 'Deposit' : h.type === 'claim' ? 'Claim' : 'Withdraw'} of $${h.amount.toLocaleString()} ${h.type === 'deposit' ? 'into' : 'from'} ${h.vaultName}`,
-    time: new Date(h.timestamp).toISOString().replace('T', ' ').slice(0, 19),
+  // Fetch real user activities from DB (admin endpoint)
+  const { data: liveActivities = [], isLoading } = useQuery<DbActivityEvent[]>({
+    queryKey: ['admin-all-activity'],
+    queryFn: async () => {
+      try {
+        const res = await fetch('/api/admin/activity?limit=100', {
+          credentials: 'include',
+          headers: { 'x-admin-key': 'hearst-admin-dev-key' },
+        })
+        if (!res.ok) {
+          console.error('[ActivitySection] Failed to fetch admin activity:', res.status)
+          return []
+        }
+        const data = await res.json()
+        return data.events || []
+      } catch (error) {
+        console.error('[ActivitySection] Error fetching admin activity:', error)
+        return []
+      }
+    },
+    staleTime: 1000 * 30, // 30 seconds
+  })
+
+  // Convert live DB activities to activity format
+  const liveActivity: ActivityEvent[] = liveActivities.map((event) => ({
+    id: `live-${event.id}`,
+    type: event.type,
+    message: `[USER] ${event.type === 'deposit' ? 'Deposit' : event.type === 'claim' ? 'Claim' : 'Withdraw'} of $${event.amount.toLocaleString()} ${event.type === 'deposit' ? 'into' : 'from'} ${event.vaultName}`,
+    time: new Date(event.timestamp).toISOString().replace('T', ' ').slice(0, 19),
     level: 'success' as const,
+    source: 'live' as const,
   }))
 
-  const allActivity = [...SYSTEM_EVENTS, ...positionActivity].sort(
+  const systemActivity: ActivityEvent[] = SYSTEM_EVENTS.map(e => ({ ...e, source: 'system' as const }))
+
+  // Merge all activities
+  const allActivity = [...systemActivity, ...liveActivity].sort(
     (a, b) => new Date(b.time).getTime() - new Date(a.time).getTime()
   )
+
+  // Apply filter
+  const filteredActivity = activeFilter === 'all'
+    ? allActivity
+    : allActivity.filter(a => a.source === activeFilter)
+
+  const totalEvents = allActivity.length
+  const systemCount = systemActivity.length
+  const liveCount = liveActivity.length
+  const last24h = allActivity.filter((a) => isRecent(a.time, 24)).length
 
   return (
     <div style={styles.container}>
       {/* Stats */}
       <div style={styles.stats}>
-        <ActivityStat label="Total Events" value={allActivity.length} />
-        <ActivityStat label="System Events" value={SYSTEM_EVENTS.length} />
-        <ActivityStat label="User Actions" value={positionActivity.length} />
-        <ActivityStat label="Last 24h" value={allActivity.filter((a) => isRecent(a.time, 24)).length} />
+        <ActivityStat label="Total Events" value={totalEvents} />
+        <ActivityStat label="System Events" value={systemCount} />
+        <ActivityStat label="User Actions" value={liveCount} accent />
       </div>
 
       {/* Filters */}
       <div style={styles.filters}>
-        <button style={{ ...styles.filterBtn, background: TOKENS.colors.accent, color: TOKENS.colors.black }}>
-          All
+        <button
+          onClick={() => setActiveFilter('all')}
+          style={{
+            ...styles.filterBtn,
+            background: activeFilter === 'all' ? TOKENS.colors.accent : TOKENS.colors.bgSidebar,
+            color: activeFilter === 'all' ? TOKENS.colors.black : TOKENS.colors.textSecondary,
+          }}
+        >
+          All ({totalEvents})
         </button>
-        <button style={styles.filterBtn}>System</button>
-        <button style={styles.filterBtn}>Vaults</button>
-        <button style={styles.filterBtn}>User</button>
+        <button
+          onClick={() => setActiveFilter('system')}
+          style={{
+            ...styles.filterBtn,
+            background: activeFilter === 'system' ? TOKENS.colors.accent : TOKENS.colors.bgSidebar,
+            color: activeFilter === 'system' ? TOKENS.colors.black : TOKENS.colors.textSecondary,
+          }}
+        >
+          System ({systemCount})
+        </button>
+        <button
+          onClick={() => setActiveFilter('live')}
+          style={{
+            ...styles.filterBtn,
+            background: activeFilter === 'live' ? TOKENS.colors.accent : TOKENS.colors.bgSidebar,
+            color: activeFilter === 'live' ? TOKENS.colors.black : TOKENS.colors.textSecondary,
+          }}
+        >
+          Users ({liveCount})
+        </button>
       </div>
 
       {/* Activity List */}
@@ -52,10 +118,19 @@ export function ActivitySection() {
           <span style={styles.headerCell}>Event</span>
           <span style={styles.headerCell}>Type</span>
           <span style={styles.headerCell}>Timestamp</span>
-          <span style={styles.headerCell}>Level</span>
+          <span style={styles.headerCell}>Source</span>
         </div>
         <div style={styles.list}>
-          {allActivity.map((event) => (
+          {isLoading && (
+            <div style={styles.loadingRow}>
+              <div style={styles.spinner} />
+              <span>Loading activities...</span>
+            </div>
+          )}
+          {!isLoading && filteredActivity.length === 0 && (
+            <div style={styles.emptyRow}>No activities found for this filter</div>
+          )}
+          {!isLoading && filteredActivity.map((event) => (
             <div key={event.id} style={styles.row}>
               <div style={styles.cellEvent}>
                 <div style={styles.eventIcon}>{getIcon(event.type)}</div>
@@ -63,7 +138,7 @@ export function ActivitySection() {
               </div>
               <span style={styles.cellType}>{event.type}</span>
               <span style={styles.cellTime}>{event.time}</span>
-              <LevelBadge level={event.level} />
+              <SourceBadge source={event.source || 'system'} />
             </div>
           ))}
         </div>
@@ -71,7 +146,9 @@ export function ActivitySection() {
 
       {/* Pagination */}
       <div style={styles.pagination}>
-        <span style={styles.pageInfo}>Showing {allActivity.length} events</span>
+        <span style={styles.pageInfo}>
+          Showing {filteredActivity.length} of {totalEvents} events
+        </span>
         <div style={styles.pageButtons}>
           <button style={styles.pageBtn} disabled>Previous</button>
           <button style={styles.pageBtn} disabled>Next</button>
@@ -81,32 +158,30 @@ export function ActivitySection() {
   )
 }
 
-function ActivityStat({ label, value }: { label: string; value: number }) {
+function ActivityStat({ label, value, accent = false }: { label: string; value: number; accent?: boolean }) {
   return (
     <div style={styles.statCard}>
-      <span style={styles.statValue}>{value}</span>
+      <span style={{ ...styles.statValue, color: accent ? TOKENS.colors.accent : styles.statValue.color }}>{value}</span>
       <span style={styles.statLabel}>{label}</span>
     </div>
   )
 }
 
-function LevelBadge({ level }: { level: string }) {
+function SourceBadge({ source }: { source: 'system' | 'live' }) {
   const colors: Record<string, string> = {
-    info: TOKENS.colors.textSecondary,
-    success: TOKENS.colors.accent,
-    warning: 'var(--color-warning)',
-    error: TOKENS.colors.danger,
+    system: TOKENS.colors.textSecondary,
+    live: '#4A9EFF',
   }
 
   return (
     <span
       style={{
-        ...styles.levelBadge,
-        color: colors[level] || TOKENS.colors.textSecondary,
-        borderColor: colors[level] || TOKENS.colors.textSecondary,
+        ...styles.sourceBadge,
+        color: colors[source] || TOKENS.colors.textSecondary,
+        borderColor: colors[source] || TOKENS.colors.textSecondary,
       }}
     >
-      {level}
+      {source}
     </span>
   )
 }
@@ -260,7 +335,7 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: TOKENS.fontSizes.xs,
     color: TOKENS.colors.textGhost,
   },
-  levelBadge: {
+  sourceBadge: {
     display: 'inline-block',
     padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[2]}`,
     border: `1px solid`,
@@ -269,6 +344,27 @@ const styles: Record<string, React.CSSProperties> = {
     fontSize: TOKENS.fontSizes.micro,
     fontWeight: TOKENS.fontWeights.bold,
     textTransform: 'uppercase',
+  },
+  loadingRow: {
+    display: 'flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: TOKENS.spacing[3],
+    padding: `${TOKENS.spacing[8]} ${TOKENS.spacing[4]}`,
+    color: TOKENS.colors.textSecondary,
+  },
+  emptyRow: {
+    padding: `${TOKENS.spacing[8]} ${TOKENS.spacing[4]}`,
+    textAlign: 'center',
+    color: TOKENS.colors.textGhost,
+  },
+  spinner: {
+    width: '20px',
+    height: '20px',
+    border: `2px solid ${TOKENS.colors.bgTertiary}`,
+    borderTopColor: TOKENS.colors.accent,
+    borderRadius: '50%',
+    animation: 'spin 1s linear infinite',
   },
   pagination: {
     display: 'flex',

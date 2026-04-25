@@ -2,27 +2,18 @@
 
 import { useRouter } from 'next/navigation'
 import { useVaultRegistry } from '@/hooks/useVaultRegistry'
-import { useDemoPortfolio, seedDemoPortfolio } from '@/hooks/useDemoPortfolio'
-import { useAppMode } from '@/hooks/useAppMode'
 import { ADMIN_TOKENS as TOKENS, MONO, fmtUsd, fmtUsdCompact } from '../constants'
 import Link from 'next/link'
 
 export function DashboardSection() {
   const router = useRouter()
   const { vaults, isLoading } = useVaultRegistry()
-  const { stats } = useDemoPortfolio()
-  const { setMode } = useAppMode()
 
   const totalVaults = vaults.length
   const activeVaults = vaults.filter((v) => v.isActive !== false).length
-  const totalValue = stats.totalDeployed + stats.totalUnclaimedYield + stats.totalClaimedYield
-  const totalUsers = 1 // Demo user count
+  const totalUsers = 0
 
-  const recentActivity = [
-    { type: 'vault_created', message: 'New vault "Prime Yield" created', time: '2h ago' },
-    { type: 'deposit', message: 'Demo deposit: $50,000', time: '5h ago' },
-    { type: 'config', message: 'APR updated for HashVault #1', time: '1d ago' },
-  ]
+  const recentActivity: { type: string; message: string; time: string }[] = []
 
   return (
     <div style={styles.container}>
@@ -36,13 +27,13 @@ export function DashboardSection() {
         />
         <StatCard
           label="Total Value Locked"
-          value={fmtUsdCompact(totalValue)}
+          value={fmtUsdCompact(0)}
           subtext="Across all vaults"
-          trend="+12.5%"
+          trend=""
           accent
         />
         <StatCard
-          label="Demo Users"
+          label="Users"
           value={totalUsers}
           subtext="Active sessions"
         />
@@ -65,15 +56,10 @@ export function DashboardSection() {
             </Link>
             <button
               style={styles.actionButton}
-              onClick={() => {
-                // Seed demo data, activate demo mode (skip reload since we're navigating), and redirect
-                seedDemoPortfolio('demo')
-                setMode('demo', { skipReload: true })
-                router.push('/app')
-              }}
+              onClick={() => router.push('/app')}
             >
               <DemoIcon />
-              <span>Launch Demo Mode</span>
+              <span>View App</span>
             </button>
             <button style={styles.actionButton}>
               <ExportIcon />

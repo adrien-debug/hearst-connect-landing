@@ -79,6 +79,12 @@ export const ADMIN_TOKENS = {
     xl: '20px',
     full: '9999px',
   },
+  borders: {
+    none: 'none',
+    thin: '1px',
+    thick: '2px',
+    heavy: '6px',
+  },
 }
 
 export const MONO = ADMIN_TOKENS.fonts.mono

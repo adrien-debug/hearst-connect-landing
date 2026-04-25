@@ -1,16 +1,15 @@
 /**
- * Vaults API Route - SECURED
+ * Vaults API Route - SECURED with JWT
  * GET: List all vaults (optionally filter by active) - Public
- * POST: Create a new vault (admin only)
+ * POST: Create a new vault - Admin only (JWT session + admin flag)
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { initDb } from '@/lib/db/connection'
 import { VaultRepository } from '@/lib/db/repositories'
-import { isAdminRequest } from '@/lib/auth/wallet-auth'
+import { requireAdminAccess, AuthError } from '@/lib/auth/session'
 import type { DbVaultInput } from '@/lib/db/schema'
 
-// Initialize DB on first request
 initDb()
 
 // GET /api/vaults - Public endpoint for listing vaults
@@ -24,24 +23,14 @@ export async function GET(request: NextRequest) {
     return NextResponse.json({ vaults })
   } catch (error) {
     console.error('[API Vaults GET] Error fetching vaults:', error)
-    return NextResponse.json(
-      { error: 'Failed to fetch vaults' },
-      { status: 500 }
-    )
+    return NextResponse.json({ error: 'Failed to fetch vaults' }, { status: 500 })
   }
 }
 
-// POST /api/vaults - Admin only
+// POST /api/vaults - Admin only (JWT session required + admin flag)
 export async function POST(request: NextRequest) {
   try {
-    // Check admin authorization
-    if (!isAdminRequest(request)) {
-      console.error('[API Vaults POST] Unauthorized admin attempt')
-      return NextResponse.json(
-        { error: 'Admin access required' },
-        { status: 403 }
-      )
-    }
+    await requireAdminAccess(request)
 
     const body = await request.json() as DbVaultInput
 
@@ -54,21 +43,20 @@ export async function POST(request: NextRequest) {
     }
 
     if (typeof body.apr !== 'number' || body.apr < 0) {
-      return NextResponse.json(
-        { error: 'Invalid APR value' },
-        { status: 400 }
-      )
+      return NextResponse.json({ error: 'Invalid APR value' }, { status: 400 })
     }
 
     const vault = VaultRepository.create(body)
-    console.log('[API Vaults POST] Created vault:', vault.id, vault.name)
+    if (process.env.NODE_ENV !== 'production') {
+      console.log('[API Vaults POST] Created vault:', vault.id, vault.name)
+    }
 
     return NextResponse.json({ vault }, { status: 201 })
   } catch (error) {
-    console.error('[API Vaults POST] Error creating vault:', error)
-    return NextResponse.json(
-      { error: 'Failed to create vault' },
-      { status: 500 }
-    )
+    console.error('[API Vaults POST] Error:', error)
+    if (error instanceof AuthError) {
+      return NextResponse.json({ error: error.message }, { status: error.statusCode })
+    }
+    return NextResponse.json({ error: 'Failed to create vault' }, { status: 500 })
   }
 }

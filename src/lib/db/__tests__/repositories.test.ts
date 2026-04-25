@@ -1,8 +1,8 @@
 import { describe, it, expect, beforeAll, afterAll } from 'vitest'
-import { initDb, closeDb } from '../connection'
+import { initDb, closeDb, _setTestDb } from '../connection'
 import { UserRepository, VaultRepository, PositionRepository, ActivityRepository } from '../repositories'
+import Database from 'better-sqlite3'
 
-// Generate unique wallet address for each test
 function generateWallet(): `0x${string}` {
   const random = Math.random().toString(36).substring(2, 15)
   return `0x${random.padStart(40, '0')}` as `0x${string}`
@@ -10,6 +10,7 @@ function generateWallet(): `0x${string}` {
 
 describe('Database Repositories', () => {
   beforeAll(() => {
+    _setTestDb(new Database(':memory:'))
     initDb()
   })
 

@@ -14,16 +14,11 @@ import type { VaultLine, Aggregate, AvailableVault } from './data'
 import { SIMULATION_VIEW_ID, AVAILABLE_VAULTS_VIEW_ID } from './view-ids'
 import { DockRadial } from './dock-radial'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
-import { useAppMode } from '@/hooks/useAppMode'
-import { useDemoPortfolio } from '@/hooks/useDemoPortfolio'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 
 export function Canvas() {
   const { vaults, agg, selectedId, setSelectedId, selected, isSimulation, isLoading } = useConnectRouting()
-  const { isDemo, toggleMode } = useAppMode()
-  const { actions: { reset } } = useDemoPortfolio()
-  const [confirmReset, setConfirmReset] = useState(false)
   const isAvailableVaultsList = selectedId === AVAILABLE_VAULTS_VIEW_ID
   const panelKey = isSimulation ? SIMULATION_VIEW_ID : isAvailableVaultsList ? AVAILABLE_VAULTS_VIEW_ID : selected?.id ?? 'portfolio'
 
@@ -61,8 +56,8 @@ export function Canvas() {
         >
           <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <img
-              src="/logos/hearst.svg"
-              alt="Hearst"
+              src="/logos/hearst-connect.svg"
+              alt="Hearst Connect"
               style={{
                 height: TOKENS.spacing[8],
                 width: 'auto',
@@ -105,8 +100,8 @@ export function Canvas() {
         {/* Logo - aligné à gauche */}
         <div style={{ display: 'flex', alignItems: 'center', height: '100%', gap: TOKENS.spacing[4] }}>
           <img
-            src="/logos/hearst.svg"
-            alt="Hearst"
+            src="/logos/hearst-connect.svg"
+            alt="Hearst Connect"
             style={{
               height: TOKENS.spacing[8],
               width: 'auto',
@@ -115,105 +110,7 @@ export function Canvas() {
           />
         </div>
 
-        {/* Demo: indicator (one-way to live) + reset + wallet. Live: wallet only */}
         <div style={{ display: 'flex', alignItems: 'center', height: '100%', gap: TOKENS.spacing[3] }}>
-          {isDemo && (
-            <>
-              {/* Demo indicator - one way switch to live only */}
-              <button
-                type="button"
-                onClick={toggleMode}
-                style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: TOKENS.spacing[2],
-                  padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[1]} ${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
-                  background: TOKENS.colors.accentDim,
-                  border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accentSubtle}`,
-                  borderRadius: TOKENS.radius.full,
-                  color: TOKENS.colors.accent,
-                  fontSize: TOKENS.fontSizes.micro,
-                  fontWeight: TOKENS.fontWeights.bold,
-                  textTransform: 'uppercase',
-                  letterSpacing: TOKENS.letterSpacing.wide,
-                  cursor: 'pointer',
-                  transition: 'all var(--transition-default)',
-                }}
-                title="Passer en mode Live (registre + chaîne)"
-              >
-                <span>DÉMO</span>
-                <span
-                  style={{
-                    display: 'inline-flex',
-                    alignItems: 'center',
-                    justifyContent: 'center',
-                    width: TOKENS.spacing[6],
-                    height: TOKENS.spacing[6],
-                    borderRadius: TOKENS.radius.full,
-                    background: TOKENS.colors.accent,
-                    transition: 'all var(--transition-default)',
-                    boxShadow: `0 ${TOKENS.spacing[1]} ${TOKENS.spacing[2]} ${TOKENS.colors.accentSubtle}`,
-                  }}
-                >
-                  <svg
-                    width={TOKENS.spacing[3]}
-                    height={TOKENS.spacing[3]}
-                    viewBox="0 0 24 24"
-                    fill="none"
-                    stroke={TOKENS.colors.black}
-                    strokeWidth={TOKENS.borders.thick}
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    style={{
-                      transform: 'rotate(0deg)',
-                      transition: 'transform var(--transition-default)',
-                    }}
-                  >
-                    <polyline points="9 18 15 12 9 6" />
-                  </svg>
-                </span>
-              </button>
-              <button
-                type="button"
-                onClick={() => {
-                  if (confirmReset) {
-                    reset()
-                    setConfirmReset(false)
-                  } else {
-                    setConfirmReset(true)
-                  }
-                }}
-                style={{
-                  padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}`,
-                  background: confirmReset ? TOKENS.colors.danger : `${TOKENS.colors.danger}26`,
-                  border: `${TOKENS.borders.thin} solid ${confirmReset ? TOKENS.colors.danger : `${TOKENS.colors.danger}80`}`,
-                  borderRadius: TOKENS.radius.sm,
-                  color: confirmReset ? TOKENS.colors.white : TOKENS.colors.danger,
-                  fontSize: TOKENS.fontSizes.micro,
-                  fontWeight: TOKENS.fontWeights.bold,
-                  textTransform: 'uppercase',
-                  letterSpacing: TOKENS.letterSpacing.wide,
-                  cursor: 'pointer',
-                  transition: 'all var(--transition-fast)',
-                }}
-                title="Réinitialiser le portefeuille démo"
-                onMouseEnter={(e) => {
-                  if (!confirmReset) {
-                    e.currentTarget.style.background = `${TOKENS.colors.danger}40`
-                    e.currentTarget.style.borderColor = `${TOKENS.colors.danger}CC`
-                  }
-                }}
-                onMouseLeave={(e) => {
-                  if (!confirmReset) {
-                    e.currentTarget.style.background = `${TOKENS.colors.danger}26`
-                    e.currentTarget.style.borderColor = `${TOKENS.colors.danger}80`
-                  }
-                }}
-              >
-                {confirmReset ? 'Confirmer ?' : 'Reset'}
-              </button>
-            </>
-          )}
           <ThemeToggle variant="minimal" size="sm" />
           <WalletButton />
         </div>
