@@ -2,7 +2,7 @@
 
 import { useState } from 'react'
 import { useVaultRegistry } from '@/hooks/useVaultRegistry'
-import { TOKENS, MONO, fmtUsd } from '@/components/connect/constants'
+import { ADMIN_TOKENS as TOKENS, MONO, fmtUsd } from '../constants'
 import { isAddress } from 'viem'
 import type { VaultConfig, VaultConfigInput } from '@/types/vault'
 

@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { TOKENS, MONO } from '@/components/connect/constants'
+import { ADMIN_TOKENS as TOKENS, MONO } from '../constants'
 import { useAppMode } from '@/hooks/useAppMode'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { STORAGE_KEYS } from '@/config/storage-keys'

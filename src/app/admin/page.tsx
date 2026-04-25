@@ -9,7 +9,7 @@ import { VaultsSection } from './sections/vaults'
 import { ActivitySection } from './sections/activity'
 import { SettingsSection } from './sections/settings'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
-import { TOKENS } from '@/components/connect/constants'
+import { ADMIN_TOKENS as TOKENS } from './constants'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 const SECTIONS: Record<string, React.ComponentType> = {

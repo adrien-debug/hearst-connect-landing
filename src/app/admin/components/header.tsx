@@ -1,6 +1,6 @@
 'use client'
 
-import { TOKENS, MONO } from '@/components/connect/constants'
+import { ADMIN_TOKENS as TOKENS, MONO } from '../constants'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 interface AdminHeaderProps {

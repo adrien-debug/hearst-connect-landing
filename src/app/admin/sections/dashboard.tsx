@@ -4,7 +4,7 @@ import { useRouter } from 'next/navigation'
 import { useVaultRegistry } from '@/hooks/useVaultRegistry'
 import { useDemoPortfolio, seedDemoPortfolio } from '@/hooks/useDemoPortfolio'
 import { useAppMode } from '@/hooks/useAppMode'
-import { TOKENS, MONO, fmtUsd, fmtUsdCompact } from '@/components/connect/constants'
+import { ADMIN_TOKENS as TOKENS, MONO, fmtUsd, fmtUsdCompact } from '../constants'
 import Link from 'next/link'
 
 export function DashboardSection() {
@@ -66,9 +66,9 @@ export function DashboardSection() {
             <button
               style={styles.actionButton}
               onClick={() => {
-                // Explicitly activate demo mode, seed data, and redirect to app
+                // Seed demo data, activate demo mode (skip reload since we're navigating), and redirect
                 seedDemoPortfolio('demo')
-                setMode('demo')
+                setMode('demo', { skipReload: true })
                 router.push('/app')
               }}
             >

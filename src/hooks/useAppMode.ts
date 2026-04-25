@@ -51,7 +51,7 @@ export function useAppMode() {
     }
   }, [])
 
-  const setAppMode = useCallback((newMode: 'demo' | 'live') => {
+  const setAppMode = useCallback((newMode: 'demo' | 'live', options?: { skipReload?: boolean }) => {
     // Prevent setting demo mode without valid admin session
     if (newMode === 'demo' && !hasValidAdminSession()) {
       console.warn('[useAppMode] Cannot activate demo mode without valid admin session')
@@ -61,8 +61,10 @@ export function useAppMode() {
     setMode(newMode)
     if (typeof window !== 'undefined') {
       localStorage.setItem(STORAGE_KEYS.APP_MODE, newMode)
-      // Force reload to apply changes
-      window.location.reload()
+      // Force reload unless explicitly skipped (e.g., when redirecting)
+      if (!options?.skipReload) {
+        window.location.reload()
+      }
     }
   }, [])
 

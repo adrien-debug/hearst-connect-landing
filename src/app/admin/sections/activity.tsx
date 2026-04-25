@@ -1,6 +1,6 @@
 'use client'
 
-import { TOKENS, MONO } from '@/components/connect/constants'
+import { ADMIN_TOKENS as TOKENS, MONO } from '../constants'
 import { useDemoPortfolio } from '@/hooks/useDemoPortfolio'
 
 const SYSTEM_EVENTS = [

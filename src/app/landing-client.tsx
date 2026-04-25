@@ -57,21 +57,21 @@ const FEATURE_PILLARS = [
 const INVESTMENT_STRATEGY_SLIDES = [
   {
     type: 'video',
-    src: '/view-1.mp4',
+    src: '/videos/view-1.mp4',
     caption: 'Flagship — stable income',
-    title: 'Hearst Prime Yield',
+    title: 'Hearst Connect Prime Yield',
     desc: 'Target ~12% annual yield. $250K min, monthly USDC distributions, 3-year lock. Diversified mining income with volatility hedging for predictable returns.',
   },
   {
     type: 'video',
-    src: '/view-2.mp4',
+    src: '/videos/view-2.mp4',
     caption: 'Growth — BTC upside',
-    title: 'Hearst Growth',
+    title: 'Hearst Connect Growth',
     desc: 'Target 16–22% annual yield. $250K min, monthly distributions, 3-year lock. Forward BTC mining exposure plus spot price upside with USDC buffer.',
   },
   {
     type: 'video',
-    src: '/view-3.mp4',
+    src: '/videos/view-3.mp4',
     caption: 'Yield mechanics',
     title: 'How yield is generated',
     desc: 'USDC is deployed into industrial mining operations. BTC rewards are converted via OTC desks. Net yield is distributed monthly, auditable end to end.',
@@ -273,22 +273,6 @@ export default function HubPageClient() {
             packaged into transparent onchain vaults.
           </span>
         </h1>
-        <div
-          style={{
-            display: 'flex',
-            gap: 'var(--hub-space-md)',
-            marginTop: 'var(--hub-space-md)',
-            flexDirection: 'column',
-            alignItems: 'center',
-          }}
-        >
-          <Link href={CTA_LINKS.launchApp.href} className="welcome-btn hub-chapter">
-            {CTA_LINKS.launchApp.label}
-          </Link>
-          <a href={CTA_LINKS.viewOffering.href} className="hub-cta-secondary hub-chapter">
-            {CTA_LINKS.viewOffering.label}
-          </a>
-        </div>
       </section>
 
       {/* Intro */}

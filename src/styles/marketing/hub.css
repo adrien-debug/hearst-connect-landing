@@ -1240,18 +1240,18 @@
 		}
 	}
 .theme-light {
-  --dashboard-page: #e5e5e5;
+  --dashboard-page: #f8fafc;
   --dashboard-surface: #ffffff;
-  --dashboard-text-primary: #171717;
-  --dashboard-text-secondary: #525252;
-  --dashboard-accent: #A7FB90;
-  --dashboard-text-accent: #4d7c0f; /* Readable olive variant for text */
-  --dashboard-border: rgba(0, 0, 0, 0.12);
-  --dashboard-overlay-04: rgba(0, 0, 0, 0.04);
-  --dashboard-overlay-06: rgba(0, 0, 0, 0.06);
-  --dashboard-overlay-08: rgba(0, 0, 0, 0.08);
-  --dashboard-overlay-10: rgba(0, 0, 0, 0.10);
-  --dashboard-overlay-12: rgba(0, 0, 0, 0.12);
+  --dashboard-text-primary: #0f172a;
+  --dashboard-text-secondary: #475569;
+  --dashboard-accent: #059669;
+  --dashboard-text-accent: #059669;
+  --dashboard-border: rgba(15, 23, 42, 0.08);
+  --dashboard-overlay-04: rgba(15, 23, 42, 0.04);
+  --dashboard-overlay-06: rgba(15, 23, 42, 0.06);
+  --dashboard-overlay-08: rgba(15, 23, 42, 0.08);
+  --dashboard-overlay-10: rgba(15, 23, 42, 0.10);
+  --dashboard-overlay-12: rgba(15, 23, 42, 0.12);
   background-color: var(--dashboard-page);
   color: var(--dashboard-text-primary);
 }
