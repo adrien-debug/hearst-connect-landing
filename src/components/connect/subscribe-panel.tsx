@@ -196,6 +196,8 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
           isValid={isValid}
           isReady={isReady}
           num={num}
+          monthlyYield={monthlyYield}
+          dailyYield={dailyYield}
           yearlyYield={yearlyYield}
           totalYield={totalYield}
           onApprove={handleApprove}

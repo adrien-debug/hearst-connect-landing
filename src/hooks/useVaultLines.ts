@@ -4,7 +4,9 @@ import { useMemo } from 'react'
 import type { VaultLine, ActiveVault, Aggregate } from '@/components/connect/data'
 import { useVaultRegistry } from './useVaultRegistry'
 import { useDemoPortfolio, useSystemVaults } from './useDemoPortfolio'
+import { useUserData } from './useUserData'
 import { useAppMode } from './useAppMode'
+import { useAccount } from 'wagmi'
 import { toAvailableVault } from '@/lib/default-vaults'
 import { DAYS_PER_YEAR } from '@/lib/constants'
 
@@ -28,15 +30,17 @@ function calculateAggregate(vaults: VaultLine[]): Aggregate {
 
 export function useVaultLines() {
   const { activeVaults, isLoading: isRegistryLoading } = useVaultRegistry()
-  const { hydratedPositions, stats } = useDemoPortfolio()
+  const { hydratedPositions: demoPositions, stats: demoStats } = useDemoPortfolio()
+  const { positions: userPositions, stats: userStats, isLoading: isUserDataLoading } = useUserData()
   const systemVaults = useSystemVaults()
   const { isDemo } = useAppMode()
+  const { isConnected } = useAccount()
 
   return useMemo(() => {
     // MODE DÉMO: Forcé par le toggle
     if (isDemo) {
       const demoVaultLines: VaultLine[] = systemVaults.map((sysVault) => {
-        const position = hydratedPositions.find((p) => p.vaultId === sysVault.id)
+        const position = demoPositions.find((p) => p.vaultId === sysVault.id)
 
         if (position && position.state !== 'withdrawn') {
           const activeVault: ActiveVault = {
@@ -82,21 +86,65 @@ export function useVaultLines() {
         .filter((v): v is ActiveVault => v.type === 'active')
         .map((v) => ({ deposited: v.deposited, claimable: v.claimable, apr: v.apr }))
 
-      const avgApr = stats.totalDeployed > 0
-        ? activeForAgg.reduce((sum, v) => sum + v.apr * v.deposited, 0) / stats.totalDeployed
+      const avgApr = demoStats.totalDeployed > 0
+        ? activeForAgg.reduce((sum, v) => sum + v.apr * v.deposited, 0) / demoStats.totalDeployed
         : 0
 
       return {
         vaults: demoVaultLines,
-        agg: { totalDeposited: stats.totalDeployed, totalClaimable: stats.totalUnclaimedYield, avgApr },
+        agg: { totalDeposited: demoStats.totalDeployed, totalClaimable: demoStats.totalUnclaimedYield, avgApr },
         hasVaults: true,
         isLoading: false,
         mode: 'demo' as const,
       }
     }
 
-    // MODE BLOCKCHAIN: Live
-    // activeVaults already includes fallback to marketing vaults via useVaultRegistry
+    // MODE LIVE: User connected with real backend data
+    if (isConnected) {
+      // Combine registry vaults with user positions
+      const vaultLines: VaultLine[] = activeVaults.map((vaultConfig) => {
+        const userPosition = userPositions.find((p) => p.vaultId === vaultConfig.id && p.state !== 'withdrawn')
+
+        if (userPosition) {
+          // User has an active position in this vault
+          const activeVault: ActiveVault = {
+            type: 'active',
+            id: vaultConfig.id,
+            name: vaultConfig.name,
+            apr: vaultConfig.apr,
+            target: vaultConfig.target,
+            strategy: vaultConfig.strategy,
+            image: vaultConfig.image,
+            deposited: userPosition.deposited,
+            claimable: userPosition.claimable,
+            lockedUntil: userPosition.maturityDate,
+            canWithdraw: userPosition.canWithdraw,
+            maturity: userPosition.isMatured ? 'Matured' : `${userPosition.daysRemaining} days`,
+            progress: userPosition.progressPercent,
+          }
+          return activeVault
+        }
+
+        // No position - show as available
+        return toAvailableVault(vaultConfig)
+      })
+
+      return {
+        vaults: vaultLines,
+        agg: {
+          totalDeposited: userStats.totalDeposited,
+          totalClaimable: userStats.totalClaimable,
+          avgApr: userStats.totalDeposited > 0
+            ? userPositions.reduce((sum, p) => sum + p.apr * p.deposited, 0) / userStats.totalDeposited
+            : 0,
+        },
+        hasVaults: vaultLines.length > 0,
+        isLoading: isRegistryLoading || isUserDataLoading,
+        mode: 'live' as const,
+      }
+    }
+
+    // MODE LIVE (wallet not connected): Show available vaults from registry only
     const configuredLines = activeVaults.map(toAvailableVault)
 
     return {
@@ -106,5 +154,16 @@ export function useVaultLines() {
       isLoading: isRegistryLoading,
       mode: 'live' as const,
     }
-  }, [isDemo, hydratedPositions, stats, systemVaults, activeVaults, isRegistryLoading])
+  }, [
+    isDemo,
+    demoPositions,
+    demoStats,
+    systemVaults,
+    activeVaults,
+    userPositions,
+    userStats,
+    isRegistryLoading,
+    isUserDataLoading,
+    isConnected,
+  ])
 }

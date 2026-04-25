@@ -2,8 +2,10 @@
 
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { VaultConfig, VaultConfigInput, VaultRegistryState } from '@/types/vault'
-import { STORAGE_KEYS } from '@/config/storage-keys'
-import { DEFAULT_MARKETING_VAULTS } from '@/lib/default-vaults'
+import { VaultsApi, dbVaultToConfig } from '@/lib/api-client'
+import type { DbVaultInput } from '@/lib/db/schema'
+
+const VAULT_REGISTRY_QUERY_KEY = 'vault-registry'
 
 function generateVaultId(): string {
   return `vault-${Date.now()}-${Math.random().toString(36).substring(2, 9)}`
@@ -16,119 +18,77 @@ function getInitialState(): VaultRegistryState {
   }
 }
 
-function loadFromStorage(): VaultRegistryState {
-  if (typeof window === 'undefined') return getInitialState()
-
-  try {
-    const stored = localStorage.getItem(STORAGE_KEYS.VAULT_REGISTRY)
-
-    if (!stored) {
-      // First visit - start with empty registry (no auto-seed)
-      // Demo vaults are only seeded when admin explicitly activates demo mode
-      return getInitialState()
-    }
-
-    const parsed = JSON.parse(stored) as VaultRegistryState
-
-    return {
-      ...getInitialState(),
-      ...parsed,
-      vaults: parsed.vaults?.map((v) => ({
-        ...v,
-        chain: v.chain,
-      })) || [],
-    }
-  } catch (e) {
-    console.error('[VaultRegistry] Corrupted storage, resetting:', e)
-    try { localStorage.removeItem(STORAGE_KEYS.VAULT_REGISTRY) } catch {}
-    return getInitialState()
-  }
-}
-
-function saveToStorage(state: VaultRegistryState): void {
-  if (typeof window === 'undefined') return
-
-  try {
-    localStorage.setItem(STORAGE_KEYS.VAULT_REGISTRY, JSON.stringify(state))
-  } catch {
-    // Silent fail in SSR or if storage is full
+// Convert VaultConfigInput to DbVaultInput for API
+function toDbVaultInput(input: VaultConfigInput): DbVaultInput {
+  return {
+    name: input.name,
+    description: input.description,
+    vaultAddress: input.vaultAddress,
+    usdcAddress: input.usdcAddress,
+    chainId: input.chain.id,
+    chainName: input.chain.name,
+    apr: input.apr,
+    target: input.target,
+    lockPeriodDays: input.lockPeriodDays,
+    minDeposit: input.minDeposit,
+    strategy: input.strategy,
+    fees: input.fees,
+    risk: input.risk,
+    image: input.image,
+    isActive: true,
   }
 }
 
 export function useVaultRegistry() {
   const queryClient = useQueryClient()
 
-  const { data: state, isLoading } = useQuery<VaultRegistryState>({
-    queryKey: ['vault-registry'],
-    queryFn: loadFromStorage,
-    staleTime: Infinity,
-    gcTime: Infinity,
+  // Fetch vaults from backend API
+  const { data: dbVaults = [], isLoading } = useQuery({
+    queryKey: [VAULT_REGISTRY_QUERY_KEY],
+    queryFn: async () => {
+      const result = await VaultsApi.list(true) // active only
+      return result.vaults
+    },
+    staleTime: 1000 * 30, // 30 seconds
   })
 
-  const currentState = state || getInitialState()
+  // Convert DbVault[] to VaultConfig[]
+  const vaults: VaultConfig[] = dbVaults.map(dbVaultToConfig)
+  const activeVaults = vaults.filter((v) => v.isActive)
+
+  // Local state for activeVaultId (remains client-side preference)
+  const { data: activeVaultId = null } = useQuery<string | null>({
+    queryKey: [VAULT_REGISTRY_QUERY_KEY, 'active'],
+    queryFn: () => null,
+    staleTime: Infinity,
+  })
+
+  const activeVault = activeVaultId ? vaults.find((v) => v.id === activeVaultId) || activeVaults[0] || null : activeVaults[0] || null
 
   const addVaultMutation = useMutation({
     mutationFn: async (input: VaultConfigInput): Promise<VaultConfig> => {
-      // Re-read fresh state from storage to avoid race conditions
-      const freshState = loadFromStorage()
-
-      const newVault: VaultConfig = {
-        ...input,
-        id: input.id || generateVaultId(),
-        createdAt: Date.now(),
-        isActive: true,
-      }
-
-      const newState: VaultRegistryState = {
-        vaults: [...freshState.vaults, newVault],
-        activeVaultId: freshState.activeVaultId || newVault.id,
-      }
-
-      saveToStorage(newState)
-      return newVault
+      const dbInput = toDbVaultInput(input)
+      const result = await VaultsApi.create(dbInput)
+      return dbVaultToConfig(result.vault)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vault-registry'] })
+      queryClient.invalidateQueries({ queryKey: [VAULT_REGISTRY_QUERY_KEY] })
     },
   })
 
   const removeVaultMutation = useMutation({
     mutationFn: async (vaultId: string): Promise<void> => {
-      // Re-read fresh state from storage to avoid race conditions
-      const freshState = loadFromStorage()
-
-      const newVaults = freshState.vaults.filter((v) => v.id !== vaultId)
-      const newActiveId =
-        freshState.activeVaultId === vaultId
-          ? newVaults[0]?.id || null
-          : freshState.activeVaultId
-
-      const newState: VaultRegistryState = {
-        vaults: newVaults,
-        activeVaultId: newActiveId,
-      }
-
-      saveToStorage(newState)
+      await VaultsApi.delete(vaultId)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vault-registry'] })
+      queryClient.invalidateQueries({ queryKey: [VAULT_REGISTRY_QUERY_KEY] })
     },
   })
 
   const setActiveVaultMutation = useMutation({
     mutationFn: async (vaultId: string | null): Promise<void> => {
-      // Re-read fresh state from storage to avoid race conditions
-      const freshState = loadFromStorage()
-
-      const newState: VaultRegistryState = {
-        ...freshState,
-        activeVaultId: vaultId,
-      }
-
-      saveToStorage(newState)
-    },
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vault-registry'] })
+      // This is just client-side preference now, no API call needed
+      queryClient.setQueryData([VAULT_REGISTRY_QUERY_KEY, 'active'], vaultId)
     },
   })
 
@@ -140,58 +100,34 @@ export function useVaultRegistry() {
       vaultId: string
       updates: Partial<VaultConfigInput>
     }): Promise<VaultConfig> => {
-      // Re-read fresh state from storage to avoid race conditions
-      const freshState = loadFromStorage()
+      // Convert partial updates to DbVaultInput format
+      const dbUpdates: Partial<DbVaultInput> = {}
+      if (updates.name !== undefined) dbUpdates.name = updates.name
+      if (updates.description !== undefined) dbUpdates.description = updates.description
+      if (updates.apr !== undefined) dbUpdates.apr = updates.apr
+      if (updates.target !== undefined) dbUpdates.target = updates.target
+      if (updates.lockPeriodDays !== undefined) dbUpdates.lockPeriodDays = updates.lockPeriodDays
+      if (updates.minDeposit !== undefined) dbUpdates.minDeposit = updates.minDeposit
+      if (updates.strategy !== undefined) dbUpdates.strategy = updates.strategy
+      if (updates.fees !== undefined) dbUpdates.fees = updates.fees
+      if (updates.risk !== undefined) dbUpdates.risk = updates.risk
+      if (updates.image !== undefined) dbUpdates.image = updates.image
 
-      const vaultIndex = freshState.vaults.findIndex((v) => v.id === vaultId)
-      if (vaultIndex === -1) {
-        throw new Error(`Vault ${vaultId} not found`)
-      }
-
-      const updatedVault: VaultConfig = {
-        ...freshState.vaults[vaultIndex],
-        ...updates,
-      }
-
-      const newVaults = [...freshState.vaults]
-      newVaults[vaultIndex] = updatedVault
-
-      const newState: VaultRegistryState = {
-        ...freshState,
-        vaults: newVaults,
-      }
-
-      saveToStorage(newState)
-      return updatedVault
+      const result = await VaultsApi.update(vaultId, dbUpdates)
+      return dbVaultToConfig(result.vault)
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ['vault-registry'] })
+      queryClient.invalidateQueries({ queryKey: [VAULT_REGISTRY_QUERY_KEY] })
     },
   })
 
-  // Fall back to marketing vaults if registry is empty (for public pages)
-  const effectiveVaults = currentState.vaults.length > 0
-    ? currentState.vaults
-    : DEFAULT_MARKETING_VAULTS.map((v, i) => ({
-        ...v,
-        id: `default-vault-${i}`,
-        createdAt: Date.now(),
-        isActive: true,
-      }))
-
-  const activeVault = currentState.activeVaultId
-    ? currentState.vaults.find((v) => v.id === currentState.activeVaultId)
-    : null
-
-  const activeVaults = effectiveVaults.filter((v) => v.isActive)
-
   return {
-    vaults: currentState.vaults,
+    vaults,
     activeVaults,
-    activeVaultId: currentState.activeVaultId,
+    activeVaultId,
     activeVault,
     isLoading,
-    hasVaults: currentState.vaults.length > 0,
+    hasVaults: vaults.length > 0,
     addVault: addVaultMutation.mutateAsync,
     removeVault: removeVaultMutation.mutateAsync,
     setActiveVault: setActiveVaultMutation.mutateAsync,

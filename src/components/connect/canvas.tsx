@@ -15,12 +15,15 @@ import { SIMULATION_VIEW_ID, AVAILABLE_VAULTS_VIEW_ID } from './view-ids'
 import { DockRadial } from './dock-radial'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { useAppMode } from '@/hooks/useAppMode'
+import { useDemoPortfolio } from '@/hooks/useDemoPortfolio'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
 
 
 export function Canvas() {
   const { vaults, agg, selectedId, setSelectedId, selected, isSimulation, isLoading } = useConnectRouting()
-  const { isDemo } = useAppMode()
+  const { isDemo, toggleMode } = useAppMode()
+  const { actions: { reset } } = useDemoPortfolio()
+  const [confirmReset, setConfirmReset] = useState(false)
   const isAvailableVaultsList = selectedId === AVAILABLE_VAULTS_VIEW_ID
   const panelKey = isSimulation ? SIMULATION_VIEW_ID : isAvailableVaultsList ? AVAILABLE_VAULTS_VIEW_ID : selected?.id ?? 'portfolio'
 

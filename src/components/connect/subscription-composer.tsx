@@ -2,7 +2,7 @@
 
 import { Label } from '@/components/ui/label'
 import { PreFlightCheck } from './pre-flight-check'
-import { TOKENS, fmtUsd } from './constants'
+import { TOKENS, fmtUsd, fmtUsdCompact } from './constants'
 import type { AvailableVault } from './data'
 import { fitValue, type SmartFitMode } from './smart-fit'
 
@@ -18,6 +18,8 @@ type Props = {
   isValid: boolean
   isReady: boolean
   num: number
+  monthlyYield: number
+  dailyYield: number
   yearlyYield: number
   totalYield: number
   onApprove: () => void
@@ -38,6 +40,8 @@ export function SubscriptionComposer({
   isValid,
   isReady,
   num,
+  monthlyYield,
+  dailyYield,
   yearlyYield,
   totalYield,
   onApprove,
@@ -53,6 +57,7 @@ export function SubscriptionComposer({
 
   const showError = num > 0 && !isValid
   const showValidHint = isValid && num > 0
+  const lockMonths = getLockMonths(vault.lockPeriod)
 
   return (
     <div
@@ -373,6 +378,15 @@ export function SubscriptionComposer({
               </span>
             </div>
 
+            <LiveSimulationCard
+              amount={num}
+              dailyYield={dailyYield}
+              monthlyYield={monthlyYield}
+              totalYield={totalYield}
+              totalValue={num + totalYield}
+              lockMonths={lockMonths}
+            />
+
             {/* Pre-flight Check */}
             <div style={{ marginTop: TOKENS.spacing[2] }}>
               <PreFlightCheck 
@@ -566,6 +580,227 @@ function ProjectionLine({ label, value, highlight }: { label: string; value: str
       </span>
     </div>
   )
+}
+
+function LiveSimulationCard({
+  amount,
+  dailyYield,
+  monthlyYield,
+  totalYield,
+  totalValue,
+  lockMonths,
+}: {
+  amount: number
+  dailyYield: number
+  monthlyYield: number
+  totalYield: number
+  totalValue: number
+  lockMonths: number
+}) {
+  const checkpoints = [
+    { label: 'Entry', months: 0, value: amount },
+    { label: `${Math.max(1, Math.round(lockMonths / 3))}M`, months: Math.max(1, Math.round(lockMonths / 3)), value: amount + totalYield / 3 },
+    { label: `${Math.max(1, Math.round((lockMonths * 2) / 3))}M`, months: Math.max(1, Math.round((lockMonths * 2) / 3)), value: amount + (totalYield * 2) / 3 },
+    { label: 'Maturity', months: lockMonths, value: totalValue },
+  ]
+
+  return (
+    <div
+      style={{
+        marginTop: TOKENS.spacing[2],
+        padding: TOKENS.spacing[3],
+        background: TOKENS.colors.bgTertiary,
+        border: `${TOKENS.borders.thin} solid ${amount > 0 ? TOKENS.colors.accentSubtle : TOKENS.colors.borderSubtle}`,
+        borderRadius: TOKENS.radius.md,
+        display: 'flex',
+        flexDirection: 'column',
+        gap: TOKENS.spacing[3],
+      }}
+    >
+      <div
+        style={{
+          display: 'flex',
+          justifyContent: 'space-between',
+          alignItems: 'center',
+          gap: TOKENS.spacing[2],
+        }}
+      >
+        <span
+          style={{
+            fontFamily: TOKENS.fonts.mono,
+            fontSize: TOKENS.fontSizes.micro,
+            fontWeight: TOKENS.fontWeights.bold,
+            letterSpacing: TOKENS.letterSpacing.display,
+            textTransform: 'uppercase',
+            color: TOKENS.colors.textSecondary,
+          }}
+        >
+          Live Simulation
+        </span>
+        <span
+          style={{
+            fontSize: TOKENS.fontSizes.micro,
+            color: TOKENS.colors.textGhost,
+            fontFamily: TOKENS.fonts.mono,
+            letterSpacing: TOKENS.letterSpacing.display,
+            textTransform: 'uppercase',
+          }}
+        >
+          {lockMonths}M Horizon
+        </span>
+      </div>
+
+      {amount > 0 ? (
+        <>
+          <div
+            style={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(3, 1fr)',
+              gap: TOKENS.spacing[2],
+            }}
+          >
+            <SimulationMetric label="Daily" value={`+${fmtUsdCompact(dailyYield)}`} />
+            <SimulationMetric label="Monthly" value={`+${fmtUsdCompact(monthlyYield)}`} accent />
+            <SimulationMetric label="Maturity" value={fmtUsdCompact(totalValue)} />
+          </div>
+
+          <div
+            style={{
+              display: 'flex',
+              alignItems: 'center',
+              gap: TOKENS.spacing[2],
+            }}
+          >
+            {checkpoints.map((point, index) => (
+              <div
+                key={`${point.label}-${index}`}
+                style={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  gap: TOKENS.spacing[2],
+                  flex: index === checkpoints.length - 1 ? '0 0 auto' : 1,
+                  minWidth: 0,
+                }}
+              >
+                <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[1], minWidth: 0 }}>
+                  <span
+                    style={{
+                      fontFamily: TOKENS.fonts.mono,
+                      fontSize: TOKENS.fontSizes.micro,
+                      fontWeight: TOKENS.fontWeights.bold,
+                      letterSpacing: TOKENS.letterSpacing.display,
+                      textTransform: 'uppercase',
+                      color: index === checkpoints.length - 1 ? TOKENS.colors.accent : TOKENS.colors.textGhost,
+                    }}
+                  >
+                    {point.label}
+                  </span>
+                  <span
+                    style={{
+                      fontSize: TOKENS.fontSizes.xs,
+                      fontWeight: TOKENS.fontWeights.bold,
+                      color: TOKENS.colors.textPrimary,
+                      whiteSpace: 'nowrap',
+                    }}
+                  >
+                    {fmtUsdCompact(point.value)}
+                  </span>
+                </div>
+                {index < checkpoints.length - 1 && (
+                  <div
+                    style={{
+                      flex: 1,
+                      height: '1px',
+                      background: TOKENS.colors.accentSubtle,
+                      position: 'relative',
+                      minWidth: TOKENS.spacing[4],
+                    }}
+                  >
+                    <span
+                      style={{
+                        position: 'absolute',
+                        top: '-1.5px',
+                        right: 0,
+                        width: '4px',
+                        height: '4px',
+                        borderRadius: TOKENS.radius.full,
+                        background: TOKENS.colors.accent,
+                      }}
+                    />
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
+
+          <div
+            style={{
+              fontSize: TOKENS.fontSizes.xs,
+              color: TOKENS.colors.textSecondary,
+              lineHeight: 1.5,
+            }}
+          >
+            Estimated cumulative yield at maturity: <span style={{ color: TOKENS.colors.accent, fontWeight: TOKENS.fontWeights.bold }}>{fmtUsd(totalYield)}</span>
+          </div>
+        </>
+      ) : (
+        <div
+          style={{
+            fontSize: TOKENS.fontSizes.xs,
+            color: TOKENS.colors.textGhost,
+            lineHeight: 1.5,
+          }}
+        >
+          Enter a deployment amount to generate the investment simulation before subscribing.
+        </div>
+      )}
+    </div>
+  )
+}
+
+function SimulationMetric({ label, value, accent = false }: { label: string; value: string; accent?: boolean }) {
+  return (
+    <div
+      style={{
+        padding: TOKENS.spacing[2],
+        background: TOKENS.colors.black,
+        borderRadius: TOKENS.radius.sm,
+        border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+      }}
+    >
+      <div
+        style={{
+          fontFamily: TOKENS.fonts.mono,
+          fontSize: TOKENS.fontSizes.micro,
+          fontWeight: TOKENS.fontWeights.bold,
+          letterSpacing: TOKENS.letterSpacing.display,
+          textTransform: 'uppercase',
+          color: TOKENS.colors.textGhost,
+          marginBottom: TOKENS.spacing[1],
+        }}
+      >
+        {label}
+      </div>
+      <div
+        style={{
+          fontSize: TOKENS.fontSizes.sm,
+          fontWeight: TOKENS.fontWeights.black,
+          color: accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
+          letterSpacing: VALUE_LETTER_SPACING,
+        }}
+      >
+        {value}
+      </div>
+    </div>
+  )
+}
+
+function getLockMonths(lockPeriod: string) {
+  const value = Number.parseInt(lockPeriod, 10)
+  if (!Number.isFinite(value) || value <= 0) return 12
+  if (lockPeriod.toLowerCase().includes('year')) return value * 12
+  if (lockPeriod.toLowerCase().includes('day')) return Math.max(1, Math.round(value / 30))
+  return value
 }
 
 const VALUE_LETTER_SPACING = '-0.02em'

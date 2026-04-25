@@ -1,13 +1,14 @@
 'use client'
 
-import { useEffect, useState, useCallback } from 'react'
+import { useEffect, useState, useCallback, useMemo } from 'react'
 import Link from 'next/link'
 import { useAccount, useConnect } from 'wagmi'
 import { Canvas } from '@/components/connect/canvas'
 import { NavigationProvider } from '@/components/connect/use-connect-routing'
 import { useAppMode } from '@/hooks/useAppMode'
-import { DEFAULT_MARKETING_VAULTS } from '@/lib/default-vaults'
+import { toAvailableVault } from '@/lib/default-vaults'
 import { TOKENS, fmtUsdCompact, MONO } from '@/components/connect/constants'
+import { useVaultRegistry } from '@/hooks/useVaultRegistry'
 
 const VAULT_ACCENT_COLORS = [
   TOKENS.colors.accent,
@@ -20,6 +21,8 @@ function AccessGate({ children }: { children: React.ReactNode }) {
   const { isConnected } = useAccount()
   const { isDemo } = useAppMode()
   const { connect, connectors, isPending, reset } = useConnect()
+  const { activeVaults } = useVaultRegistry()
+  const availableVaults = useMemo(() => activeVaults.map(toAvailableVault), [activeVaults])
 
   useEffect(() => {
     setMounted(true)
@@ -191,7 +194,7 @@ function AccessGate({ children }: { children: React.ReactNode }) {
               textTransform: 'uppercase',
               color: TOKENS.colors.textSecondary,
             }}>
-              Available Vaults ({DEFAULT_MARKETING_VAULTS.length})
+              Available Vaults ({availableVaults.length})
             </span>
             <button
               onClick={handleConnect}
@@ -223,9 +226,37 @@ function AccessGate({ children }: { children: React.ReactNode }) {
 
           {/* Vault Cards */}
           <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[4] }}>
-            {DEFAULT_MARKETING_VAULTS.map((vault, index) => (
+            {availableVaults.length === 0 ? (
+              <div
+                style={{
+                  background: TOKENS.colors.bgSurface,
+                  border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+                  borderRadius: TOKENS.radius.lg,
+                  padding: TOKENS.spacing[6],
+                  textAlign: 'center',
+                  color: TOKENS.colors.textSecondary,
+                }}
+              >
+                <div
+                  style={{
+                    fontFamily: MONO,
+                    fontSize: TOKENS.fontSizes.micro,
+                    fontWeight: TOKENS.fontWeights.bold,
+                    letterSpacing: TOKENS.letterSpacing.display,
+                    textTransform: 'uppercase',
+                    color: TOKENS.colors.textGhost,
+                    marginBottom: TOKENS.spacing[3],
+                  }}
+                >
+                  No vaults configured
+                </div>
+                <p style={{ margin: 0, fontSize: TOKENS.fontSizes.sm, lineHeight: 1.6 }}>
+                  Create vaults in the admin console to make them available in the app.
+                </p>
+              </div>
+            ) : availableVaults.map((vault, index) => (
               <div 
-                key={vault.name}
+                key={vault.id}
                 style={{
                   background: TOKENS.colors.bgSurface,
                   border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
@@ -307,7 +338,7 @@ function AccessGate({ children }: { children: React.ReactNode }) {
                     { label: 'APR', value: `${vault.apr}%`, accent: true },
                     { label: 'Target', value: vault.target },
                     { label: 'Min', value: fmtUsdCompact(vault.minDeposit) },
-                    { label: 'Lock', value: vault.lockPeriodDays >= 365 ? `${Math.floor(vault.lockPeriodDays / 365)}Y` : `${vault.lockPeriodDays}D` },
+                      { label: 'Lock', value: vault.term },
                   ].map((stat) => (
                     <div key={stat.label} style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2] }}>
                       <span style={{
