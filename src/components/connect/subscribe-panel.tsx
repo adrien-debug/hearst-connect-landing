@@ -13,6 +13,7 @@ import { parseUnits } from 'viem'
 import { WalletNotConnected, VaultNotConfigured } from './empty-states'
 import { useAppMode } from '@/hooks/useAppMode'
 import { useDemoPortfolio } from '@/hooks/useDemoPortfolio'
+import { useLiveActions } from '@/hooks/useLiveActions'
 
 export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBack?: () => void }) {
   const { mode, isLimit } = useSmartFit({
@@ -36,7 +37,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
   const usdcAddress = vaultConfig?.usdcAddress
   const isVaultConfigured = !!vaultConfig && !!vaultAddress && !!usdcAddress
 
-  const { deposit, isPending: isDepositPending } = useVaultActions(
+  const { deposit: chainDeposit, isPending: isDepositPending } = useVaultActions(
     isVaultConfigured ? vaultAddress : undefined
   )
   const { approve, isPending: isApprovePending } = useTokenAllowance(
@@ -44,6 +45,9 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
     address,
     isVaultConfigured ? vaultAddress : undefined
   )
+
+  // Use live actions for deposit with backend persistence
+  const { deposit: liveDeposit, isPending: isLivePending } = useLiveActions(vault.id)
 
   const num = parseFloat(amount) || 0
   const isValid = num >= vault.minDeposit
@@ -63,25 +67,25 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
     if (!isReady) return
     if (isDemo) {
       setIsDepositing(true)
-      await new Promise((r) => setTimeout(r, 800))
-      demoActions.deposit(vault.id, num)
-      setAmount('')
-      setAgreed(false)
+      const result = await liveDeposit(num)
+      if (result.success) {
+        setAmount('')
+        setAgreed(false)
+        onBack?.()
+      }
       setIsDepositing(false)
-      onBack?.()
       return
     }
     if (!isVaultConfigured) return
     try {
       setIsDepositing(true)
-      const amountBigInt = parseUnits(amount, 6)
-      const maxSafe = BigInt(Number.MAX_SAFE_INTEGER)
-      if (amountBigInt > maxSafe) {
-        throw new Error('Amount too large. Please enter a smaller amount.')
+      const result = await liveDeposit(num)
+      if (result.success) {
+        setAmount('')
+        setAgreed(false)
+      } else if (result.error) {
+        console.error('[SubscribePanel] Deposit failed:', result.error)
       }
-      await deposit(amountBigInt)
-      setAmount('')
-      setAgreed(false)
     } catch (err) {
       console.error('[SubscribePanel] Deposit failed:', err)
     } finally {
@@ -203,7 +207,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
           onApprove={handleApprove}
           isApproving={isDemo ? false : isApprovePending}
           onDeposit={handleDeposit}
-          isDepositing={isDepositing || (!isDemo && isDepositPending)}
+          isDepositing={isDepositing || (!isDemo && (isDepositPending || isLivePending))}
         />
       </div>
     </div>

@@ -85,38 +85,36 @@ function hydratePosition(position: DbUserPositionWithVault): UserPositionLine {
 }
 
 export function useUserData() {
-  const { userId, isAuthenticated } = useBackendUser()
+  const { isAuthenticated } = useBackendUser()
   const queryClient = useQueryClient()
 
-  // Query positions
+  // Query positions - now derived from authenticated wallet header
   const {
     data: positions = [],
     isLoading: isPositionsLoading,
     error: positionsError,
   } = useQuery<DbUserPositionWithVault[]>({
-    queryKey: [POSITIONS_QUERY_KEY, userId],
+    queryKey: [POSITIONS_QUERY_KEY],
     queryFn: async () => {
-      if (!userId) return []
-      const result = await PositionsApi.listByUser(userId)
+      const result = await PositionsApi.listByUser()
       return result.positions
     },
-    enabled: isAuthenticated && !!userId,
+    enabled: isAuthenticated,
     staleTime: 1000 * 30, // 30 seconds
   })
 
-  // Query activity
+  // Query activity - now derived from authenticated wallet header
   const {
     data: activity = [],
     isLoading: isActivityLoading,
     error: activityError,
   } = useQuery<DbActivityEvent[]>({
-    queryKey: [ACTIVITY_QUERY_KEY, userId],
+    queryKey: [ACTIVITY_QUERY_KEY],
     queryFn: async () => {
-      if (!userId) return []
-      const result = await ActivityApi.listByUser(userId, 50)
+      const result = await ActivityApi.listByUser(50)
       return result.events
     },
-    enabled: isAuthenticated && !!userId,
+    enabled: isAuthenticated,
     staleTime: 1000 * 30, // 30 seconds
   })
 
@@ -131,26 +129,27 @@ export function useUserData() {
     activePositionsCount: hydratedPositions.filter(p => p.state !== 'withdrawn').length,
   }
 
-  // Mutations
+  // Mutations - no userId needed, derived from wallet header
   const depositMutation = useMutation({
     mutationFn: async ({
       vaultId,
       amount,
       maturityDate,
       vaultName,
+      txHash,
     }: {
       vaultId: string
       amount: number
       maturityDate: number
       vaultName: string
+      txHash?: string
     }) => {
-      if (!userId) throw new Error('User not authenticated')
-      const result = await PositionsApi.addDeposit(userId, vaultId, amount, maturityDate, vaultName)
+      const result = await PositionsApi.addDeposit(vaultId, amount, maturityDate, vaultName, txHash)
       return result
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, userId] })
-      queryClient.invalidateQueries({ queryKey: [ACTIVITY_QUERY_KEY, userId] })
+      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY] })
+      queryClient.invalidateQueries({ queryKey: [ACTIVITY_QUERY_KEY] })
     },
   })
 
@@ -160,13 +159,14 @@ export function useUserData() {
       vaultId,
       vaultName,
       amount,
+      txHash,
     }: {
       positionId: string
       vaultId: string
       vaultName: string
       amount: number
+      txHash?: string
     }) => {
-      if (!userId) throw new Error('User not authenticated')
       // Update position accumulated/claimed yield
       const position = positions.find(p => p.id === positionId)
       if (!position) throw new Error('Position not found')
@@ -176,16 +176,17 @@ export function useUserData() {
         accumulatedYield: newAccumulated,
         claimedYield: position.claimedYield + amount,
         vaultName,
+        txHash,
       })
 
       // Log activity
-      await ActivityApi.logClaim(userId, vaultId, vaultName, amount)
+      await ActivityApi.logClaim(vaultId, vaultName, amount, txHash)
 
       return { success: true }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, userId] })
-      queryClient.invalidateQueries({ queryKey: [ACTIVITY_QUERY_KEY, userId] })
+      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY] })
+      queryClient.invalidateQueries({ queryKey: [ACTIVITY_QUERY_KEY] })
     },
   })
 
@@ -195,31 +196,31 @@ export function useUserData() {
       vaultId,
       vaultName,
       amount,
+      txHash,
     }: {
       positionId: string
       vaultId: string
       vaultName: string
       amount: number
+      txHash?: string
     }) => {
-      if (!userId) throw new Error('User not authenticated')
-
       // Update position state to withdrawn
-      await PositionsApi.update(positionId, { state: 'withdrawn', vaultName })
+      await PositionsApi.update(positionId, { state: 'withdrawn', vaultName, txHash })
 
       // Log activity (amount includes principal + unclaimed yield)
-      await ActivityApi.logWithdraw(userId, vaultId, vaultName, amount)
+      await ActivityApi.logWithdraw(vaultId, vaultName, amount, txHash)
 
       return { success: true }
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, userId] })
-      queryClient.invalidateQueries({ queryKey: [ACTIVITY_QUERY_KEY, userId] })
+      queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY] })
+      queryClient.invalidateQueries({ queryKey: [ACTIVITY_QUERY_KEY] })
     },
   })
 
   const refresh = () => {
-    queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY, userId] })
-    queryClient.invalidateQueries({ queryKey: [ACTIVITY_QUERY_KEY, userId] })
+    queryClient.invalidateQueries({ queryKey: [POSITIONS_QUERY_KEY] })
+    queryClient.invalidateQueries({ queryKey: [ACTIVITY_QUERY_KEY] })
   }
 
   // Convert to UI format

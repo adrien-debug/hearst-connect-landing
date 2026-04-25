@@ -1,17 +1,19 @@
 /**
- * Single Vault API Route
- * GET: Get vault by ID
- * PATCH: Update vault
- * DELETE: Delete vault
+ * Single Vault API Route - SECURED
+ * GET: Get vault by ID - Public
+ * PATCH: Update vault - Admin only
+ * DELETE: Delete vault - Admin only
  */
 
 import { NextRequest, NextResponse } from 'next/server'
 import { initDb } from '@/lib/db/connection'
 import { VaultRepository } from '@/lib/db/repositories'
+import { isAdminRequest } from '@/lib/auth/wallet-auth'
 import type { DbVaultInput } from '@/lib/db/schema'
 
 initDb()
 
+// GET /api/vaults/[id] - Public endpoint
 export async function GET(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
@@ -37,11 +39,21 @@ export async function GET(
   }
 }
 
+// PATCH /api/vaults/[id] - Admin only
 export async function PATCH(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Check admin authorization
+    if (!isAdminRequest(request)) {
+      console.error('[API Vault PATCH] Unauthorized admin attempt')
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      )
+    }
+
     const { id } = await params
     const updates = await request.json() as Partial<DbVaultInput>
 
@@ -65,11 +77,21 @@ export async function PATCH(
   }
 }
 
+// DELETE /api/vaults/[id] - Admin only
 export async function DELETE(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> }
 ) {
   try {
+    // Check admin authorization
+    if (!isAdminRequest(request)) {
+      console.error('[API Vault DELETE] Unauthorized admin attempt')
+      return NextResponse.json(
+        { error: 'Admin access required' },
+        { status: 403 }
+      )
+    }
+
     const { id } = await params
     const deleted = VaultRepository.delete(id)
 

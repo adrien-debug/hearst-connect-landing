@@ -23,6 +23,7 @@ import { Skeleton } from './skeleton'
 import { WalletNotConnected, VaultNotConfigured, OnChainError } from './empty-states'
 import { useAppMode } from '@/hooks/useAppMode'
 import { useDemoPortfolio } from '@/hooks/useDemoPortfolio'
+import { useLiveActions } from '@/hooks/useLiveActions'
 
 type ModalType = 'claim' | 'manage' | 'exit' | null
 
@@ -159,71 +160,49 @@ export function VaultDetailPanel({
   const totalTargetYield = capitalDeployed * (parseFloat(vault.target) / 100)
   const remainingToTarget = Math.max(0, totalTargetYield - accruedYield)
 
+  // Use live actions for claim/withdraw with backend persistence
+  const { claim: liveClaim, withdraw: liveWithdraw, isPending: isLivePending } = useLiveActions(vault.id)
+
   const handleClaim = async () => {
-    if (isDemo && demoPosition) {
-      await transaction.execute(
-        async () => {
-          await new Promise((r) => setTimeout(r, 600))
-          const ok = demoActions.claim(demoPosition.id)
-          if (!ok) throw new Error('Nothing to claim')
-        },
-        {
-          pending: 'Processing claim...',
-          success: `Claimed ${fmtUsdCompact(accruedYield)} successfully!`,
-          error: 'Nothing to claim right now.',
-        }
-      )
-      return
-    }
-    if (!claim) {
-      console.error('[VaultDetailPanel] Claim function not available')
-      return
-    }
+    // Both demo and live modes now use liveClaim which handles both on-chain and backend
     await transaction.execute(
       async () => {
-        await claim()
-        await new Promise((resolve) => setTimeout(resolve, 2000))
-        refresh()
+        const result = await liveClaim()
+        if (!result.success) {
+          throw new Error(result.error || 'Claim failed')
+        }
+        // Refresh on-chain data after backend persistence
+        if (!isDemo) {
+          await new Promise((resolve) => setTimeout(resolve, 2000))
+          refresh()
+        }
       },
       {
         pending: 'Processing claim...',
         success: `Claimed ${fmtUsdCompact(accruedYield)} successfully!`,
-        error: 'Claim failed. Please try again.',
+        error: isDemo ? 'Nothing to claim right now.' : 'Claim failed. Please try again.',
       }
     )
   }
 
   const handleExit = async () => {
-    if (isDemo && demoPosition) {
-      await transaction.execute(
-        async () => {
-          await new Promise((r) => setTimeout(r, 600))
-          const ok = demoActions.withdraw(demoPosition.id)
-          if (!ok) throw new Error('Position not matured yet')
-        },
-        {
-          pending: 'Processing exit...',
-          success: 'Position exited successfully!',
-          error: 'Position not matured yet — cannot exit.',
-        }
-      )
-      return
-    }
-    if (!withdraw) {
-      console.error('[VaultDetailPanel] Withdraw function not available')
-      return
-    }
-    const withdrawAmount = BigInt(Math.floor(capitalDeployed * 1e6))
+    // Both demo and live modes now use liveWithdraw which handles both on-chain and backend
     await transaction.execute(
       async () => {
-        await withdraw(withdrawAmount)
-        await new Promise((resolve) => setTimeout(resolve, 3000))
-        refresh()
+        const result = await liveWithdraw()
+        if (!result.success) {
+          throw new Error(result.error || 'Withdraw failed')
+        }
+        // Refresh on-chain data after backend persistence
+        if (!isDemo) {
+          await new Promise((resolve) => setTimeout(resolve, 3000))
+          refresh()
+        }
       },
       {
         pending: 'Processing exit...',
         success: 'Position exited successfully!',
-        error: 'Exit failed. Please contact support.',
+        error: isDemo ? 'Position not matured yet — cannot exit.' : 'Exit failed. Please contact support.',
       }
     )
   }

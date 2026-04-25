@@ -1,6 +1,7 @@
 /**
  * API Client for Hearst Connect backend
  * HTTP client utilities for the SQLite-backed API
+ * Includes wallet-based authentication headers
  */
 
 import type { Address, Chain } from 'viem'
@@ -15,6 +16,14 @@ import type {
 } from './db/schema'
 
 const API_BASE = '/api'
+const WALLET_HEADER = 'x-wallet-address'
+
+// Current wallet address for authenticated requests
+let currentWalletAddress: Address | null = null
+
+export function setApiWalletAddress(address: Address | null) {
+  currentWalletAddress = address
+}
 
 // Error handling helper
 class ApiError extends Error {
@@ -24,10 +33,24 @@ class ApiError extends Error {
   }
 }
 
-async function fetchApi<T>(endpoint: string, options?: RequestInit): Promise<T> {
+async function fetchApi<T>(endpoint: string, options?: RequestInit, requireAuth = false): Promise<T> {
+  const headers: Record<string, string> = {
+    'Content-Type': 'application/json',
+  }
+
+  // Add wallet authentication header if available
+  if (currentWalletAddress) {
+    headers[WALLET_HEADER] = currentWalletAddress
+  } else if (requireAuth) {
+    throw new ApiError(401, 'Wallet not connected. Authentication required.')
+  }
+
   const response = await fetch(`${API_BASE}${endpoint}`, {
-    headers: { 'Content-Type': 'application/json' },
     ...options,
+    headers: {
+      ...headers,
+      ...options?.headers,
+    },
   })
 
   if (!response.ok) {
@@ -91,27 +114,34 @@ export const VaultsApi = {
   },
 }
 
-// Positions API
+// Positions API - All require authentication
 export const PositionsApi = {
-  async listByUser(userId: string): Promise<{ positions: DbUserPositionWithVault[] }> {
-    return fetchApi<{ positions: DbUserPositionWithVault[] }>(`/positions?userId=${encodeURIComponent(userId)}`)
+  // GET /positions - lists positions for authenticated wallet (no userId param needed)
+  async listByUser(): Promise<{ positions: DbUserPositionWithVault[] }> {
+    return fetchApi<{ positions: DbUserPositionWithVault[] }>('/positions', undefined, true)
   },
 
+  // POST /positions - creates position for authenticated wallet
   async create(
-    userId: string,
     vaultId: string,
     deposited: number,
     maturityDate: number,
-    vaultName: string
+    vaultName: string,
+    txHash?: string
   ): Promise<{ position: DbUserPosition; isNew: boolean }> {
-    return fetchApi<{ position: DbUserPosition; isNew: boolean }>('/positions', {
-      method: 'POST',
-      body: JSON.stringify({ userId, vaultId, deposited, maturityDate, vaultName }),
-    })
+    return fetchApi<{ position: DbUserPosition; isNew: boolean }>(
+      '/positions',
+      {
+        method: 'POST',
+        body: JSON.stringify({ vaultId, deposited, maturityDate, vaultName, txHash }),
+      },
+      true
+    )
   },
 
+  // PATCH /positions - updates position for authenticated wallet
   async update(
-    id: string,
+    positionId: string,
     updates: {
       deposited?: number
       claimedYield?: number
@@ -119,49 +149,67 @@ export const PositionsApi = {
       state?: 'active' | 'matured' | 'withdrawn'
       maturityDate?: number
       vaultName?: string
+      txHash?: string
     }
   ): Promise<{ position: DbUserPosition }> {
-    return fetchApi<{ position: DbUserPosition }>('/positions', {
-      method: 'PATCH',
-      body: JSON.stringify({ id, ...updates }),
-    })
-  },
-
-  async addDeposit(
-    userId: string,
-    vaultId: string,
-    amount: number,
-    maturityDate: number,
-    vaultName: string
-  ): Promise<{ position: DbUserPosition; isNew: boolean }> {
-    return fetchApi<{ position: DbUserPosition; isNew: boolean }>('/positions', {
-      method: 'POST',
-      body: JSON.stringify({ userId, vaultId, deposited: amount, maturityDate, vaultName }),
-    })
-  },
-}
-
-// Activity API
-export const ActivityApi = {
-  async listByUser(userId: string, limit = 50): Promise<{ events: DbActivityEvent[] }> {
-    return fetchApi<{ events: DbActivityEvent[] }>(
-      `/activity?userId=${encodeURIComponent(userId)}&limit=${limit}`
+    return fetchApi<{ position: DbUserPosition }>(
+      '/positions',
+      {
+        method: 'PATCH',
+        body: JSON.stringify({ positionId, ...updates }),
+      },
+      true
     )
   },
 
-  async create(input: DbActivityEventInput): Promise<{ event: DbActivityEvent }> {
-    return fetchApi<{ event: DbActivityEvent }>('/activity', {
-      method: 'POST',
-      body: JSON.stringify(input),
-    })
+  // POST /positions (same endpoint, adds to existing) - for additional deposits
+  async addDeposit(
+    vaultId: string,
+    amount: number,
+    maturityDate: number,
+    vaultName: string,
+    txHash?: string
+  ): Promise<{ position: DbUserPosition; isNew: boolean }> {
+    return fetchApi<{ position: DbUserPosition; isNew: boolean }>(
+      '/positions',
+      {
+        method: 'POST',
+        body: JSON.stringify({ vaultId, deposited: amount, maturityDate, vaultName, txHash }),
+      },
+      true
+    )
+  },
+}
+
+// Activity API - All require authentication
+export const ActivityApi = {
+  // GET /activity - lists activity for authenticated wallet
+  async listByUser(limit = 50): Promise<{ events: DbActivityEvent[] }> {
+    return fetchApi<{ events: DbActivityEvent[] }>(
+      `/activity?limit=${limit}`,
+      undefined,
+      true
+    )
   },
 
-  async logClaim(userId: string, vaultId: string, vaultName: string, amount: number): Promise<void> {
-    await this.create({ userId, vaultId, vaultName, type: 'claim', amount })
+  // POST /activity - creates activity event for authenticated wallet
+  async create(input: Omit<DbActivityEventInput, 'userId'> & { txHash?: string }): Promise<{ event: DbActivityEvent }> {
+    return fetchApi<{ event: DbActivityEvent }>(
+      '/activity',
+      {
+        method: 'POST',
+        body: JSON.stringify(input),
+      },
+      true
+    )
   },
 
-  async logWithdraw(userId: string, vaultId: string, vaultName: string, amount: number): Promise<void> {
-    await this.create({ userId, vaultId, vaultName, type: 'withdraw', amount })
+  async logClaim(vaultId: string, vaultName: string, amount: number, txHash?: string): Promise<void> {
+    await this.create({ vaultId, vaultName, type: 'claim', amount, txHash })
+  },
+
+  async logWithdraw(vaultId: string, vaultName: string, amount: number, txHash?: string): Promise<void> {
+    await this.create({ vaultId, vaultName, type: 'withdraw', amount, txHash })
   },
 }
 
