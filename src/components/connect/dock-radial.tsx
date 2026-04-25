@@ -90,7 +90,7 @@ export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialPro
           borderRadius: TOKENS.radius.xl,
           padding: TOKENS.spacing[1],
           gap: TOKENS.spacing[1],
-          boxShadow: '0 8px 32px rgba(0, 0, 0, 0.5), 0 0 0 1px rgba(255, 255, 255, 0.02)',
+          boxShadow: 'var(--hc-shadow-lg), 0 0 0 1px var(--hc-border-subtle)',
         }}
       >
       {/* Navigation Tabs */}
@@ -204,12 +204,12 @@ function NavButton({ id, label, isActive, hoveredId, setHoveredId, onClick }: Na
         position: 'relative',
         padding: `${TOKENS.spacing[2]}px ${TOKENS.spacing[4]}px`,
         background: isActive
-          ? 'rgba(255, 255, 255, 0.08)'
+          ? TOKENS.colors.surfaceActive
           : isHovered
             ? TOKENS.colors.surfaceHover
             : 'transparent',
         border: 'none',
-        borderRadius: '20px',
+        borderRadius: TOKENS.radius.xl,
         cursor: 'pointer',
         transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
         display: 'flex',

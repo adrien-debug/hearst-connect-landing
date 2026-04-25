@@ -7,20 +7,19 @@ Onchain access to institutional Bitcoin mining cash flows.
 | Route | Description |
 |-------|-------------|
 | `/` | Landing page — marketing, investment strategies carousel, CTA |
-| `/intro` | **Entry page** — value proposition, wallet connect (top-right), "Invest in Vaults" CTA |
-| `/vaults` | **Product page** — browse vaults, wallet connect (top-right), enter platform when connected |
+| `/intro` | **Legacy entry** — server-side redirect to `/vaults` |
+| `/vaults` | **Entry page** — browse vaults, wallet connect, "Enter Platform" CTA when connected |
 | `/app` | **Dashboard** — portfolio, vault subscription. Requires wallet connection or demo mode. |
 | `/admin` | Vault registry management (add/edit/remove vaults) |
 
-> **Redirects:** `/launch-app` → `/intro`, `/hub` → `/`, `/vault` → `/vaults`.
+> **Redirects:** `/launch-app` → `/vaults`, `/hub` → `/`, `/vault` → `/vaults`, `/intro` → `/vaults`.
 
 ## User Flow
 
-1. **Landing** (`/`) → "Launch App" → **Intro** (`/intro`)
-2. **Intro** (`/intro`) → Connect wallet (top-right) → "Invest in Vaults" → **Vaults** (`/vaults`)
-3. **Vaults** (`/vaults`) → Browse products, wallet ready → "Enter Platform" → **Dashboard** (`/app`)
+1. **Landing** (`/`) → "Launch App" → **Vaults** (`/vaults`)
+2. **Vaults** (`/vaults`) → Browse products + connect wallet → "Enter Platform" → **Dashboard** (`/app`)
 
-Classic DeFi flow: landing → entry → products → platform.
+Streamlined DeFi flow: landing → products (with wallet) → platform.
 
 ## Tech Stack
 
@@ -82,7 +81,9 @@ From Admin panel, authorized users can:
 ## UI / Design System (Cinematic Financial OS)
 
 - **Tokens** in `src/components/connect/constants.ts` (single source) and `src/styles/connect/dashboard-vars.css` (CSS variables for `.connect-scope`).
+- **Theme tokens** in `src/styles/theme/tokens.css` — unified `[data-theme="dark"]` / `[data-theme="light"]` system with `--color-*` CSS variables.
 - **Look**: deep void `#050505`, accent `#A7FB90`, type scale 48/24/14/11, spacing on an **8px** grid.
+- **Dark/Light mode**: Supported globally via `ThemeProvider` + `ThemeToggle`. Vaults page uses design system tokens (`--color-*`) for theme-aware rendering. Cards use glassmorphism (`backdrop-filter: blur`) with theme-specific overrides.
 - **Rule file**: `.cursor/rules/vault-ui-system.mdc` — all `connect/` components must use `TOKENS.*` exclusively.
 - **Tests**: `npm test` (Vitest) — `src/lib/*.test.ts` for `vault-math` and `projection-simulation`.
 - **Typecheck**: `npm run lint` → `tsc -p . --noEmit`.

@@ -660,7 +660,7 @@ function AllocationDonut({
               border: `1px solid ${TOKENS.colors.borderSubtle}`,
               borderRadius: TOKENS.radius.md,
               padding: `${TOKENS.spacing[3]}px ${TOKENS.spacing[4]}px`,
-              boxShadow: '0 8px 24px rgba(0,0,0,0.4)',
+              boxShadow: 'var(--hc-shadow-lg)',
               zIndex: 10,
               pointerEvents: 'none',
               animation: 'fadeIn 150ms ease-out',
@@ -871,7 +871,7 @@ function LineChartArea({ data, portfolioValue, mode }: { data: number[]; portfol
             y1={padding.top + chartHeight * ratio}
             x2={width - padding.right}
             y2={padding.top + chartHeight * ratio}
-            stroke="rgba(255,255,255,0.06)"
+            stroke={TOKENS.colors.borderMain}
             strokeWidth="0.5"
             strokeDasharray="2,2"
           />

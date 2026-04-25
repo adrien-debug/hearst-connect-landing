@@ -3,21 +3,12 @@
  * Import once from the connect shell (e.g. `canvas.tsx`).
  */
 .connect-scope {
-  --hc-bg-app: #050505;
-  /** Medium charcoal — distinct from sidebar #050505 */
-  --hc-bg-page: #141414;
-  --hc-bg-sidebar: #050505;
-  /** Main stage: dramatic shoulder light + deep carbon layers + subtle edge separation */
+  /** Stage cinematic gradients (dark) */
   --hc-stage-shoulder: radial-gradient(ellipse 160% 100% at 50% -30%, rgba(255, 255, 255, 0.045) 0%, transparent 55%);
   --hc-stage-veil: linear-gradient(180deg, rgba(255, 255, 255, 0.008) 0%, transparent 55%);
   --hc-stage-carbon: radial-gradient(ellipse at 25% 15%, rgba(15, 15, 15, 0.6) 0%, transparent 45%),
                      radial-gradient(ellipse at 75% 85%, rgba(8, 8, 8, 0.5) 0%, transparent 40%),
                      radial-gradient(ellipse at 50% 50%, rgba(5, 5, 5, 0.8) 0%, transparent 70%);
-  --hc-accent: #a7fb90;
-  --hc-text-primary: rgba(255, 255, 255, 0.92);
-  --hc-text-secondary: rgba(255, 255, 255, 0.55);
-  --hc-text-ghost: rgba(255, 255, 255, 0.35);
-  --hc-border-subtle: rgba(255, 255, 255, 0.08);
   --hc-space-2: 8px;
   --hc-space-3: 12px;
   --hc-space-4: 16px;
@@ -29,12 +20,17 @@
   --hc-radius-sm: 8px;
   --hc-radius-md: 12px;
   --hc-sidebar-w: 280px;
-  color-scheme: dark;
 }
 
 .connect-scope .connect-main-scene {
   background-color: var(--hc-bg-page);
   background-image: var(--hc-stage-shoulder), var(--hc-stage-carbon), var(--hc-stage-veil);
+}
+
+[data-theme="light"] .connect-scope .connect-main-scene {
+  background-image: 
+    radial-gradient(circle at 15% 50%, rgba(5, 150, 105, 0.03), transparent 25%),
+    radial-gradient(circle at 85% 30%, rgba(15, 23, 42, 0.02), transparent 25%);
 }
 
 .connect-scope .connect-panel-stage {
@@ -70,12 +66,12 @@
 }
 
 .connect-scope ::-webkit-scrollbar-thumb {
-  background: rgba(255, 255, 255, 0.15);
+  background: var(--hc-scrollbar-thumb);
   border-radius: 3px;
 }
 
 .connect-scope ::-webkit-scrollbar-thumb:hover {
-  background: rgba(255, 255, 255, 0.25);
+  background: var(--hc-scrollbar-thumb-hover);
 }
 
 .connect-scope ::-webkit-scrollbar-corner {
@@ -85,7 +81,7 @@
 /* Firefox support */
 .connect-scope {
   scrollbar-width: thin;
-  scrollbar-color: rgba(255, 255, 255, 0.15) transparent;
+  scrollbar-color: var(--hc-scrollbar-thumb) transparent;
 }
 
 /* Hide scrollbar utility (still functional) */
@@ -108,14 +104,14 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #050505;
+  background: var(--color-bg-primary, #050505);
 }
 
 .app-spinner {
   width: 40px;
   height: 40px;
-  border: 2px solid rgba(255, 255, 255, 0.1);
-  border-top-color: #a7fb90;
+  border: 2px solid var(--color-border-subtle, rgba(255, 255, 255, 0.1));
+  border-top-color: var(--color-accent, #a7fb90);
   border-radius: 50%;
   animation: app-spin 1s linear infinite;
 }
@@ -130,10 +126,15 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  background: #050505;
+  background: var(--color-bg-primary, #050505);
   background-image:
     radial-gradient(ellipse 70% 55% at 50% 50%, rgba(167, 251, 144, 0.06) 0%, transparent 70%);
   padding: 2rem;
+}
+
+[data-theme="light"] .app-access-denied {
+  background-image:
+    radial-gradient(ellipse 70% 55% at 50% 50%, rgba(5, 150, 105, 0.04) 0%, transparent 70%);
 }
 
 .app-access-card {
@@ -141,7 +142,7 @@
   width: 100%;
   padding: 2.5rem;
   background: rgba(255, 255, 255, 0.03);
-  border: 1px solid rgba(255, 255, 255, 0.08);
+  border: 1px solid var(--color-border-subtle, rgba(255, 255, 255, 0.08));
   border-radius: 16px;
   text-align: center;
   display: flex;
@@ -150,14 +151,19 @@
   gap: 1.25rem;
 }
 
+[data-theme="light"] .app-access-card {
+  background: #ffffff;
+  box-shadow: 0 4px 24px rgba(15, 23, 42, 0.08);
+}
+
 .app-access-icon {
   width: 64px;
   height: 64px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: #a7fb90;
-  background: rgba(167, 251, 144, 0.1);
+  color: var(--color-accent, #a7fb90);
+  background: var(--color-accent-dim, rgba(167, 251, 144, 0.1));
   border-radius: 50%;
 }
 
@@ -165,14 +171,14 @@
   font-size: 1.5rem;
   font-weight: 700;
   letter-spacing: -0.02em;
-  color: #eef0f4;
+  color: var(--color-text-primary, #eef0f4);
   margin: 0;
 }
 
 .app-access-desc {
   font-size: 0.9375rem;
   line-height: 1.6;
-  color: rgba(220, 226, 234, 0.7);
+  color: var(--color-text-secondary, rgba(220, 226, 234, 0.7));
   margin: 0;
 }
 
@@ -201,24 +207,24 @@
 }
 
 .app-access-btn--primary {
-  background: #a7fb90;
-  color: #050a05;
+  background: var(--color-accent, #a7fb90);
+  color: var(--color-accent-text, #050a05);
 }
 
 .app-access-btn--primary:hover {
-  background: #c4ffa8;
+  filter: brightness(1.1);
   transform: translateY(-1px);
 }
 
 .app-access-btn--ghost {
   background: transparent;
-  color: rgba(220, 226, 234, 0.7);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  color: var(--color-text-secondary, rgba(220, 226, 234, 0.7));
+  border: 1px solid var(--color-border-subtle, rgba(255, 255, 255, 0.1));
 }
 
 .app-access-btn--ghost:hover {
-  border-color: rgba(255, 255, 255, 0.2);
-  color: #eef0f4;
+  border-color: var(--color-border-strong, rgba(255, 255, 255, 0.2));
+  color: var(--color-text-primary, #eef0f4);
 }
 
 @media (max-width: 480px) {

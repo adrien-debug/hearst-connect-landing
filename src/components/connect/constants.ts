@@ -2,43 +2,35 @@
 
 export const TOKENS = {
   colors: {
-    white: '#FFFFFF',
-    black: '#000000',
-    /** App shell / deep void */
-    bgApp: '#050505',
-    /** Main scene — medium charcoal distinct from sidebar */
-    bgPage: '#141414',
-    /** Sidebar column */
-    bgSidebar: '#050505',
-    /** Subtle lift (modals, hover) */
-    bgSurface: '#0A0A0A',
-    /** Secondary background - cards, panels */
-    bgSecondary: '#0F0F0F',
-    /** Tertiary background - nested elements */
-    bgTertiary: '#1A1A1A',
-    /** Legacy aliases — map to scene */
-    gray50: '#F8F9FA',
-    gray100: '#0A0A0A',
-    gray200: 'rgba(255,255,255,0.08)',
-    gray500: 'rgba(255,255,255,0.45)',
-    gray700: 'rgba(255,255,255,0.72)',
-    accent: '#A7FB90',
-    accentDim: 'rgba(167, 251, 144, 0.05)',
-    accentGlow: 'rgba(167, 251, 144, 0.12)',
-    /** Subtle accent background for selected states */
-    accentSubtle: 'rgba(167, 251, 144, 0.12)',
-    textPrimary: 'rgba(255,255,255,0.92)',
-    textSecondary: 'rgba(255,255,255,0.55)',
-    textGhost: 'rgba(255,255,255,0.35)',
-    textOnDark: 'rgba(255,255,255,0.92)',
-    borderMain: 'rgba(255,255,255,0.06)',
-    borderSubtle: 'rgba(255,255,255,0.08)',
-    borderStrong: 'rgba(255,255,255,0.14)',
-    sidebarTextPrimary: 'rgba(255,255,255,0.92)',
-    sidebarTextGhost: 'rgba(255,255,255,0.35)',
-    surfaceHover: 'rgba(255,255,255,0.04)',
-    surfaceActive: 'rgba(255,255,255,0.08)',
-    danger: '#EF4444',
+    white: 'var(--hc-text-primary)',
+    black: 'var(--hc-bg-app)',
+    bgApp: 'var(--hc-bg-app)',
+    bgPage: 'var(--hc-bg-page)',
+    bgSidebar: 'var(--hc-bg-sidebar)',
+    bgSurface: 'var(--hc-bg-surface)',
+    bgSecondary: 'var(--hc-bg-secondary)',
+    bgTertiary: 'var(--hc-bg-tertiary)',
+    gray50: 'var(--hc-bg-tertiary)',
+    gray100: 'var(--hc-bg-surface)',
+    gray200: 'var(--hc-border-subtle)',
+    gray500: 'var(--hc-text-ghost)',
+    gray700: 'var(--hc-text-secondary)',
+    accent: 'var(--hc-accent)',
+    accentDim: 'var(--hc-accent-dim)',
+    accentGlow: 'var(--hc-accent-glow)',
+    accentSubtle: 'var(--hc-accent-glow)',
+    textPrimary: 'var(--hc-text-primary)',
+    textSecondary: 'var(--hc-text-secondary)',
+    textGhost: 'var(--hc-text-ghost)',
+    textOnDark: 'var(--hc-text-primary)',
+    borderMain: 'var(--hc-border-subtle)',
+    borderSubtle: 'var(--hc-border-subtle)',
+    borderStrong: 'var(--hc-border-strong)',
+    sidebarTextPrimary: 'var(--hc-text-primary)',
+    sidebarTextGhost: 'var(--hc-text-ghost)',
+    surfaceHover: 'var(--hc-accent-dim)',
+    surfaceActive: 'var(--hc-border-subtle)',
+    danger: 'var(--color-error, #EF4444)',
   },
   fonts: {
     sans: "'Satoshi Variable', Inter, -apple-system, sans-serif",
@@ -133,9 +125,9 @@ export const VALUE_LETTER_SPACING = '-0.02em'
 export const CHART_PALETTE = [
   TOKENS.colors.accent,
   TOKENS.colors.white,
-  'rgba(255,255,255,0.45)',
-  'rgba(255,255,255,0.35)',
-  'rgba(255,255,255,0.25)',
+  TOKENS.colors.gray500,
+  TOKENS.colors.textGhost,
+  'var(--hc-border-default)',
 ] as const
 
 export function fmtUsd(n: number): string {

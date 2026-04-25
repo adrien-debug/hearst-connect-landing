@@ -140,38 +140,39 @@
    ============================================ */
 
 [data-theme="light"] {
-  /* Backgrounds (light) */
-  --color-bg-primary: #ffffff;
-  --color-bg-secondary: #fafafa;
+  /* Backgrounds (Neutral grays for a technical/industrial light mode) */
+  --color-bg-primary: #e5e5e5;
+  --color-bg-secondary: #f0f0f0;
   --color-bg-tertiary: #f5f5f5;
   --color-bg-elevated: #ffffff;
-  --color-bg-overlay: rgba(0, 0, 0, 0.6);
+  --color-bg-overlay: rgba(0, 0, 0, 0.5);
   --color-bg-input: #ffffff;
 
-  /* Text (black opacities on light) */
-  --color-text-primary: rgba(0, 0, 0, 0.90);
-  --color-text-secondary: rgba(0, 0, 0, 0.60);
-  --color-text-ghost: rgba(0, 0, 0, 0.45);
-  --color-text-disabled: rgba(0, 0, 0, 0.30);
+  /* Text (Dark grays/blacks) */
+  --color-text-primary: #171717;
+  --color-text-secondary: #525252;
+  --color-text-ghost: #737373;
+  --color-text-disabled: #a3a3a3;
   --color-text-inverse: #ffffff;
 
-  /* Borders (black opacities - stronger for visibility) */
+  /* Borders */
   --color-border-subtle: rgba(0, 0, 0, 0.10);
   --color-border-default: rgba(0, 0, 0, 0.15);
   --color-border-strong: rgba(0, 0, 0, 0.25);
   --color-border-focus: rgba(0, 0, 0, 0.40);
 
-  /* Accent (darker green for contrast on white - 4.5:1 ratio) */
-  --color-accent: #2e7d32;
-  --color-accent-dim: rgba(46, 125, 50, 0.10);
-  --color-accent-subtle: rgba(46, 125, 50, 0.15);
-  --color-accent-glow: rgba(46, 125, 50, 0.25);
-  --color-accent-text: #ffffff;
+  /* Accent (Restored Neon Yellow for backgrounds, Olive for text) */
+  --color-accent: #a7fb90;
+  --color-accent-fg: #4d7c0f; /* Readable text variant */
+  --color-accent-dim: rgba(167, 251, 144, 0.35);
+  --color-accent-subtle: rgba(167, 251, 144, 0.50);
+  --color-accent-glow: rgba(167, 251, 144, 0.60);
+  --color-accent-text: #000000;
 
-  /* Status colors (darker variants for light) */
-  --color-success: #2e7d32;
-  --color-success-bg: rgba(46, 125, 50, 0.12);
-  --color-success-border: rgba(46, 125, 50, 0.25);
+  /* Status colors (Readable variants for light mode) */
+  --color-success: #4d7c0f;
+  --color-success-bg: rgba(77, 124, 15, 0.12);
+  --color-success-border: rgba(77, 124, 15, 0.25);
   
   --color-error: #dc2626;
   --color-error-bg: rgba(220, 38, 38, 0.12);
@@ -185,19 +186,19 @@
   --color-info-bg: rgba(37, 99, 235, 0.12);
   --color-info-border: rgba(37, 99, 235, 0.25);
 
-  /* Shadows (softer on light backgrounds) */
-  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
-  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.10);
+  /* Shadows */
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.08);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.12);
   --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.15);
-  --shadow-glow: 0 0 20px rgba(46, 125, 50, 0.25);
+  --shadow-glow: 0 0 20px rgba(167, 251, 144, 0.40);
 
   /* Interactive states */
   --color-hover: rgba(0, 0, 0, 0.04);
   --color-active: rgba(0, 0, 0, 0.08);
-  --color-selected: rgba(46, 125, 50, 0.12);
+  --color-selected: rgba(167, 251, 144, 0.25);
 
-  /* Scrollbar (inverted) */
+  /* Scrollbar */
   --scrollbar-thumb: rgba(0, 0, 0, 0.25);
   --scrollbar-thumb-hover: rgba(0, 0, 0, 0.35);
   --scrollbar-track: transparent;
@@ -208,7 +209,6 @@
    ============================================ */
 
 .connect-scope {
-  /* Connect stays dark regardless of global theme */
   --hc-bg-app: #050505;
   --hc-bg-page: #141414;
   --hc-bg-sidebar: #050505;
@@ -228,16 +228,48 @@
   --hc-accent-dim: rgba(167, 251, 144, 0.05);
   --hc-accent-glow: rgba(167, 251, 144, 0.12);
 
-  /* Shadows for depth */
+  --hc-overlay: rgba(0, 0, 0, 0.8);
+
   --hc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.30);
   --hc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.40);
   --hc-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.50);
 
-  /* Connect scrollbar (dark) */
   --hc-scrollbar-thumb: rgba(255, 255, 255, 0.15);
   --hc-scrollbar-thumb-hover: rgba(255, 255, 255, 0.25);
 
   color-scheme: dark;
+}
+
+[data-theme="light"] .connect-scope {
+  --hc-bg-app: #d4d4d4; /* Darker gray for the main app background to make cards pop */
+  --hc-bg-page: #e5e5e5;
+  --hc-bg-sidebar: #d4d4d4;
+  --hc-bg-surface: #f5f5f5; /* Slightly off-white for cards to reduce glare */
+  --hc-bg-secondary: #e5e5e5;
+  --hc-bg-tertiary: #d4d4d4;
+
+  --hc-text-primary: #171717;
+  --hc-text-secondary: #525252;
+  --hc-text-ghost: #737373;
+
+  --hc-border-subtle: rgba(0, 0, 0, 0.15); /* Stronger borders for better definition */
+  --hc-border-default: rgba(0, 0, 0, 0.20);
+  --hc-border-strong: rgba(0, 0, 0, 0.30);
+
+  --hc-accent: #a7fb90;
+  --hc-accent-dim: rgba(167, 251, 144, 0.40); /* Stronger dim for better visibility on gray */
+  --hc-accent-glow: rgba(167, 251, 144, 0.60);
+
+  --hc-overlay: rgba(0, 0, 0, 0.6);
+
+  --hc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.08);
+  --hc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.12);
+  --hc-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.15);
+
+  --hc-scrollbar-thumb: rgba(0, 0, 0, 0.35);
+  --hc-scrollbar-thumb-hover: rgba(0, 0, 0, 0.45);
+
+  color-scheme: light;
 }
 
 /* ============================================

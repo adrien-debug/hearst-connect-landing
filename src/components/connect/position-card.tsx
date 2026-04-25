@@ -61,7 +61,7 @@ export function PositionCard({ data, mode }: PositionCardProps) {
         }}>
           {data.isTargetReached && (
             <span style={{
-              padding: '2px 6px',
+              padding: `${TOKENS.spacing[1]}px ${TOKENS.spacing[2]}px`,
               background: TOKENS.colors.accentSubtle,
               borderRadius: TOKENS.radius.sm,
               fontSize: TOKENS.fontSizes.micro,
@@ -140,7 +140,7 @@ export function PositionCard({ data, mode }: PositionCardProps) {
             height: '100%',
             background: data.unlockTimeline.progressPercent >= 100
               ? TOKENS.colors.accent
-              : 'rgba(255,255,255,0.6)',
+              : TOKENS.colors.gray700,
             borderRadius: TOKENS.radius.sm,
           }} />
         </div>

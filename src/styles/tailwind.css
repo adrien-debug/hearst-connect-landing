@@ -53,23 +53,20 @@
  * ──────────────────────────────────────────────────────────────────────────────
  */
 .connect-scope {
-  /* Couleurs — noir/blanc/accent pur, pas le dark #0A0A0A du site */
-  --dashboard-page:           #FFFFFF;
-  --dashboard-surface:        #F8F9FA;
-  --dashboard-card:           #F1F3F5;
-  --dashboard-text-primary:   #000000;
-  --dashboard-text-secondary: #495057;
-  --dashboard-text-muted:     #ADB5BD;
-  --dashboard-text-ghost:     #ADB5BD;
-  --dashboard-border:         #000000;
-  --dashboard-border-mid:     #000000;
-  --dashboard-border-strong:  #000000;
+  --dashboard-page:           var(--hc-bg-app);
+  --dashboard-surface:        var(--hc-bg-surface);
+  --dashboard-card:           var(--hc-bg-secondary);
+  --dashboard-text-primary:   var(--hc-text-primary);
+  --dashboard-text-secondary: var(--hc-text-secondary);
+  --dashboard-text-muted:     var(--hc-text-ghost);
+  --dashboard-text-ghost:     var(--hc-text-ghost);
+  --dashboard-border:         var(--hc-border-subtle);
+  --dashboard-border-mid:     var(--hc-border-default);
+  --dashboard-border-strong:  var(--hc-border-strong);
 
-  /* Accent — identique site marketing, mais usage chirurgical dans l'app */
-  --dashboard-accent:         #a7fb90;
-  --dashboard-accent-hover:   #a7fb90;
+  --dashboard-accent:         var(--hc-accent);
+  --dashboard-accent-hover:   var(--hc-accent);
 
-  /* Radius — zéro absolu, pas de pill, pas de card molle */
   --dashboard-radius-box:     0px;
   --dashboard-radius-card:    0px;
   --dashboard-radius-input:   0px;
@@ -77,10 +74,9 @@
   --dashboard-radius-button:  0px;
   --dashboard-radius-badge:   0px;
 
-  /* Typographie — Satoshi Variable (identique marketing), IBM Plex Mono pour les données */
   font-family: 'Satoshi Variable', Inter, -apple-system, sans-serif;
-  background-color: #FFFFFF;
-  color: #000000;
+  background-color: var(--hc-bg-app);
+  color: var(--hc-text-primary);
   -webkit-font-smoothing: antialiased;
 }
 

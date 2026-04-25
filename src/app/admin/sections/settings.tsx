@@ -159,7 +159,7 @@ function StatusItem({
 }) {
   const colors = {
     good: TOKENS.colors.accent,
-    warning: '#F59E0B',
+    warning: 'var(--color-warning)',
     error: TOKENS.colors.danger,
     neutral: TOKENS.colors.textGhost,
   }
@@ -312,12 +312,12 @@ const styles: Record<string, React.CSSProperties> = {
   toggle: {
     width: '44px',
     height: '24px',
-    borderRadius: '12px',
+    borderRadius: TOKENS.radius.md,
     border: 'none',
     cursor: 'pointer',
     position: 'relative',
     transition: 'background 0.2s ease',
-    padding: '2px',
+    padding: `${TOKENS.spacing[1]}px`,
   },
   toggleKnob: {
     display: 'block',
@@ -402,11 +402,11 @@ const styles: Record<string, React.CSSProperties> = {
   modalOverlay: {
     position: 'fixed',
     inset: 0,
-    background: 'rgba(0,0,0,0.8)',
+    background: 'var(--color-bg-overlay)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 100,
+    zIndex: 'var(--z-modal)',
   },
   modal: {
     width: '100%',

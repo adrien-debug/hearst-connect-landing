@@ -210,7 +210,7 @@ function CheckItem({
 }) {
   const statusColors = {
     success: TOKENS.colors.accent,
-    warning: '#F59E0B',
+    warning: 'var(--color-warning)',
     error: TOKENS.colors.danger,
     pending: TOKENS.colors.textGhost,
     action: TOKENS.colors.accent,

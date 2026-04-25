@@ -251,7 +251,7 @@ export default function HubPageClient() {
             </ul>
           </nav>
 
-          <div style={{ display: 'flex', alignItems: 'center', gap: '12px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--space-3)' }}>
           <ThemeToggle variant="minimal" size="sm" />
           <Link href={CTA_LINKS.launchApp.href} className="login-btn" prefetch>
             <span>{CTA_LINKS.launchApp.label}</span>

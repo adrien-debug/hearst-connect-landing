@@ -1,124 +1,95 @@
-'use client'
+/**
+ * Smart fitting utilities for responsive text and values
+ */
 
-import { useEffect, useMemo, useState, useRef } from 'react'
-import { SHELL_PADDING, SHELL_GAP } from './constants'
+import { useMemo } from 'react'
 
 export type SmartFitMode = 'normal' | 'tight' | 'limit'
 
-interface SmartFitOptions {
-  tightHeight: number
-  limitHeight: number
+interface UseSmartFitOptions {
+  tightHeight?: number
+  limitHeight?: number
   tightWidth?: number
   limitWidth?: number
-  /** Viewport &lt; this → `tight` (unless height forces `limit`). Aligned with CSS @media (width < 930px) */
-  midBreakpoint?: number
-  /** Viewport &lt; this (with mid) → stricter `tight` / `limit` heuristics. Aligned with CSS @media (width < 768px) */
-  narrowBreakpoint?: number
   reserveHeight?: number
   reserveWidth?: number
 }
 
-function resolveMode(width: number, height: number, options: SmartFitOptions): SmartFitMode {
-  const availableWidth = Math.max(0, width - (options.reserveWidth ?? 0))
-  const availableHeight = Math.max(0, height - (options.reserveHeight ?? 0))
-  // Aligned with CSS breakpoints: 768px (mobile), 930px (tablet)
-  const mid = options.midBreakpoint ?? 930
-  const narrow = options.narrowBreakpoint ?? 768
-  const heightCrisis = availableHeight <= options.limitHeight
-  const heightTight = availableHeight <= options.tightHeight
+export function useSmartFit(options?: UseSmartFitOptions) {
+  const { tightHeight = 740, limitHeight = 660, tightWidth = 940, limitWidth = 820 } = options || {}
 
-  /** &lt;768px: smallest shell — limit if vertical space is also constrained, else tight */
-  if (width < narrow) {
-    if (heightCrisis) return 'limit'
-    return 'tight'
-  }
+  // Determine mode based on viewport dimensions (client-side only)
+  const mode: SmartFitMode = useMemo(() => {
+    if (typeof window === 'undefined') return 'normal'
+    const h = window.innerHeight
+    const w = window.innerWidth
+    if (h < limitHeight || w < limitWidth) return 'limit'
+    if (h < tightHeight || w < tightWidth) return 'tight'
+    return 'normal'
+  }, [tightHeight, limitHeight, tightWidth, limitWidth])
 
-  /** 768–930: compact but not always limit */
-  if (width < mid) {
-    if (heightCrisis) return 'limit'
-    return 'tight'
-  }
-
-  const isLimit = heightCrisis || (options.limitWidth !== undefined && availableWidth <= options.limitWidth)
-  if (isLimit) return 'limit'
-
-  const isTight = heightTight || (options.tightWidth !== undefined && availableWidth <= options.tightWidth)
-  if (isTight) return 'tight'
-
-  return 'normal'
-}
-
-export function useSmartFit(options: SmartFitOptions) {
-  // Start with 'normal' for SSR, then calculate real mode after hydration
-  const [mode, setMode] = useState<SmartFitMode>('normal')
-  const [isHydrated, setIsHydrated] = useState(false)
-
-  // Throttle resize updates to 60fps (16ms)
-  const rafRef = useRef<number | null>(null)
-  const lastModeRef = useRef<SmartFitMode>('normal')
-
-  useEffect(() => {
-    // Mark as hydrated and calculate initial mode
-    setIsHydrated(true)
-
-    const update = () => {
-      const newMode = resolveMode(window.innerWidth, window.innerHeight, options)
-      if (newMode !== lastModeRef.current) {
-        lastModeRef.current = newMode
-        setMode(newMode)
-      }
-    }
-
-    const throttledUpdate = () => {
-      if (rafRef.current) return
-      rafRef.current = requestAnimationFrame(() => {
-        update()
-        rafRef.current = null
-      })
-    }
-
-    // Calculate initial mode
-    update()
-    window.addEventListener('resize', throttledUpdate)
-    return () => {
-      window.removeEventListener('resize', throttledUpdate)
-      if (rafRef.current) {
-        cancelAnimationFrame(rafRef.current)
-      }
-    }
-  }, [
-    options.limitHeight,
-    options.limitWidth,
-    options.tightHeight,
-    options.tightWidth,
-    options.reserveHeight,
-    options.reserveWidth,
-    options.midBreakpoint,
-    options.narrowBreakpoint,
-  ])
+  const isLimit = mode === 'limit'
+  const isTight = mode === 'tight'
 
   return {
     mode,
-    isTight: mode !== 'normal',
-    isLimit: mode === 'limit',
-    /** Sidebar lists & metadata: same idea as pre-refactor `isCompactBottom` */
-    isCompactBottom: mode !== 'normal',
-    /** Whether hydration has completed - useful for avoiding SSR mismatches */
-    isHydrated,
+    isLimit,
+    isTight,
+    isNormal: !isLimit && !isTight,
   }
 }
 
-export function fitValue<T>(mode: SmartFitMode, values: Record<SmartFitMode, T>): T {
-  return values[mode]
+export function useShellPadding(mode?: SmartFitMode) {
+  const effectiveMode = mode || 'normal'
+
+  const values = {
+    normal: { padding: 24, gap: 24 },
+    tight: { padding: 16, gap: 16 },
+    limit: { padding: 12, gap: 12 },
+  }
+
+  return values[effectiveMode]
 }
 
-/** Unified shell padding hook for consistent panel layouts */
-export function useShellPadding(mode: SmartFitMode) {
-  return useMemo(
-    () => ({
-      padding: SHELL_PADDING[mode],
-      gap: SHELL_GAP[mode],
-    }),
-    [mode]
-  )
+type FitValueMapping<T = string> = {
+  normal: T
+  tight: T
+  limit: T
+}
+
+/**
+ * fitValue - Returns a value from the mapping based on the current mode
+ */
+export function fitValue<T extends string | number>(
+  mode: SmartFitMode,
+  mapping: FitValueMapping<T>
+): T
+/**
+ * fitValue - Truncates a string/number based on mode (legacy API)
+ */
+export function fitValue(value: number | string, mode?: SmartFitMode): string
+export function fitValue<T extends string | number>(
+  modeOrValue: SmartFitMode | number | string,
+  mappingOrMode?: FitValueMapping<T> | SmartFitMode
+): T | string {
+  // If first arg is a mode string and second is an object with normal/tight/limit, return mapping value
+  if (
+    typeof modeOrValue === 'string' &&
+    ['normal', 'tight', 'limit'].includes(modeOrValue) &&
+    mappingOrMode &&
+    typeof mappingOrMode === 'object' &&
+    'normal' in mappingOrMode
+  ) {
+    const mode = modeOrValue as SmartFitMode
+    const mapping = mappingOrMode as FitValueMapping<T>
+    return mapping[mode]
+  }
+
+  // Otherwise, first arg is value, second is mode (or undefined) - truncate string
+  const str = String(modeOrValue)
+  const mode = (typeof mappingOrMode === 'string' ? mappingOrMode : 'normal') as SmartFitMode
+  
+  if (mode === 'limit') return str.slice(0, 4)
+  if (mode === 'tight') return str.slice(0, 6)
+  return str
 }

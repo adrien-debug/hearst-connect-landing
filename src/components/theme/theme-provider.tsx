@@ -98,6 +98,7 @@ export function ThemeProvider({
     }
     
     root.setAttribute(THEME_ATTR, effectiveTheme)
+    root.classList.toggle('dark', effectiveTheme === 'dark')
     
     if (disableTransitionOnChange) {
       requestAnimationFrame(() => {

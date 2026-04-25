@@ -14,8 +14,8 @@ export type ConnectLabelProps = {
 
 const toneColor: Record<NonNullable<ConnectLabelProps['tone']>, string> = {
   scene: TOKENS.colors.textGhost,
-  sidebar: 'rgba(255,255,255,0.45)',
-  inverted: 'rgba(0,0,0,0.55)',
+  sidebar: TOKENS.colors.gray500,
+  inverted: 'var(--hc-text-secondary)',
 }
 
 /** Standardized label margin-bottom for pixel alignment */

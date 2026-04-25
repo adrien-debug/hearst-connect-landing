@@ -258,7 +258,7 @@ export function VaultDetailPanel({
             ← Back
           </button>
         </div>
-        <OnChainError error={error} onRetry={refresh} />
+        <OnChainError error={error as unknown as Error} />
       </div>
     )
   }
@@ -426,7 +426,7 @@ export function VaultDetailPanel({
             background: TOKENS.colors.bgSecondary,
             borderRadius: TOKENS.radius.lg,
             padding: TOKENS.spacing[4],
-            border: '1px solid rgba(239, 68, 68, 0.3)',
+            border: `1px solid color-mix(in srgb, ${TOKENS.colors.danger} 30%, transparent)`,
           }}>
             <span style={{
               fontSize: TOKENS.fontSizes.sm,
@@ -481,7 +481,7 @@ export function VaultDetailPanel({
               style={{
                 height: '100%',
                 width: `${Math.min(100, progressToTarget)}%`,
-                background: isTargetReached ? TOKENS.colors.accent : 'rgba(255,255,255,0.6)',
+                background: isTargetReached ? TOKENS.colors.accent : TOKENS.colors.gray700,
                 borderRadius: TOKENS.radius.sm,
                 transition: 'width 1s ease',
               }}
@@ -809,8 +809,8 @@ function CapitalProtectionGauge({
           width: '100%',
           height: '100%',
           background: isProtected
-            ? 'linear-gradient(90deg, rgba(167,251,144,0.3) 0%, rgba(167,251,144,0.1) 100%)'
-            : 'linear-gradient(90deg, rgba(255,255,255,0.1) 0%, rgba(255,255,255,0.05) 100%)',
+            ? `linear-gradient(90deg, ${TOKENS.colors.accentGlow} 0%, ${TOKENS.colors.accentDim} 100%)`
+            : `linear-gradient(90deg, ${TOKENS.colors.surfaceActive} 0%, ${TOKENS.colors.surfaceHover} 100%)`,
           position: 'relative',
         }}>
           <div style={{
@@ -928,7 +928,7 @@ function PerformanceHistoryChart({
                 height: `${Math.max(10, height)}%`,
                 background: isCurrent
                   ? TOKENS.colors.accent
-                  : `rgba(200,200,200,${0.3 + (index * 0.1)})`,
+                  : TOKENS.colors.textGhost,
                 borderRadius: `${TOKENS.radius.sm} ${TOKENS.radius.sm} 0 0`,
                 minHeight: '4px',
               }} />
@@ -973,7 +973,7 @@ function PerformanceHistoryChart({
           <div style={{
             width: '8px',
             height: '8px',
-            background: 'rgba(255,255,255,0.45)',
+            background: TOKENS.colors.gray500,
             borderRadius: TOKENS.radius.sm,
           }} />
           <span style={{ color: TOKENS.colors.textSecondary }}>

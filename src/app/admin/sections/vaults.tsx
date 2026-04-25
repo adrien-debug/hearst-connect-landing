@@ -557,11 +557,11 @@ const styles: Record<string, React.CSSProperties> = {
   modalOverlay: {
     position: 'fixed',
     inset: 0,
-    background: 'rgba(0,0,0,0.8)',
+    background: 'var(--color-bg-overlay)',
     display: 'flex',
     alignItems: 'center',
     justifyContent: 'center',
-    zIndex: 100,
+    zIndex: 'var(--z-dropdown)',
     padding: TOKENS.spacing[6],
   },
   modal: {

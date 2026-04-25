@@ -254,13 +254,13 @@ export function SimulationPanel() {
                         y1={y}
                         x2="100"
                         y2={y}
-                        stroke="rgba(255,255,255,0.06)"
+                        stroke={TOKENS.colors.borderMain}
                         strokeWidth="0.3"
                       />
                     ))}
-                    <polyline points={series.bear} fill="none" stroke={scenario === 'bear' ? TOKENS.colors.accent : "rgba(255,255,255,0.2)"} strokeWidth={scenario === 'bear' ? "0.8" : "0.3"} />
-                    <polyline points={series.base} fill="none" stroke={scenario === 'base' ? TOKENS.colors.accent : "rgba(255,255,255,0.2)"} strokeWidth={scenario === 'base' ? "0.8" : "0.3"} />
-                    <polyline points={series.bull} fill="none" stroke={scenario === 'bull' ? TOKENS.colors.accent : "rgba(255,255,255,0.2)"} strokeWidth={scenario === 'bull' ? "0.8" : "0.3"} />
+                    <polyline points={series.bear} fill="none" stroke={scenario === 'bear' ? TOKENS.colors.accent : TOKENS.colors.textGhost} strokeWidth={scenario === 'bear' ? "0.8" : "0.3"} />
+                    <polyline points={series.base} fill="none" stroke={scenario === 'base' ? TOKENS.colors.accent : TOKENS.colors.textGhost} strokeWidth={scenario === 'base' ? "0.8" : "0.3"} />
+                    <polyline points={series.bull} fill="none" stroke={scenario === 'bull' ? TOKENS.colors.accent : TOKENS.colors.textGhost} strokeWidth={scenario === 'bull' ? "0.8" : "0.3"} />
                   </svg>
                 </div>
               </div>
@@ -313,8 +313,8 @@ export function SimulationPanel() {
                 <div style={{ 
                   display: 'flex', 
                   background: TOKENS.colors.bgTertiary, 
-                  borderRadius: '24px', 
-                  padding: '4px',
+                  borderRadius: TOKENS.radius.xl, 
+                  padding: `${TOKENS.spacing[1]}px`,
                   border: `1px solid ${TOKENS.colors.borderSubtle}`
                 }}>
                   {(['bear', 'base', 'bull'] as const).map(s => (
@@ -322,8 +322,8 @@ export function SimulationPanel() {
                       key={s}
                       onClick={() => setScenario(s)}
                       style={{
-                        padding: '6px 24px',
-                        borderRadius: '20px',
+                        padding: `${TOKENS.spacing[2]}px ${TOKENS.spacing[6]}px`,
+                        borderRadius: TOKENS.radius.xl,
                         background: scenario === s ? TOKENS.colors.accent : 'transparent',
                         color: scenario === s ? TOKENS.colors.black : TOKENS.colors.textSecondary,
                         fontSize: TOKENS.fontSizes.xs,
@@ -426,7 +426,7 @@ export function SimulationPanel() {
                   <span>Principal</span>
                   <span>Yield</span>
                 </div>
-                <div style={{ display: 'flex', height: '6px', borderRadius: '3px', overflow: 'hidden', background: TOKENS.colors.bgTertiary }}>
+                <div style={{ display: 'flex', height: '6px', borderRadius: TOKENS.radius.sm, overflow: 'hidden', background: TOKENS.colors.bgTertiary }}>
                   <div style={{ width: `${(500000 / active.totalValue) * 100}%`, background: TOKENS.colors.white }} />
                   <div style={{ width: `${(active.cumulativeYield / active.totalValue) * 100}%`, background: TOKENS.colors.accent }} />
                 </div>

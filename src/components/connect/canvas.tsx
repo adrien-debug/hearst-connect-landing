@@ -62,7 +62,7 @@ export function Canvas() {
             borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
             paddingLeft: TOKENS.spacing[6],
             paddingRight: TOKENS.spacing[6],
-            zIndex: 100,
+            zIndex: 'var(--z-dropdown)',
           }}
         >
           <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>

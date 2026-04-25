@@ -70,7 +70,7 @@ export function Modal({
       style={{
         position: 'fixed',
         inset: 0,
-        zIndex: 500,
+        zIndex: 'var(--z-modal)',
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
@@ -83,7 +83,7 @@ export function Modal({
         style={{
           position: 'absolute',
           inset: 0,
-          background: 'rgba(0,0,0,0.8)',
+          background: 'var(--hc-overlay)',
           animation: 'fadeIn 200ms ease-out',
         }}
       />
@@ -97,7 +97,7 @@ export function Modal({
           background: TOKENS.colors.black,
           borderRadius: TOKENS.radius.lg,
           border: `1px solid ${TOKENS.colors.borderSubtle}`,
-          boxShadow: '0 24px 48px rgba(0,0,0,0.5)',
+          boxShadow: 'var(--hc-shadow-lg)',
           animation: 'scaleIn 200ms ease-out',
           display: 'flex',
           flexDirection: 'column',

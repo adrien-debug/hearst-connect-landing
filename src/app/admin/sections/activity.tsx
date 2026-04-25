@@ -94,7 +94,7 @@ function LevelBadge({ level }: { level: string }) {
   const colors: Record<string, string> = {
     info: TOKENS.colors.textSecondary,
     success: TOKENS.colors.accent,
-    warning: '#F59E0B',
+    warning: 'var(--color-warning)',
     error: TOKENS.colors.danger,
   }
 

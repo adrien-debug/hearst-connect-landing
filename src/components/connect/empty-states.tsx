@@ -1,19 +1,18 @@
 'use client'
 
-import { useConnect } from 'wagmi'
 import { TOKENS } from './constants'
 
-interface EmptyStateProps {
+export function EmptyState({
+  title,
+  description,
+  icon,
+  children,
+}: {
   title: string
-  description?: string
-  action?: {
-    label: string
-    onClick: () => void
-  }
+  description: string
   icon?: React.ReactNode
-}
-
-export function EmptyState({ title, description, action, icon }: EmptyStateProps) {
+  children?: React.ReactNode
+}) {
   return (
     <div
       style={{
@@ -21,57 +20,57 @@ export function EmptyState({ title, description, action, icon }: EmptyStateProps
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: `${TOKENS.spacing[8]}px`,
+        gap: TOKENS.spacing[3],
+        padding: `${TOKENS.spacing[8]}px ${TOKENS.spacing[6]}px`,
         textAlign: 'center',
-        background: TOKENS.colors.bgSecondary,
-        borderRadius: TOKENS.radius.lg,
-        border: `1px dashed ${TOKENS.colors.borderSubtle}`,
-        minHeight: '200px',
+        color: TOKENS.colors.textSecondary,
       }}
     >
       {icon && (
-        <div
-          style={{
-            width: '48px',
-            height: '48px',
-            borderRadius: '50%',
-            background: TOKENS.colors.bgTertiary,
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
-            marginBottom: `${TOKENS.spacing[4]}px`,
-            color: TOKENS.colors.textSecondary,
-          }}
-        >
+        <div style={{ color: TOKENS.colors.textGhost }}>
           {icon}
         </div>
       )}
-      <h3
-        style={{
-          fontSize: TOKENS.fontSizes.md,
-          fontWeight: TOKENS.fontWeights.bold,
-          color: TOKENS.colors.textPrimary,
-          margin: `0 0 ${TOKENS.spacing[2]}px 0`,
-        }}
-      >
+      <div style={{ fontSize: TOKENS.fontSizes.lg, fontWeight: 600, color: TOKENS.colors.textPrimary }}>
         {title}
-      </h3>
-      {description && (
-        <p
-          style={{
-            fontSize: TOKENS.fontSizes.sm,
-            color: TOKENS.colors.textSecondary,
-            margin: `0 0 ${TOKENS.spacing[4]}px 0`,
-            maxWidth: '300px',
-            lineHeight: '1.5',
-          }}
-        >
-          {description}
-        </p>
-      )}
-      {action && (
+      </div>
+      <div style={{ fontSize: TOKENS.fontSizes.sm, maxWidth: '280px', lineHeight: 1.5 }}>
+        {description}
+      </div>
+      {children}
+    </div>
+  )
+}
+
+export function VaultNotConfigured() {
+  return (
+    <EmptyState
+      title="Vault not configured"
+      description="This vault is not yet configured. Please check back later."
+      icon={
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <path d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+        </svg>
+      }
+    />
+  )
+}
+
+export function WalletNotConnected({ onConnect }: { onConnect?: () => void }) {
+  return (
+    <EmptyState
+      title="Wallet not connected"
+      description="Connect your wallet to view your positions and subscribe to vaults."
+      icon={
+        <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={1.5}>
+          <path d="M19 7H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z" />
+          <path d="M16 11h0" />
+        </svg>
+      }
+    >
+      {onConnect && (
         <button
-          onClick={action.onClick}
+          onClick={onConnect}
           style={{
             padding: `${TOKENS.spacing[2]}px ${TOKENS.spacing[4]}px`,
             background: TOKENS.colors.accent,
@@ -79,70 +78,14 @@ export function EmptyState({ title, description, action, icon }: EmptyStateProps
             border: 'none',
             borderRadius: TOKENS.radius.md,
             fontSize: TOKENS.fontSizes.sm,
-            fontWeight: TOKENS.fontWeights.bold,
+            fontWeight: 600,
             cursor: 'pointer',
-            textTransform: 'uppercase',
-            letterSpacing: '0.05em',
           }}
         >
-          {action.label}
+          Connect Wallet
         </button>
       )}
-    </div>
-  )
-}
-
-export function VaultNotConfigured({ onConfigure }: { onConfigure?: () => void }) {
-  return (
-    <EmptyState
-      title="No Vault Configured"
-      description="An admin needs to configure a vault before you can view positions or make deposits."
-      icon={
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-          <line x1="12" y1="8" x2="12" y2="12" />
-          <line x1="12" y1="16" x2="12.01" y2="16" />
-        </svg>
-      }
-      action={
-        onConfigure
-          ? {
-              label: 'Configure Vault',
-              onClick: onConfigure,
-            }
-          : undefined
-      }
-    />
-  )
-}
-
-export function WalletNotConnected({ onConnect }: { onConnect?: () => void }) {
-  const { connect, connectors, isPending } = useConnect()
-
-  const handleConnect = () => {
-    if (onConnect) {
-      onConnect()
-    } else {
-      const connector = connectors[0]
-      if (connector) connect({ connector })
-    }
-  }
-
-  return (
-    <EmptyState
-      title="Wallet Not Connected"
-      description="Connect your wallet to view your vault positions and manage your deposits."
-      icon={
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-          <rect x="2" y="5" width="20" height="14" rx="2" />
-          <path d="M16 11.5a.5.5 0 0 1 .5.5v.5a.5.5 0 0 1-.5.5H12" />
-        </svg>
-      }
-      action={{
-        label: isPending ? 'Connecting...' : 'Connect Wallet',
-        onClick: handleConnect,
-      }}
-    />
+    </EmptyState>
   )
 }
 
@@ -151,76 +94,36 @@ export function LoadingState() {
     <div
       style={{
         display: 'flex',
-        flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'center',
-        padding: `${TOKENS.spacing[8]}px`,
-        minHeight: '200px',
+        padding: TOKENS.spacing[8],
       }}
     >
       <div
         style={{
-          width: '40px',
-          height: '40px',
-          border: `3px solid ${TOKENS.colors.bgTertiary}`,
+          width: '32px',
+          height: '32px',
+          border: `2px solid ${TOKENS.colors.borderSubtle}`,
           borderTopColor: TOKENS.colors.accent,
           borderRadius: '50%',
           animation: 'spin 1s linear infinite',
         }}
       />
-      <style>{`
-        @keyframes spin {
-          to { transform: rotate(360deg); }
-        }
-      `}</style>
     </div>
   )
 }
 
-export function OnChainError({
-  error,
-  onRetry,
-}: {
-  error: { code: string; message: string }
-  onRetry?: () => void
-}) {
-  const isRpcError = error.code === 'FETCH_ERROR' || error.message.includes('RPC')
-  const isVaultError = error.code === 'VAULT_NOT_FOUND'
-
-  const getErrorTitle = () => {
-    if (isRpcError) return 'Connection Error'
-    if (isVaultError) return 'Vault Configuration Error'
-    return 'Error'
-  }
-
-  const getErrorDescription = () => {
-    if (isRpcError) {
-      return 'Unable to connect to the blockchain. Please check your network connection and try again.'
-    }
-    if (isVaultError) {
-      return 'The vault configuration is missing or invalid. Please configure a vault in the admin panel.'
-    }
-    return error.message
-  }
-
+export function OnChainError({ error }: { error?: Error }) {
   return (
     <EmptyState
-      title={getErrorTitle()}
-      description={getErrorDescription()}
+      title="Something went wrong"
+      description={error?.message || "We couldn't load the data. Please try again."}
       icon={
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="#ef4444" strokeWidth="2">
+        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke={TOKENS.colors.danger} strokeWidth="2">
           <circle cx="12" cy="12" r="10" />
           <line x1="12" y1="8" x2="12" y2="12" />
           <line x1="12" y1="16" x2="12.01" y2="16" />
         </svg>
-      }
-      action={
-        onRetry
-          ? {
-              label: 'Retry',
-              onClick: onRetry,
-            }
-          : undefined
       }
     />
   )
