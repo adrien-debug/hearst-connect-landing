@@ -65,11 +65,9 @@ export async function POST(request: NextRequest) {
       )
     }
 
-    // Validate txHash if provided (must be valid hex)
-    if (body.txHash && body.txHash !== 'pending') {
-      if (!/^0x([A-Fa-f0-9]{64})$/.test(body.txHash)) {
-        return NextResponse.json({ error: 'Invalid txHash format' }, { status: 400 })
-      }
+    // Require valid txHash
+    if (!body.txHash || !/^0x([A-Fa-f0-9]{64})$/.test(body.txHash)) {
+      return NextResponse.json({ error: 'Valid txHash is required' }, { status: 400 })
     }
 
     // Check if user already has an active position for this vault
@@ -155,10 +153,8 @@ export async function PATCH(request: NextRequest) {
     }
 
     // Validate txHash if provided
-    if (body.txHash && body.txHash !== 'pending') {
-      if (!/^0x([A-Fa-f0-9]{64})$/.test(body.txHash)) {
-        return NextResponse.json({ error: 'Invalid txHash format' }, { status: 400 })
-      }
+    if (body.txHash && !/^0x([A-Fa-f0-9]{64})$/.test(body.txHash)) {
+      return NextResponse.json({ error: 'Invalid txHash format' }, { status: 400 })
     }
 
     // Verify the position belongs to this user

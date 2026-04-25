@@ -16,7 +16,9 @@ Onchain access to institutional Bitcoin mining cash flows.
 
 1. **Landing** (`/`) → "Launch App" → **AccessGate** (`/app`)
 2. **AccessGate** → Connect Wallet → Sign In with Ethereum (SIWE EIP-4361)
-3. **Dashboard** — Authenticated view with vaults, portfolio, activity
+3. **Dashboard** — Authenticated view with vaults, portfolio, activity (`src/components/connect/canvas.tsx`). A fixed bottom dock (`dock-radial.tsx`) shows version, status, and the Hearst monogram control: it stays visible while data loads and on every sub-view; it always returns to the portfolio dashboard via `onSelect(null)`.
+
+**Wallet / Base:** wagmi is configured for **Base only** (`src/config/wagmi.ts`). The primary connector is **MetaMask** (`injected({ target: 'metaMask' })`), with Coinbase Wallet as a fallback. Subscribe **Pre-flight Check** (`pre-flight-check.tsx`) reads **USDC allowance** and **vault epoch** on-chain; the portfolio sparkline uses **logged activity** from the API, not synthetic random history.
 
 Streamlined DeFi flow: landing → wallet connect → SIWE auth → platform.
 
@@ -69,7 +71,7 @@ NEXT_PUBLIC_GOOGLE_ADS_ID=                              # Google Ads
 
 1. **Landing** (`/`) → **Launch App** → `/app`
 2. **AccessGate** (`src/app/app/app-client.tsx`) shows marketing + wallet connect
-3. **Connect Wallet** (wagmi injected connector) → popup MetaMask
+3. **Connect Wallet** (wagmi MetaMask-targeted injected connector) → MetaMask on Base
 4. **Sign In with Wallet** → Sign EIP-4361 message
    - `POST /api/auth/nonce` — HMAC stateless nonce (5min TTL)
    - Wallet signs the SIWE message

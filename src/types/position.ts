@@ -9,7 +9,8 @@ export interface UnlockTimeline {
 export interface EpochData {
   currentEpoch: number
   epochProgress: number
-  epochEndsAt: string
+  /** ISO lock / maturity anchor from on-chain `userInfo` when available */
+  epochEndsAt?: string
 }
 
 export interface PositionData {

@@ -51,6 +51,7 @@ export function usePositionData({
   const {
     global,
     isLoading: isGlobalLoading,
+    isError: isGlobalError,
     refetch: refetchGlobal,
   } = useVaultGlobal(isVaultConfigured ? vaultAddress : undefined)
 
@@ -66,6 +67,12 @@ export function usePositionData({
       return {
         code: 'WALLET_NOT_CONNECTED',
         message: 'Wallet not connected. Please connect your wallet.',
+      }
+    }
+    if (isGlobalError) {
+      return {
+        code: 'FETCH_ERROR',
+        message: 'Could not load vault data from the network. Check Base + RPC.',
       }
     }
     return null
@@ -111,7 +118,7 @@ export function usePositionData({
       epoch: {
         currentEpoch: global.currentEpoch,
         epochProgress: global.shouldAdvanceEpoch ? EPOCH_PROGRESS_NEAR_END : EPOCH_PROGRESS_DEFAULT,
-        epochEndsAt: new Date(Date.now() + 15 * MS_PER_DAY).toISOString(),
+        epochEndsAt: position.lockEnd.toISOString(),
       },
       canWithdraw: position.canWithdraw,
       isTargetReached,

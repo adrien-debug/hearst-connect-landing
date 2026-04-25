@@ -9,26 +9,56 @@ export function getDaysToMaturity(maturityDate: string | Date): number {
   return Math.max(0, Math.ceil((target - today) / (1000 * 60 * 60 * 24)))
 }
 
+export type SparklineActivityEvent = {
+  type: 'deposit' | 'claim' | 'withdraw'
+  amount: number // already in display units (USD)
+  timestamp: number
+}
+
 /**
- * Mock value history for portfolio evolution chart.
- * Seeded pseudo-random for SSR/client consistency.
+ * Builds a stepped portfolio curve from persisted activity (deposits / withdraws).
+ * The curve starts at the first event — no artificial 30d lookback.
+ * Amounts are already in display units (converted by useUserData).
  */
-export function generateValueHistory(currentValue: number): number[] {
-  const points = 30
-  const data: number[] = []
-  let value = currentValue * 0.92
-
-  let seed = 12345
-  const seededRandom = () => {
-    seed = (seed * 9301 + 49297) % 233280
-    return seed / 233280
+export function buildPortfolioSparklineFromActivity(
+  events: SparklineActivityEvent[],
+  currentPortfolioValue: number,
+  points = 30,
+): number[] {
+  const n = Math.max(2, points)
+  if (currentPortfolioValue <= 0) {
+    return Array.from({ length: n }, () => 0)
   }
 
-  for (let i = 0; i < points; i++) {
-    value = value + (currentValue - value) * (0.08 + seededRandom() * 0.04)
-    data.push(value)
+  const sorted = [...events].sort((a, b) => a.timestamp - b.timestamp)
+  if (sorted.length === 0) {
+    return Array.from({ length: n }, () => currentPortfolioValue)
   }
 
-  data[data.length - 1] = currentValue
-  return data
+  const firstT = sorted[0].timestamp
+  const lastT = Date.now()
+  const span = lastT - firstT
+
+  // If all events happened very recently (< 1h), show flat line at current value
+  if (span < 3600_000) {
+    return Array.from({ length: n }, () => currentPortfolioValue)
+  }
+
+  const valueAt = (t: number): number => {
+    let running = 0
+    for (const e of sorted) {
+      if (e.timestamp > t) break
+      if (e.type === 'deposit') running += e.amount
+      else if (e.type === 'withdraw') running = Math.max(0, running - e.amount)
+    }
+    return running
+  }
+
+  const out: number[] = []
+  for (let i = 0; i < n; i++) {
+    const t = firstT + (span * i) / (n - 1)
+    out.push(valueAt(t))
+  }
+  out[out.length - 1] = currentPortfolioValue
+  return out
 }

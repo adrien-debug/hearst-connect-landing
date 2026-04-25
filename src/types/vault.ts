@@ -15,6 +15,7 @@ export interface VaultConfig {
   fees: string
   risk: string
   image?: string
+  isTest: boolean
   isActive: boolean
   createdAt: number
 }

@@ -1,6 +1,7 @@
 'use client'
 
-import { useAccount, useChainId } from 'wagmi'
+import { useEffect } from 'react'
+import { useAccount, useSwitchChain } from 'wagmi'
 import { useTokenAllowance } from '@/hooks/useTokenAllowance'
 import { useVaultGlobal } from '@/hooks/useVault'
 import { useVaultById } from '@/hooks/useVaultRegistry'
@@ -12,38 +13,56 @@ export function PreFlightCheck({
   depositAmount,
   onApprove,
   isApproving,
+  onReadyChange,
 }: {
   vault: AvailableVault
   depositAmount: string
   onApprove: () => void
   isApproving: boolean
+  onReadyChange?: (ready: boolean) => void
 }) {
-  const { address, isConnected } = useAccount()
-  const chainId = useChainId()
+  const { address, isConnected, chain } = useAccount()
+  const { switchChain, isPending: isSwitching } = useSwitchChain()
+  const isOnBase = chain?.id === 8453
+  const isTestVault = vault.isTest ?? false
 
   // Get vault addresses from registry
   const vaultConfig = useVaultById(vault.id)
   const usdcAddress = vaultConfig?.usdcAddress
   const vaultAddress = vaultConfig?.vaultAddress
 
-  const { hasAllowance, isLoading: isAllowanceLoading } = useTokenAllowance(
-    usdcAddress,
-    address,
-    vaultAddress
-  )
+  const {
+    allowance,
+    hasAllowance,
+    isLoading: isAllowanceLoading,
+    isAllowanceError,
+    refetchAllowance,
+  } = useTokenAllowance(usdcAddress, address, vaultAddress)
 
-  const { global } = useVaultGlobal(vaultAddress)
+  const { global, isLoading: isGlobalLoading, isError: isGlobalError, refetch: refetchVaultGlobal } =
+    useVaultGlobal(vaultAddress)
   
   const formatAddress = (addr?: string) => {
     if (!addr) return ''
     return `${addr.slice(0, 6)}…${addr.slice(-4)}`
   }
   
-  const allGood = isConnected && 
-    chainId === 8453 && 
-    hasAllowance(depositAmount) && 
-    global?.currentEpoch && 
-    !global?.shouldAdvanceEpoch
+  const epochOk =
+    global != null &&
+    typeof global.currentEpoch === 'number' &&
+    global.currentEpoch >= 0 &&
+    !global.shouldAdvanceEpoch
+
+  const allGood = isTestVault
+    ? isConnected
+    : isConnected &&
+      isOnBase &&
+      hasAllowance(depositAmount) &&
+      epochOk
+
+  useEffect(() => {
+    onReadyChange?.(!!allGood)
+  }, [allGood, onReadyChange])
   
   return (
     <div style={{
@@ -74,41 +93,107 @@ export function PreFlightCheck({
           value={isConnected ? `✓ Connected · ${formatAddress(address)}` : '✗ Connect wallet'}
         />
         
+        {isTestVault ? (
+          <CheckItem
+            status="success"
+            label="Mode"
+            statusLabel="SIMULATED"
+            value="✓ Test vault — no on-chain transaction required"
+          />
+        ) : (
+        <>
         {/* Network */}
         <CheckItem 
-          status={chainId === 8453 ? 'success' : chainId ? 'warning' : 'error'}
+          status={isOnBase ? 'success' : chain ? 'warning' : 'error'}
           label="Network"
-          value={chainId === 8453 ? '✓ Base' : chainId ? '⚠ Switch to Base' : '✗ Unknown network'}
+          value={isOnBase ? `✓ Base` : chain ? `⚠ Switch to Base (on ${chain.name})` : '✗ Unknown network'}
+          action={!isOnBase && isConnected ? {
+            label: isSwitching ? 'Switching…' : 'Switch',
+            onClick: () => switchChain({ chainId: 8453 }),
+            disabled: isSwitching,
+          } : undefined}
         />
         
         {/* Allowance */}
         {isConnected && (
           <CheckItem 
-            status={isAllowanceLoading ? 'pending' : hasAllowance(depositAmount) ? 'success' : 'action'}
+            status={
+              isAllowanceError
+                ? 'error'
+                : isAllowanceLoading && allowance === undefined
+                  ? 'pending'
+                  : hasAllowance(depositAmount)
+                    ? 'success'
+                    : 'action'
+            }
             label="Allowance"
-            value={isAllowanceLoading 
-              ? 'Checking…' 
-              : hasAllowance(depositAmount) 
-                ? '✓ USDC approved' 
-                : 'Approve USDC first'}
-            action={!isAllowanceLoading && !hasAllowance(depositAmount) ? {
-              label: isApproving ? 'Approving…' : 'Approve',
-              onClick: onApprove,
-              disabled: isApproving,
-            } : undefined}
+            value={
+              isAllowanceError
+                ? '✗ Could not read USDC allowance (RPC/network)'
+                : isAllowanceLoading && allowance === undefined
+                  ? 'Checking…'
+                  : hasAllowance(depositAmount)
+                    ? '✓ USDC approved'
+                    : 'Approve USDC first'}
+            action={
+              isAllowanceError
+                ? {
+                    label: 'Retry',
+                    onClick: () => void refetchAllowance(),
+                    disabled: isAllowanceLoading,
+                  }
+                : !isAllowanceLoading && allowance !== undefined && !hasAllowance(depositAmount)
+                  ? {
+                      label: isApproving ? 'Approving…' : 'Approve',
+                      onClick: onApprove,
+                      disabled: isApproving,
+                    }
+                  : undefined
+            }
           />
         )}
         
-        {/* Epoch */}
-        {global && (
-          <CheckItem 
-            status={global.shouldAdvanceEpoch ? 'warning' : 'success'}
+        {/* Epoch — on-chain reads */}
+        {vaultAddress && isConnected && (
+          <CheckItem
+            status={
+              isGlobalLoading
+                ? 'pending'
+                : isGlobalError
+                  ? 'error'
+                  : global?.shouldAdvanceEpoch
+                    ? 'warning'
+                    : global
+                      ? 'success'
+                      : 'error'
+            }
             label="Epoch"
-            statusLabel={global.shouldAdvanceEpoch ? 'ENDING' : 'ACTIVE'}
-            value={global.shouldAdvanceEpoch 
-              ? `⚠ Epoch ${global.currentEpoch} ending soon` 
-              : `✓ Epoch ${global.currentEpoch} active`}
+            statusLabel={
+              isGlobalLoading ? 'SYNC' : isGlobalError ? 'ERROR' : global?.shouldAdvanceEpoch ? 'ENDING' : global ? 'ACTIVE' : '—'
+            }
+            value={
+              isGlobalLoading
+                ? 'Reading vault epoch…'
+                : isGlobalError
+                  ? '✗ Could not read vault (wrong network, ABI, or RPC)'
+                  : global
+                    ? global.shouldAdvanceEpoch
+                      ? `⚠ Epoch ${global.currentEpoch} ending soon`
+                      : `✓ Epoch ${global.currentEpoch} active`
+                    : '✗ Vault state incomplete'
+            }
+            action={
+              isGlobalError
+                ? {
+                    label: 'Retry',
+                    onClick: () => void refetchVaultGlobal(),
+                    disabled: isGlobalLoading,
+                  }
+                : undefined
+            }
           />
+        )}
+        </>
         )}
       </div>
       

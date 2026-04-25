@@ -34,6 +34,7 @@ export interface DbVault {
   fees: string
   risk: string
   image: string | null
+  isTest: number // SQLite boolean as 0/1
   isActive: number // SQLite boolean as 0/1
   createdAt: number
   updatedAt: number

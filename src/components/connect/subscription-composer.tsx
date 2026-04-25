@@ -25,6 +25,7 @@ type Props = {
   isApproving: boolean
   onDeposit: () => void
   isDepositing: boolean
+  onPreFlightReady?: (ready: boolean) => void
 }
 
 export function SubscriptionComposer({
@@ -46,6 +47,7 @@ export function SubscriptionComposer({
   isApproving,
   onDeposit,
   isDepositing,
+  onPreFlightReady,
 }: Props) {
   const idAmount = 'subscribe-amount'
   const idAgree = 'subscribe-term-confirm'
@@ -392,6 +394,7 @@ export function SubscriptionComposer({
                 depositAmount={amount}
                 onApprove={onApprove}
                 isApproving={isApproving}
+                onReadyChange={onPreFlightReady}
               />
             </div>
 
@@ -633,7 +636,7 @@ function LiveSimulationCard({
             color: TOKENS.colors.textSecondary,
           }}
         >
-          Live Simulation
+          Yield projection
         </span>
         <span
           style={{
@@ -644,7 +647,7 @@ function LiveSimulationCard({
             textTransform: 'uppercase',
           }}
         >
-          {lockMonths}M Horizon
+          {lockMonths}M horizon · APR-based estimate
         </span>
       </div>
 

@@ -13,7 +13,7 @@ interface AdminSession {
   timestamp: number
 }
 
-// Simple SHA-256 hash (client-side only - for demo purposes)
+// Simple SHA-256 hash (client-side only)
 async function hashPassword(password: string): Promise<string> {
   const encoder = new TextEncoder()
   const data = encoder.encode(password)

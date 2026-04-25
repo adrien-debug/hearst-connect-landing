@@ -106,6 +106,7 @@ export const VaultRepository = {
       fees: input.fees,
       risk: input.risk,
       image: input.image ?? null,
+      isTest: (input as DbVaultInput & { isTest?: boolean }).isTest ? 1 : 0,
       isActive: input.isActive ?? true ? 1 : 0,
       createdAt: now,
       updatedAt: now,
@@ -115,8 +116,8 @@ export const VaultRepository = {
       INSERT INTO vaults (
         id, name, description, vault_address, usdc_address, chain_id, chain_name,
         apr, target, lock_period_days, min_deposit, strategy, fees, risk, image,
-        is_active, created_at, updated_at
-      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
+        is_test, is_active, created_at, updated_at
+      ) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)
     `)
     stmt.run(
       vault.id,
@@ -134,6 +135,7 @@ export const VaultRepository = {
       vault.fees,
       vault.risk,
       vault.image,
+      vault.isTest,
       vault.isActive,
       vault.createdAt,
       vault.updatedAt
@@ -413,6 +415,7 @@ function mapVaultRow(row: Record<string, unknown>): DbVault {
     fees: String(row.fees),
     risk: String(row.risk),
     image: row.image ? String(row.image) : null,
+    isTest: Number(row.is_test ?? 0),
     isActive: Number(row.is_active),
     createdAt: Number(row.created_at),
     updatedAt: Number(row.updated_at),

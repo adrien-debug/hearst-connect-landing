@@ -5,7 +5,7 @@ import { EmptyState } from './empty-states'
 import { VaultCardCompact } from './vault-card-compact'
 import { TOKENS, fmtUsdCompact, fmtUsd, VALUE_LETTER_SPACING, CHART_PALETTE } from './constants'
 import { formatVaultName } from './formatting'
-import { generateValueHistory, getDaysToMaturity } from './utils/portfolio-chart-utils'
+import { buildPortfolioSparklineFromActivity, getDaysToMaturity } from './utils/portfolio-chart-utils'
 import { fitValue, type SmartFitMode, useSmartFit, useShellPadding } from './smart-fit'
 import { type VaultLine, type Aggregate, type ActiveVault, type AvailableVault } from './data'
 import { useUserData } from '@/hooks/useUserData'
@@ -36,7 +36,7 @@ export function PortfolioSummary({
   const [isClaimingAll, setIsClaimingAll] = useState(false)
   useEffect(() => { setMounted(true) }, [])
 
-  const { actions: userActions } = useUserData()
+  const { actions: userActions, activity: userActivity } = useUserData()
 
   const activeVaults = vaults.filter((v): v is ActiveVault => v.type === 'active')
   const availableVaults = vaults.filter((v): v is AvailableVault => v.type === 'available')
@@ -68,8 +68,10 @@ export function PortfolioSummary({
   }
 
   // Memoized derived data — prevents recalculation on every render
-  const valueHistory = useMemo(() => generateValueHistory(portfolioValue), [portfolioValue])
-  const { activity: userActivity } = useUserData()
+  const valueHistory = useMemo(
+    () => buildPortfolioSparklineFromActivity(userActivity, portfolioValue),
+    [userActivity, portfolioValue],
+  )
   const recentActivity = mounted ? userActivity.slice(0, 5) : []
   const donutData = useMemo(() => {
     return activeVaults.map((vault, index) => ({
@@ -180,18 +182,18 @@ export function PortfolioSummary({
           <div style={{
             display: 'grid',
             gridTemplateColumns: fitValue(mode, {
-              normal: '200px 1fr',
-              tight: '180px 1fr',
+              normal: '260px 1fr',
+              tight: '220px 1fr',
               limit: '1fr',
             }),
-            gap: TOKENS.spacing[3],
+            gap: TOKENS.spacing[6],
             background: TOKENS.colors.black,
             border: `1px solid ${TOKENS.colors.borderSubtle}`,
             borderRadius: TOKENS.radius.lg,
-            padding: TOKENS.spacing[3],
+            padding: TOKENS.spacing[6],
             minHeight: fitValue(mode, {
-              normal: '260px',
-              tight: '220px',
+              normal: '340px',
+              tight: '280px',
               limit: 'auto',
             }),
             flexShrink: 0,
@@ -200,18 +202,22 @@ export function PortfolioSummary({
               display: 'flex',
               flexDirection: 'column',
               alignItems: 'center',
+              justifyContent: 'center',
+              borderRight: mode !== 'limit' ? `1px solid ${TOKENS.colors.borderSubtle}` : 'none',
+              borderBottom: mode === 'limit' ? `1px solid ${TOKENS.colors.borderSubtle}` : 'none',
+              paddingRight: mode !== 'limit' ? TOKENS.spacing[6] : 0,
+              paddingBottom: mode === 'limit' ? TOKENS.spacing[6] : 0,
             }}>
               <AllocationDonut
                 data={donutData}
                 total={portfolioValue}
                 mode={mode}
-                compact
                 onSegmentClick={(vaultId) => onVaultSelect?.(vaultId)}
               />
               <div style={{
                 display: 'flex',
-                gap: TOKENS.spacing[3],
-                marginTop: TOKENS.spacing[2],
+                gap: TOKENS.spacing[6],
+                marginTop: TOKENS.spacing[6],
               }}>
                 <MiniStat
                   label="Progress"
@@ -225,8 +231,15 @@ export function PortfolioSummary({
               display: 'flex',
               flexDirection: 'column',
               minWidth: 0,
+              paddingLeft: mode !== 'limit' ? TOKENS.spacing[4] : 0,
+              paddingTop: TOKENS.spacing[2],
             }}>
-              <LineChartArea data={valueHistory} portfolioValue={portfolioValue} mode={mode} />
+              <LineChartArea 
+                data={valueHistory} 
+                portfolioValue={portfolioValue} 
+                totalDeposited={safeAgg.totalDeposited} 
+                mode={mode} 
+              />
             </div>
           </div>
 
@@ -236,33 +249,35 @@ export function PortfolioSummary({
             border: `1px solid ${TOKENS.colors.borderSubtle}`,
             borderRadius: TOKENS.radius.lg,
             padding: fitValue(mode, {
-              normal: `${TOKENS.spacing[4]}`,
-              tight: `${TOKENS.spacing[3]}`,
-              limit: `${TOKENS.spacing[3]}`,
+              normal: `${TOKENS.spacing[6]}`,
+              tight: `${TOKENS.spacing[5]}`,
+              limit: `${TOKENS.spacing[4]}`,
             }),
             display: 'flex',
             flexDirection: 'column',
             minHeight: 0,
             overflow: 'hidden',
           }}>
-            <div style={{
-              display: 'flex',
-              justifyContent: 'space-between',
-              alignItems: 'center',
-              marginBottom: TOKENS.spacing[2],
-              padding: `0 ${TOKENS.spacing[2]}`,
-              flexShrink: 0,
-            }}>
-              <span style={{
-                fontFamily: TOKENS.fonts.mono,
-                fontSize: TOKENS.fontSizes.micro,
-                fontWeight: TOKENS.fontWeights.bold,
-                letterSpacing: TOKENS.letterSpacing.display,
-                textTransform: 'uppercase',
-                color: TOKENS.colors.textSecondary,
-              }}>
-                Positions ({mounted ? activeVaults.length : 0})
-              </span>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'center',
+        padding: `0 0 0`,
+        marginBottom: TOKENS.spacing[8],
+        flexShrink: 0,
+      }}>
+        <span style={{
+          fontFamily: TOKENS.fonts.mono,
+          fontSize: TOKENS.fontSizes.xs,
+          fontWeight: TOKENS.fontWeights.bold,
+          letterSpacing: TOKENS.letterSpacing.display,
+          textTransform: 'uppercase',
+          borderLeft: `3px solid ${TOKENS.colors.accent}`,
+          paddingLeft: TOKENS.spacing[3],
+          color: TOKENS.colors.textSecondary,
+        }}>
+          Positions ({mounted ? activeVaults.length : 0})
+        </span>
               <button
                 onClick={handleClaimAll}
                 disabled={safeAgg.totalClaimable === 0 || isClaimingAll}
@@ -291,13 +306,13 @@ export function PortfolioSummary({
                 overflowY: 'auto',
                 display: 'flex',
                 flexDirection: 'column',
-                gap: TOKENS.spacing[3],
+                gap: TOKENS.spacing[4],
               }}
             >
               <div style={{
                 display: 'flex',
                 flexDirection: 'column',
-                gap: TOKENS.spacing[2],
+                gap: TOKENS.spacing[4],
               }}>
                 {activeVaults.length === 0 ? (
                   <EmptyState
@@ -322,7 +337,7 @@ export function PortfolioSummary({
 
               {activeVaults.length > 0 && (
                 <div style={{
-                  paddingTop: TOKENS.spacing[2],
+                  paddingTop: TOKENS.spacing[4],
                   borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
                 }}>
                   <MaturityTimelineCompact vaults={activeVaults} mode={mode} />
@@ -347,12 +362,17 @@ export function PortfolioSummary({
             title={`Available Vaults (${availableVaults.length})`}
             actionLabel={availableVaults.length > 0 ? 'View All' : undefined}
             onAction={availableVaults.length > 0 ? onAvailableVaultsClick : undefined}
+            noScroll
           >
             {availableVaults.length === 0 ? (
               <PanelEmptyMessage message="No vaults available" />
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2] }}>
-                {availableVaults.slice(0, 3).map((vault, index) => (
+              <div style={{ 
+                display: 'grid', 
+                gridTemplateColumns: 'repeat(2, 1fr)', 
+                gap: TOKENS.spacing[5] 
+              }}>
+                {availableVaults.slice(0, 4).map((vault, index) => (
                   <AvailableVaultTeaser
                     key={vault.id}
                     vault={vault}
@@ -372,7 +392,7 @@ export function PortfolioSummary({
             {recentActivity.length === 0 ? (
               <PanelEmptyMessage message="No recent activity yet" />
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2] }}>
+              <div style={{ display: 'flex', flexDirection: 'column' }}>
                 {recentActivity.map((item) => (
                   <ActivityRow
                     key={item.id}
@@ -723,27 +743,27 @@ function MiniStat({ label, value, accent = false }: { label: string; value: stri
 
 /** LineChartArea — Full area chart with gradient fill */
 function LineChartArea({ data, portfolioValue, mode }: { data: number[]; portfolioValue: number; mode: SmartFitMode }) {
+  const isFlat = data.every(v => v === data[0])
   const min = Math.min(...data)
   const max = Math.max(...data)
   const range = max - min || 1
   const startValue = data[0]
-  const change = ((portfolioValue - startValue) / startValue) * 100
+  const change = startValue > 0 ? ((portfolioValue - startValue) / startValue) * 100 : 0
   const isPositive = change >= 0
 
-  // Chart dimensions
   const width = 400
   const height = 120
-  const padding = { top: 10, right: 10, bottom: 20, left: 50 }
+  const padding = { top: 10, right: 10, bottom: 20, left: 60 }
   const chartWidth = width - padding.left - padding.right
   const chartHeight = height - padding.top - padding.bottom
 
-  // Generate points
   const points = data.map((value, i) => ({
     x: padding.left + (i / (data.length - 1)) * chartWidth,
-    y: padding.top + chartHeight - ((value - min) / range) * chartHeight,
+    y: isFlat
+      ? padding.top + chartHeight * 0.3
+      : padding.top + chartHeight - ((value - min) / range) * chartHeight,
   }))
 
-  // Create area path
   const areaPath = [
     `M ${points[0].x} ${padding.top + chartHeight}`,
     ...points.map((p) => `L ${p.x} ${p.y}`),
@@ -753,38 +773,44 @@ function LineChartArea({ data, portfolioValue, mode }: { data: number[]; portfol
 
   const linePath = points.map((p, i) => `${i === 0 ? 'M' : 'L'} ${p.x} ${p.y}`).join(' ')
 
-  // Y-axis labels
-  const yLabels = [min, (min + max) / 2, max].map((v) => fmtUsdCompact(v))
+  const yLabels = isFlat
+    ? [fmtUsdCompact(portfolioValue)]
+    : [fmtUsdCompact(min), fmtUsdCompact((min + max) / 2), fmtUsdCompact(max)]
+  const yRatios = isFlat ? [0.7] : [0, 0.5, 1]
 
   return (
     <div style={{ width: '100%', height: '100%' }}>
-      {/* Header */}
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'baseline',
-        marginBottom: TOKENS.spacing[2],
+        padding: `0 0 0`,
+        marginBottom: TOKENS.spacing[8],
       }}>
         <span style={{
           fontFamily: TOKENS.fonts.mono,
-          fontSize: TOKENS.fontSizes.micro,
+          fontSize: TOKENS.fontSizes.xs,
           fontWeight: TOKENS.fontWeights.bold,
           letterSpacing: TOKENS.letterSpacing.display,
           textTransform: 'uppercase',
+          borderLeft: `3px solid ${TOKENS.colors.accent}`,
+          paddingLeft: TOKENS.spacing[3],
           color: TOKENS.colors.textSecondary,
         }}>
-          Value Evolution (30D)
+          Portfolio Value
         </span>
-        <span style={{
-          fontSize: TOKENS.fontSizes.xs,
-          fontWeight: TOKENS.fontWeights.bold,
-          color: isPositive ? TOKENS.colors.accent : TOKENS.colors.white,
-        }}>
-          {isPositive ? '+' : ''}{change.toFixed(1)}%
-        </span>
+        {change !== 0 && (
+          <span style={{
+            fontSize: TOKENS.fontSizes.micro,
+            fontWeight: TOKENS.fontWeights.bold,
+            color: isPositive ? TOKENS.colors.accent : TOKENS.colors.danger,
+            fontFamily: TOKENS.fonts.mono,
+          }}>
+            {isPositive ? '+' : ''}{change.toFixed(1)}%
+          </span>
+        )}
       </div>
 
-      {/* Chart */}
       <svg viewBox={`0 0 ${width} ${height}`} style={{ width: '100%', height: 'auto' }}>
         <defs>
           <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
@@ -793,8 +819,7 @@ function LineChartArea({ data, portfolioValue, mode }: { data: number[]; portfol
           </linearGradient>
         </defs>
 
-        {/* Grid lines */}
-        {[0, 0.5, 1].map((ratio, i) => (
+        {yRatios.map((ratio, i) => (
           <line
             key={i}
             x1={padding.left}
@@ -807,25 +832,22 @@ function LineChartArea({ data, portfolioValue, mode }: { data: number[]; portfol
           />
         ))}
 
-        {/* Y-axis labels */}
-        {[0, 0.5, 1].map((ratio, i) => (
+        {yRatios.map((ratio, i) => (
           <text
             key={i}
             x={padding.left - 5}
             y={padding.top + chartHeight * (1 - ratio) + 3}
             textAnchor="end"
             fill={TOKENS.colors.textGhost}
-            fontSize="9"
+            fontSize="7"
             fontFamily={TOKENS.fonts.mono}
           >
             {yLabels[i]}
           </text>
         ))}
 
-        {/* Area fill */}
         <path d={areaPath} fill="url(#areaGradient)" />
 
-        {/* Line */}
         <path
           d={linePath}
           fill="none"
@@ -835,7 +857,6 @@ function LineChartArea({ data, portfolioValue, mode }: { data: number[]; portfol
           strokeLinejoin="round"
         />
 
-        {/* Current value dot */}
         <circle
           cx={points[points.length - 1].x}
           cy={points[points.length - 1].y}
@@ -845,11 +866,10 @@ function LineChartArea({ data, portfolioValue, mode }: { data: number[]; portfol
           strokeWidth="2"
         />
 
-        {/* X-axis labels */}
-        <text x={padding.left} y={height - 5} fill={TOKENS.colors.textGhost} fontSize="9" fontFamily={TOKENS.fonts.mono}>
-          30d ago
+        <text x={padding.left} y={height - 5} fill={TOKENS.colors.textGhost} fontSize="7" fontFamily={TOKENS.fonts.mono}>
+          Start
         </text>
-        <text x={width - padding.right} y={height - 5} textAnchor="end" fill={TOKENS.colors.textGhost} fontSize="9" fontFamily={TOKENS.fonts.mono}>
+        <text x={width - padding.right} y={height - 5} textAnchor="end" fill={TOKENS.colors.textGhost} fontSize="7" fontFamily={TOKENS.fonts.mono}>
           Today
         </text>
       </svg>
@@ -920,42 +940,47 @@ function DashboardSideCard({
   actionLabel,
   onAction,
   children,
+  noScroll = false,
 }: {
   mode: SmartFitMode
   title: string
   actionLabel?: string
   onAction?: () => void
   children: ReactNode
+  noScroll?: boolean
 }) {
+  const pad = fitValue(mode, {
+    normal: TOKENS.spacing[8],
+    tight: TOKENS.spacing[6],
+    limit: TOKENS.spacing[4],
+  })
+
   return (
     <div style={{
       background: TOKENS.colors.black,
       border: `1px solid ${TOKENS.colors.borderSubtle}`,
       borderRadius: TOKENS.radius.lg,
-      padding: fitValue(mode, {
-        normal: `${TOKENS.spacing[4]}`,
-        tight: `${TOKENS.spacing[3]}`,
-        limit: `${TOKENS.spacing[3]}`,
-      }),
       display: 'flex',
       flexDirection: 'column',
       minHeight: 0,
-      overflow: 'hidden',
+      overflow: noScroll ? 'visible' : 'hidden',
     }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: TOKENS.spacing[2],
-        padding: `0 ${TOKENS.spacing[2]}`,
+        padding: `${pad}px ${pad}px 0`,
+        marginBottom: TOKENS.spacing[8],
         flexShrink: 0,
       }}>
         <span style={{
           fontFamily: TOKENS.fonts.mono,
-          fontSize: TOKENS.fontSizes.micro,
+          fontSize: TOKENS.fontSizes.xs,
           fontWeight: TOKENS.fontWeights.bold,
           letterSpacing: TOKENS.letterSpacing.display,
           textTransform: 'uppercase',
+          borderLeft: `3px solid ${TOKENS.colors.accent}`,
+          paddingLeft: TOKENS.spacing[3],
           color: TOKENS.colors.textSecondary,
         }}>
           {title}
@@ -981,11 +1006,13 @@ function DashboardSideCard({
         ) : null}
       </div>
       <div
-        className="hide-scrollbar"
+        className={noScroll ? '' : 'hide-scrollbar'}
         style={{
           flex: 1,
           minHeight: 0,
-          overflowY: 'auto',
+          overflowY: noScroll ? 'visible' : 'auto',
+          overflowX: noScroll ? 'visible' : 'hidden',
+          padding: `0 ${pad}px ${pad}px`,
         }}
       >
         {children}
@@ -1026,32 +1053,32 @@ function ActivityRow({
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: `${TOKENS.spacing[6]} 1fr auto`,
-      gap: TOKENS.spacing[3],
+      gridTemplateColumns: `${TOKENS.spacing[4]} 1fr auto`,
+      gap: TOKENS.spacing[5],
       alignItems: 'center',
-      padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[2]}`,
-      background: TOKENS.colors.bgTertiary,
-      border: `1px solid ${TOKENS.colors.borderSubtle}`,
-      borderRadius: TOKENS.radius.md,
+      padding: `${TOKENS.spacing[5]} 0`,
+      borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
     }}>
+      {/* Tiny indicator */}
       <div style={{
-        width: TOKENS.spacing[6],
-        height: TOKENS.spacing[6],
+        width: TOKENS.spacing[4],
+        height: TOKENS.spacing[4],
         borderRadius: TOKENS.radius.full,
         background: `${accentColor}14`,
-        border: `1px solid ${accentColor}40`,
         display: 'flex',
         alignItems: 'center',
         justifyContent: 'center',
         color: accentColor,
-        fontSize: TOKENS.fontSizes.sm,
+        fontSize: '10px',
         fontWeight: TOKENS.fontWeights.bold,
       }}>
         {activityGlyph(type)}
       </div>
-      <div style={{ minWidth: 0 }}>
+      
+      {/* Texts condensed */}
+      <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column' }}>
         <div style={{
-          fontSize: TOKENS.fontSizes.sm,
+          fontSize: TOKENS.fontSizes.xs,
           fontWeight: TOKENS.fontWeights.bold,
           color: TOKENS.colors.textPrimary,
           whiteSpace: 'nowrap',
@@ -1061,7 +1088,7 @@ function ActivityRow({
           {label}
         </div>
         <div style={{
-          fontSize: TOKENS.fontSizes.xs,
+          fontSize: TOKENS.fontSizes.micro,
           color: TOKENS.colors.textSecondary,
           whiteSpace: 'nowrap',
           overflow: 'hidden',
@@ -1070,17 +1097,19 @@ function ActivityRow({
           {vaultName}
         </div>
       </div>
-      <div style={{ textAlign: 'right' }}>
+
+      {/* Amounts and Time */}
+      <div style={{ textAlign: 'right', display: 'flex', flexDirection: 'column' }}>
         <div style={{
-          fontSize: TOKENS.fontSizes.sm,
-          fontWeight: TOKENS.fontWeights.black,
+          fontSize: TOKENS.fontSizes.xs,
+          fontWeight: TOKENS.fontWeights.bold,
           color: accentColor,
           letterSpacing: VALUE_LETTER_SPACING,
         }}>
           {isNegative ? '-' : '+'}{fmtUsdCompact(amount)}
         </div>
         <div style={{
-          fontSize: TOKENS.fontSizes.xs,
+          fontSize: TOKENS.fontSizes.micro,
           color: TOKENS.colors.textGhost,
         }}>
           {formatRelativeTime(timestamp)}
@@ -1122,7 +1151,7 @@ function formatRelativeTime(timestamp: number) {
   return `${days}d ago`
 }
 
-/** AvailableVaultTeaser — Ultra-compact vault teaser */
+/** AvailableVaultTeaser — Card vault teaser */
 function AvailableVaultTeaser({
   vault,
   index,
@@ -1135,6 +1164,7 @@ function AvailableVaultTeaser({
   onClick?: () => void
 }) {
   const accentColor = index === 0 ? TOKENS.colors.accent : TOKENS.colors.white
+  const headerBg = `linear-gradient(135deg, ${TOKENS.colors.bgTertiary} 0%, ${TOKENS.colors.black} 100%)`
 
   return (
     <div
@@ -1144,40 +1174,94 @@ function AvailableVaultTeaser({
       onKeyDown={onClick ? (e) => { if (e.key === 'Enter' || e.key === ' ') onClick() } : undefined}
       style={{
         background: TOKENS.colors.black,
-        borderRadius: TOKENS.radius.md,
-        padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}`,
+        borderRadius: TOKENS.radius.lg,
         border: `1px solid ${TOKENS.colors.borderSubtle}`,
         cursor: onClick ? 'pointer' : 'default',
-        transition: 'all 120ms ease-out',
+        transition: 'all 150ms ease-out',
         display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        gap: TOKENS.spacing[2],
+        flexDirection: 'column',
+        overflow: 'hidden',
+        position: 'relative',
       }}
       onMouseEnter={(e) => {
         if (onClick) {
-          e.currentTarget.style.borderColor = TOKENS.colors.accent
-          e.currentTarget.style.background = TOKENS.colors.bgTertiary
+          e.currentTarget.style.borderColor = accentColor
+          e.currentTarget.style.transform = 'translateY(-4px)'
+          e.currentTarget.style.boxShadow = `0 8px 24px ${accentColor}1A`
         }
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = TOKENS.colors.borderSubtle
-        e.currentTarget.style.background = TOKENS.colors.black
+        e.currentTarget.style.transform = 'none'
+        e.currentTarget.style.boxShadow = 'none'
       }}
     >
+      {/* Graphic Header */}
       <div style={{
+        height: '72px',
+        background: headerBg,
+        borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
         display: 'flex',
         alignItems: 'center',
-        gap: TOKENS.spacing[2],
-        minWidth: 0,
+        justifyContent: 'center',
+        position: 'relative',
+        overflow: 'hidden',
       }}>
+        {/* Glow orb */}
         <div style={{
-          width: TOKENS.spacing[2],
-          height: TOKENS.spacing[2],
-          borderRadius: '50%',
+          position: 'absolute',
+          top: '-20px',
+          right: '-20px',
+          width: '80px',
+          height: '80px',
           background: accentColor,
-          flexShrink: 0,
+          filter: 'blur(32px)',
+          opacity: 0.15,
+          borderRadius: '50%',
         }} />
+
+        {/* Subtle grid pattern overlay */}
+        <div style={{
+          position: 'absolute',
+          inset: 0,
+          opacity: 0.05,
+          backgroundImage: `linear-gradient(${accentColor} 1px, transparent 1px), linear-gradient(90deg, ${accentColor} 1px, transparent 1px)`,
+          backgroundSize: '12px 12px',
+          backgroundPosition: 'center',
+        }} />
+
+        {/* Central Icon */}
+        <div style={{
+          width: TOKENS.spacing[8],
+          height: TOKENS.spacing[8],
+          borderRadius: TOKENS.radius.sm,
+          background: `linear-gradient(135deg, ${TOKENS.colors.bgApp} 0%, ${TOKENS.colors.black} 100%)`,
+          border: `1px solid ${accentColor}40`,
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          zIndex: 1,
+          transform: 'rotate(45deg)',
+          boxShadow: `0 4px 12px rgba(0,0,0,0.5)`,
+        }}>
+          <div style={{
+            width: TOKENS.spacing[3],
+            height: TOKENS.spacing[3],
+            borderRadius: '2px',
+            background: accentColor,
+            boxShadow: `0 0 12px ${accentColor}`,
+            transform: 'rotate(-45deg)',
+          }} />
+        </div>
+      </div>
+
+      {/* Content Body */}
+      <div style={{
+        padding: TOKENS.spacing[5],
+        display: 'flex',
+        flexDirection: 'column',
+        gap: TOKENS.spacing[3],
+      }}>
         <span style={{
           fontSize: TOKENS.fontSizes.xs,
           fontWeight: TOKENS.fontWeights.bold,
@@ -1190,27 +1274,29 @@ function AvailableVaultTeaser({
         }}>
           {formatVaultName(vault.name)}
         </span>
-      </div>
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: TOKENS.spacing[2],
-        flexShrink: 0,
-      }}>
-        <span style={{
-          fontSize: TOKENS.fontSizes.sm,
-          fontWeight: TOKENS.fontWeights.black,
-          color: accentColor,
-          letterSpacing: VALUE_LETTER_SPACING,
+        
+        <div style={{
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: TOKENS.spacing[1],
         }}>
-          {vault.apr}%
-        </span>
-        <span style={{
-          fontSize: TOKENS.fontSizes.micro,
-          color: TOKENS.colors.textGhost,
-        }}>
-          APY
-        </span>
+          <span style={{
+            fontSize: TOKENS.fontSizes.lg,
+            fontWeight: TOKENS.fontWeights.black,
+            color: accentColor,
+            letterSpacing: VALUE_LETTER_SPACING,
+          }}>
+            {vault.apr}%
+          </span>
+          <span style={{
+            fontSize: TOKENS.fontSizes.micro,
+            fontWeight: TOKENS.fontWeights.bold,
+            color: TOKENS.colors.textGhost,
+            textTransform: 'uppercase',
+          }}>
+            APY
+          </span>
+        </div>
       </div>
     </div>
   )

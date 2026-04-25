@@ -21,5 +21,6 @@ export function toAvailableVault(config: VaultConfig): AvailableVault {
     token: 'USDC',
     risk: config.risk,
     fees: config.fees,
+    isTest: config.isTest,
   }
 }

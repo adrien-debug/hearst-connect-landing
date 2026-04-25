@@ -83,7 +83,7 @@ export function useVaultPosition(vaultAddress?: Address) {
 }
 
 export function useVaultGlobal(vaultAddress?: Address) {
-  const { data: totalDeposits, refetch: refetchDeposits } = useReadContract({
+  const { data: totalDeposits, isError: errDeposits, refetch: refetchDeposits } = useReadContract({
     address: vaultAddress,
     abi: VAULT_ABI,
     functionName: 'totalDeposits',
@@ -93,7 +93,7 @@ export function useVaultGlobal(vaultAddress?: Address) {
     },
   })
 
-  const { data: monthlyAPR, refetch: refetchMonthly } = useReadContract({
+  const { data: monthlyAPR, isError: errMonthly, refetch: refetchMonthly } = useReadContract({
     address: vaultAddress,
     abi: VAULT_ABI,
     functionName: 'monthlyAPR',
@@ -103,7 +103,7 @@ export function useVaultGlobal(vaultAddress?: Address) {
     },
   })
 
-  const { data: annualAPR, refetch: refetchAnnual } = useReadContract({
+  const { data: annualAPR, isError: errAnnual, refetch: refetchAnnual } = useReadContract({
     address: vaultAddress,
     abi: VAULT_ABI,
     functionName: 'getAnnualAPR',
@@ -113,7 +113,7 @@ export function useVaultGlobal(vaultAddress?: Address) {
     },
   })
 
-  const { data: currentEpoch, refetch: refetchEpoch } = useReadContract({
+  const { data: currentEpoch, isError: errEpoch, refetch: refetchEpoch } = useReadContract({
     address: vaultAddress,
     abi: VAULT_ABI,
     functionName: 'currentEpoch',
@@ -123,7 +123,7 @@ export function useVaultGlobal(vaultAddress?: Address) {
     },
   })
 
-  const { data: shouldAdvanceEpoch, refetch: refetchShouldAdvance } = useReadContract({
+  const { data: shouldAdvanceEpoch, isError: errAdvance, refetch: refetchShouldAdvance } = useReadContract({
     address: vaultAddress,
     abi: VAULT_ABI,
     functionName: 'shouldAdvanceEpoch',
@@ -133,13 +133,20 @@ export function useVaultGlobal(vaultAddress?: Address) {
     },
   })
 
-  const global: VaultGlobal | null = totalDeposits !== undefined && monthlyAPR !== undefined && annualAPR !== undefined
+  const vaultReadsReady =
+    totalDeposits !== undefined &&
+    monthlyAPR !== undefined &&
+    annualAPR !== undefined &&
+    currentEpoch !== undefined &&
+    shouldAdvanceEpoch !== undefined
+
+  const global: VaultGlobal | null = vaultReadsReady
     ? {
         totalDeposits: Number(formatUnits(totalDeposits, USDC_DECIMALS)),
         monthlyAPR: Number(monthlyAPR) / BASIS_POINTS_DIVISOR,
         annualAPR: Number(annualAPR) / BASIS_POINTS_DIVISOR,
-        currentEpoch: Number(currentEpoch || 0),
-        shouldAdvanceEpoch: shouldAdvanceEpoch || false,
+        currentEpoch: Number(currentEpoch),
+        shouldAdvanceEpoch: Boolean(shouldAdvanceEpoch),
       }
     : null
 
@@ -153,19 +160,24 @@ export function useVaultGlobal(vaultAddress?: Address) {
     ])
   }
 
+  const readError =
+    errDeposits || errMonthly || errAnnual || errEpoch || errAdvance
+
   return {
     global,
-    isLoading: !global,
+    /** True while required vault view calls have not returned (and none failed yet). */
+    isLoading: Boolean(vaultAddress) && !vaultReadsReady && !readError,
+    isError: Boolean(vaultAddress) && !vaultReadsReady && readError,
     refetch,
   }
 }
 
 export function useVaultActions(vaultAddress?: Address) {
-  const { writeContract, isPending, data: hash } = useWriteContract()
+  const { writeContractAsync, isPending, data: hash } = useWriteContract()
 
-  const deposit = async (amount: bigint) => {
-    if (!vaultAddress) return
-    return writeContract({
+  const deposit = async (amount: bigint): Promise<`0x${string}`> => {
+    if (!vaultAddress) throw new Error('Vault address not configured')
+    return writeContractAsync({
       address: vaultAddress,
       abi: VAULT_ABI,
       functionName: 'deposit',
@@ -173,18 +185,18 @@ export function useVaultActions(vaultAddress?: Address) {
     })
   }
 
-  const claim = async () => {
-    if (!vaultAddress) return
-    return writeContract({
+  const claim = async (): Promise<`0x${string}`> => {
+    if (!vaultAddress) throw new Error('Vault address not configured')
+    return writeContractAsync({
       address: vaultAddress,
       abi: VAULT_ABI,
       functionName: 'claim',
     })
   }
 
-  const withdraw = async (amount: bigint) => {
-    if (!vaultAddress) return
-    return writeContract({
+  const withdraw = async (amount: bigint): Promise<`0x${string}`> => {
+    if (!vaultAddress) throw new Error('Vault address not configured')
+    return writeContractAsync({
       address: vaultAddress,
       abi: VAULT_ABI,
       functionName: 'withdraw',

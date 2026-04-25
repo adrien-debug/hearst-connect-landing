@@ -23,6 +23,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
   const [amount, setAmount] = useState('')
   const [agreed, setAgreed] = useState(false)
   const [isDepositing, setIsDepositing] = useState(false)
+  const [preFlightReady, setPreFlightReady] = useState(false)
 
   const { address, isConnected } = useAccount()
 
@@ -41,7 +42,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
 
   const num = parseFloat(amount) || 0
   const isValid = num >= vault.minDeposit
-  const isReady = isValid && agreed
+  const isReady = isValid && agreed && preFlightReady
   const yearlyYield = num * (vault.apr / 100)
   const targetPct = parseFloat(vault.target.replace('%', '')) || 0
   const totalYield = num * (targetPct / 100)
@@ -185,6 +186,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
           isApproving={isApprovePending}
           onDeposit={handleDeposit}
           isDepositing={isDepositing || isLivePending}
+          onPreFlightReady={setPreFlightReady}
         />
       </div>
     </div>

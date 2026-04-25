@@ -3,17 +3,28 @@
 import { useReadContract, useWriteContract } from 'wagmi'
 import { ERC20_ABI } from '@/config/abi/vault'
 import { type Address, parseUnits } from 'viem'
-import { USDC_DECIMALS, POLL_INTERVAL_APPROVE } from '@/lib/constants'
+import { USDC_DECIMALS } from '@/lib/constants'
+
+const ALLOWANCE_STALE_MS = 12_000
 
 export function useTokenAllowance(tokenAddress?: Address, owner?: Address, spender?: Address) {
-  const { data: allowance, isLoading } = useReadContract({
+  const enabled = Boolean(tokenAddress && owner && spender)
+
+  const {
+    data: allowance,
+    isLoading,
+    isError: isAllowanceError,
+    error: allowanceError,
+    refetch: refetchAllowance,
+  } = useReadContract({
     address: tokenAddress,
     abi: ERC20_ABI,
     functionName: 'allowance',
     args: owner && spender ? [owner, spender] : undefined,
     query: {
-      enabled: !!tokenAddress && !!owner && !!spender,
-      refetchInterval: POLL_INTERVAL_APPROVE,
+      enabled,
+      staleTime: ALLOWANCE_STALE_MS,
+      refetchOnWindowFocus: true,
     },
   })
 
@@ -27,23 +38,30 @@ export function useTokenAllowance(tokenAddress?: Address, owner?: Address, spend
     },
   })
 
-  const { writeContract, isPending } = useWriteContract()
+  const { writeContractAsync, isPending } = useWriteContract()
 
   const approve = async (amount: string) => {
     if (!tokenAddress || !spender) return
     const amountBigInt = parseUnits(amount, USDC_DECIMALS)
-    return writeContract({
+    const out = await writeContractAsync({
       address: tokenAddress,
       abi: ERC20_ABI,
       functionName: 'approve',
       args: [spender, amountBigInt],
     })
+    void refetchAllowance()
+    return out
   }
 
   const hasAllowance = (requiredAmount: string): boolean => {
-    if (!allowance) return false
-    const required = parseUnits(requiredAmount, USDC_DECIMALS)
-    return allowance >= required
+    if (allowance === undefined) return false
+    try {
+      const trimmed = requiredAmount.trim()
+      const required = parseUnits(trimmed || '0', USDC_DECIMALS)
+      return allowance >= required
+    } catch {
+      return false
+    }
   }
 
   return {
@@ -51,7 +69,11 @@ export function useTokenAllowance(tokenAddress?: Address, owner?: Address, spend
     balance,
     approve,
     isPending,
+    /** True only while the first successful read is in flight (not background refetch). */
     isLoading,
+    isAllowanceError,
+    allowanceError,
+    refetchAllowance,
     hasAllowance,
   }
 }

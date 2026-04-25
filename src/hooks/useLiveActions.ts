@@ -23,6 +23,7 @@ export function useLiveActions(vaultId: string) {
   const vaultConfig = useVaultById(vaultId)
   const vaultAddress = vaultConfig?.vaultAddress
   const vaultName = vaultConfig?.name || 'Unknown Vault'
+  const isTestVault = vaultConfig?.isTest ?? false
 
   const { deposit, claim, withdraw, isPending: isChainPending } = useVaultActions(
     vaultAddress ? (vaultAddress as Address) : undefined
@@ -44,9 +45,18 @@ export function useLiveActions(vaultId: string) {
 
     try {
       setIsPending(true)
-      const amountBigInt = parseUnits(amount.toString(), 6)
-      await deposit(amountBigInt)
+      let txHash: `0x${string}`
 
+      if (isTestVault) {
+        const rand = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+          .map(b => b.toString(16).padStart(2, '0')).join('')
+        txHash = `0x${rand}` as `0x${string}`
+      } else {
+        const amountBigInt = parseUnits(amount.toString(), 6)
+        txHash = await deposit(amountBigInt)
+      }
+
+      setLastTxHash(txHash)
       const lockDays = vaultConfig?.lockPeriodDays || 365
       const maturityDate = Date.now() + lockDays * 24 * 60 * 60 * 1000
       await userActions.deposit({
@@ -54,9 +64,9 @@ export function useLiveActions(vaultId: string) {
         amount: Math.floor(amount * 1e6),
         maturityDate,
         vaultName,
-        txHash: 'pending',
+        txHash,
       })
-      return { success: true }
+      return { success: true, txHash }
     } catch (error) {
       console.error('[useLiveActions] Deposit error:', error)
       return { success: false, error: error instanceof Error ? error.message : 'Deposit failed' }
@@ -77,15 +87,25 @@ export function useLiveActions(vaultId: string) {
 
     try {
       setIsPending(true)
-      await claim()
+      let txHash: `0x${string}`
+
+      if (isTestVault) {
+        const rand = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+          .map(b => b.toString(16).padStart(2, '0')).join('')
+        txHash = `0x${rand}` as `0x${string}`
+      } else {
+        txHash = await claim()
+      }
+
+      setLastTxHash(txHash)
       await userActions.claim({
         positionId: existingPosition.id,
         vaultId,
         vaultName,
         amount: Math.floor(existingPosition.claimable * 1e6),
-        txHash: 'pending',
+        txHash,
       })
-      return { success: true }
+      return { success: true, txHash }
     } catch (error) {
       console.error('[useLiveActions] Claim error:', error)
       return { success: false, error: error instanceof Error ? error.message : 'Claim failed' }
@@ -107,17 +127,26 @@ export function useLiveActions(vaultId: string) {
     try {
       setIsPending(true)
       const total = existingPosition.deposited + existingPosition.claimable
-      const amountBigInt = parseUnits(total.toString(), 6)
-      await withdraw(amountBigInt)
+      let txHash: `0x${string}`
 
+      if (isTestVault) {
+        const rand = Array.from(crypto.getRandomValues(new Uint8Array(32)))
+          .map(b => b.toString(16).padStart(2, '0')).join('')
+        txHash = `0x${rand}` as `0x${string}`
+      } else {
+        const amountBigInt = parseUnits(total.toString(), 6)
+        txHash = await withdraw(amountBigInt)
+      }
+
+      setLastTxHash(txHash)
       await userActions.withdraw({
         positionId: existingPosition.id,
         vaultId,
         vaultName,
         amount: Math.floor(total * 1e6),
-        txHash: 'pending',
+        txHash,
       })
-      return { success: true }
+      return { success: true, txHash }
     } catch (error) {
       console.error('[useLiveActions] Withdraw error:', error)
       return { success: false, error: error instanceof Error ? error.message : 'Withdraw failed' }

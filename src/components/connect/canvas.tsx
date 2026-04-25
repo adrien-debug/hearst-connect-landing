@@ -28,7 +28,7 @@ export function Canvas() {
 
   const availableVaults = vaults.filter((v): v is AvailableVault => v.type === 'available')
 
-  // Show loading state
+  // Show loading state (keep same bottom dock as post-load so chrome does not disappear)
   if (isLoading) {
     return (
       <div
@@ -66,9 +66,13 @@ export function Canvas() {
             />
           </div>
         </header>
-        <main className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden">
+        <main
+          className="flex min-h-0 min-w-0 flex-1 items-center justify-center overflow-hidden"
+          style={{ paddingBottom: `calc(6 * ${TOKENS.spacing[4]})` }}
+        >
           <LoadingState />
         </main>
+        <DockRadial onSelect={setSelectedId} />
       </div>
     )
   }
@@ -140,11 +144,7 @@ export function Canvas() {
       </main>
 
       {/* Dock Radial Navigation */}
-      <DockRadial
-        selectedId={selectedId}
-        onSelect={handleSelect}
-        isSimulation={isSimulation}
-      />
+      <DockRadial onSelect={handleSelect} />
     </div>
   )
 }
@@ -201,13 +201,16 @@ function WalletButton() {
   }
 
   const handleConnect = () => {
-    const connector = connectors[0]
+    const connector =
+      connectors.find((c) => c.id === 'metaMask' || c.name === 'MetaMask') ?? connectors[0]
     if (connector) connect({ connector })
   }
 
   if (!mounted || !isConnected) {
     return (
       <button
+        type="button"
+        title="Connect with MetaMask (Base)"
         onClick={handleConnect}
         disabled={!mounted || isConnecting}
         style={{

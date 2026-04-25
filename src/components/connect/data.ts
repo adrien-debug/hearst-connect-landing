@@ -10,6 +10,7 @@ interface BaseVault {
   target: string
   strategy: string
   image?: string
+  isTest?: boolean
 }
 
 export interface ActiveVault extends BaseVault {

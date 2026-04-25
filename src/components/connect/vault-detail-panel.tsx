@@ -154,7 +154,6 @@ export function VaultDetailPanel({
   const { claim: liveClaim, withdraw: liveWithdraw } = useLiveActions(vault.id)
 
   const handleClaim = async () => {
-    // Both demo and live modes now use liveClaim which handles both on-chain and backend
     await transaction.execute(
       async () => {
         const result = await liveClaim()
@@ -173,7 +172,6 @@ export function VaultDetailPanel({
   }
 
   const handleExit = async () => {
-    // Both demo and live modes now use liveWithdraw which handles both on-chain and backend
     await transaction.execute(
       async () => {
         const result = await liveWithdraw()

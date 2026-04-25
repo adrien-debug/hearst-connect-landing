@@ -86,6 +86,7 @@ export function initDb(): void {
       fees TEXT NOT NULL,
       risk TEXT NOT NULL,
       image TEXT,
+      is_test INTEGER DEFAULT 0,
       is_active INTEGER DEFAULT 1,
       created_at INTEGER NOT NULL,
       updated_at INTEGER NOT NULL

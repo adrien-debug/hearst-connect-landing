@@ -4,7 +4,9 @@ import { useQuery, useQueryClient, useMutation } from '@tanstack/react-query'
 import { useBackendUser } from './useBackendUser'
 import { PositionsApi, ActivityApi } from '@/lib/api-client'
 import type { DbUserPositionWithVault, DbActivityEvent } from '@/lib/db/schema'
-import { MS_PER_DAY } from '@/lib/constants'
+import { MS_PER_DAY, USDC_DECIMALS } from '@/lib/constants'
+
+const USDC_DIVISOR = 10 ** USDC_DECIMALS
 
 const POSITIONS_QUERY_KEY = 'user-positions'
 const ACTIVITY_QUERY_KEY = 'user-activity'
@@ -60,9 +62,9 @@ function hydratePosition(position: DbUserPositionWithVault): UserPositionLine {
     id: position.id,
     vaultId: position.vaultId,
     vaultName: position.vaultName,
-    deposited: position.deposited,
-    claimable: Math.max(0, claimable),
-    currentYield: position.accumulatedYield,
+    deposited: position.deposited / USDC_DIVISOR,
+    claimable: Math.max(0, claimable / USDC_DIVISOR),
+    currentYield: position.accumulatedYield / USDC_DIVISOR,
     state: isMatured ? 'matured' : position.state,
     createdAt: position.createdAt,
     maturityDate: position.maturityDate,
@@ -119,7 +121,7 @@ export function useUserData() {
   const stats: UserDataStats = {
     totalDeposited: hydratedPositions.reduce((sum, p) => sum + p.deposited, 0),
     totalClaimable: hydratedPositions.reduce((sum, p) => sum + p.claimable, 0),
-    totalYieldClaimed: positions.reduce((sum, p) => sum + p.claimedYield, 0),
+    totalYieldClaimed: positions.reduce((sum, p) => sum + p.claimedYield, 0) / USDC_DIVISOR,
     activePositionsCount: hydratedPositions.filter(p => p.state !== 'withdrawn').length,
   }
 
@@ -223,7 +225,7 @@ export function useUserData() {
     type: event.type,
     vaultId: event.vaultId,
     vaultName: event.vaultName,
-    amount: event.amount,
+    amount: event.amount / USDC_DIVISOR,
     timestamp: event.timestamp,
   }))
 

@@ -224,6 +224,7 @@ export function dbVaultToConfig(dbVault: DbVault): {
   fees: string
   risk: string
   image?: string
+  isTest: boolean
   isActive: boolean
   createdAt: number
 } {
@@ -242,6 +243,7 @@ export function dbVaultToConfig(dbVault: DbVault): {
     fees: dbVault.fees,
     risk: dbVault.risk,
     image: dbVault.image ?? undefined,
+    isTest: (dbVault as DbVault & { isTest?: number }).isTest === 1,
     isActive: dbVault.isActive === 1,
     createdAt: dbVault.createdAt,
   }

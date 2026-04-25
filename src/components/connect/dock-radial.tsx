@@ -1,18 +1,13 @@
 'use client'
 
-import { useState } from 'react'
 import { TOKENS } from './constants'
 
 interface DockRadialProps {
-  selectedId: string | null
   onSelect: (id: string | null) => void
-  isSimulation: boolean
 }
 
-export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialProps) {
-  const [hovered, setHovered] = useState(false)
-  const isDashboardActive = !isSimulation && selectedId === null
-
+/** Bottom dock: fixed chrome. Center control always shows Hearst mark + home to portfolio (`onSelect(null)`). */
+export function DockRadial({ onSelect }: DockRadialProps) {
   return (
     <>
       {/* Left Footer Info */}
@@ -48,53 +43,49 @@ export function DockRadial({ selectedId, onSelect, isSimulation }: DockRadialPro
       </div>
 
       <button
+        type="button"
         onClick={() => onSelect(null)}
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
+        aria-label="Retour au tableau de bord"
         style={{
           position: 'fixed',
           bottom: TOKENS.spacing[6],
           left: '50%',
           transform: 'translateX(-50%)',
           zIndex: 50,
-          width: '48px',
-          height: '48px',
+          width: '52px',
+          height: '52px',
           borderRadius: TOKENS.radius.full,
-          background: isDashboardActive
-            ? TOKENS.colors.accentSubtle
-            : hovered
-              ? TOKENS.colors.surfaceHover
-              : TOKENS.colors.bgApp,
-          border: `${TOKENS.borders.thin} solid ${isDashboardActive ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
+          background: TOKENS.colors.accentSubtle,
+          border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`,
           cursor: 'pointer',
           display: 'flex',
           alignItems: 'center',
           justifyContent: 'center',
-          transition: 'all 0.25s cubic-bezier(0.4, 0, 0.2, 1)',
-          boxShadow: `0 4px 20px ${TOKENS.colors.black}`,
+          transition: 'opacity 0.2s ease, transform 0.2s ease',
+          boxShadow: `0 0 22px ${TOKENS.colors.accentGlow}, 0 4px 20px ${TOKENS.colors.black}`,
         }}
-        title="Dashboard"
+        title="Tableau de bord"
       >
-        {isDashboardActive && (
-          <span
-            style={{
-              position: 'absolute',
-              bottom: '4px',
-              width: '4px',
-              height: '4px',
-              borderRadius: '50%',
-              background: TOKENS.colors.accent,
-            }}
-          />
-        )}
+        <span
+          aria-hidden
+          style={{
+            position: 'absolute',
+            bottom: '5px',
+            width: '4px',
+            height: '4px',
+            borderRadius: '50%',
+            background: TOKENS.colors.accent,
+          }}
+        />
 
+        {/* Official Hearst wordmark monogram (green HB from /logos/hearst-connect.svg); larger hit area reads clearer than 22px */}
         <svg
           viewBox="572.6 466.87 129.26 142.86"
+          aria-hidden
           style={{
-            width: '22px',
-            height: '22px',
-            color: isDashboardActive ? TOKENS.colors.accent : hovered ? TOKENS.colors.white : TOKENS.colors.textSecondary,
-            transition: 'all 0.2s ease',
+            width: '26px',
+            height: '26px',
+            color: TOKENS.colors.accent,
             display: 'block',
           }}
         >
