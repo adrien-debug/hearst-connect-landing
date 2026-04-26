@@ -222,13 +222,6 @@ export const VaultRepository = {
     if (result.changes === 0) return null
     return this.findById(id)
   },
-
-  delete(id: string): boolean {
-    const db = getDb()
-    const stmt = db.prepare('DELETE FROM vaults WHERE id = ?')
-    const result = stmt.run(id)
-    return result.changes > 0
-  },
 }
 
 // User Positions Repository

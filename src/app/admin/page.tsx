@@ -91,8 +91,8 @@ function LoginScreen({
   onLogin: (email: string, password: string) => Promise<boolean>
   error: string | null
 }) {
-  const [email, setEmail] = useState('admin@hearst.app')
-  const [password, setPassword] = useState('hearst2024')
+  const [email, setEmail] = useState('')
+  const [password, setPassword] = useState('')
   const [isLoggingIn, setIsLoggingIn] = useState(false)
 
   const handleSubmit = async (e: React.FormEvent) => {

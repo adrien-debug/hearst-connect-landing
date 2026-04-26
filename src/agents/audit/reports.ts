@@ -39,7 +39,9 @@ export async function generateDailyReport(): Promise<string> {
         `Generate a brief daily risk assessment (3-4 bullet points).\nBTC: $${snap.btcPrice.toFixed(0)}, 24h: ${snap.btc24hChange.toFixed(2)}%, 7d: ${snap.btc7dChange.toFixed(2)}%\nUSDC: ${snap.usdcApy.toFixed(2)}%, USDT: ${snap.usdtApy.toFixed(2)}%\nF&G: ${snap.fearGreed}\nSignals 24h: ${pending} pending, ${blocked} blocked`,
         300
       )
-    } catch {}
+    } catch (e) {
+      console.warn('[audit/reports] Claude analysis failed, report will skip risk assessment:', e)
+    }
   }
 
   if (analysis) {

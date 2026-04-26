@@ -195,7 +195,9 @@ export function SimulatorSection() {
         next.miningNet = Math.round(10 * (next.btcPrice / 95000) * 10) / 10
         return next
       })
-    } catch {}
+    } catch (e) {
+      console.warn('[simulator] fetchLive failed:', e)
+    }
   }, [])
 
   useEffect(() => {

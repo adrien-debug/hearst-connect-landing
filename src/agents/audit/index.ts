@@ -4,13 +4,11 @@
  */
 
 import { pushWebhook, getSignals, getLatestMarket, getAgentConfig } from '../shared/hearst-api'
-import { analyzeWithClaude } from '../shared/anthropic'
 import { sendSlackNotification, formatDailyReport, formatCriticalAlert } from '../shared/slack'
 import { runRiskChecks } from './risk-checks'
 import { generateDailyReport } from './reports'
 
 let AUDIT_INTERVAL = 2 * 60_000
-let promptExtra = ''
 const DAILY_REPORT_HOUR = 8
 
 let lastReportDate = ''
@@ -19,7 +17,9 @@ async function log(level: 'info' | 'warn' | 'error', message: string) {
   console.log(`[Audit][${level}] ${message}`)
   try {
     await pushWebhook({ action: 'log', data: { agent: 'audit', level, message } })
-  } catch {}
+  } catch (e) {
+    console.warn('[Audit] log webhook failed:', e)
+  }
 }
 
 async function auditPendingSignals() {
@@ -75,8 +75,9 @@ async function tick() {
     const cfg = await getAgentConfig()
     const cfgInterval = parseInt(cfg.audit_interval_ms || '120000', 10)
     if (cfgInterval >= 30000) AUDIT_INTERVAL = cfgInterval
-    promptExtra = cfg.audit_prompt_extra || ''
-  } catch {}
+  } catch (e) {
+    await log('warn', `Config fetch failed, using previous interval: ${e}`)
+  }
 
   await auditPendingSignals()
   await checkDailyReport()

@@ -22,7 +22,9 @@ async function log(level: 'info' | 'warn' | 'error', message: string, data?: unk
   console.log(`[Watcher][${level}] ${message}`)
   try {
     await pushWebhook({ action: 'log', data: { agent: 'watcher', level, message, dataJson: data ? JSON.stringify(data) : undefined } })
-  } catch {}
+  } catch (e) {
+    console.warn('[Watcher] log webhook failed:', e)
+  }
 }
 
 let promptExtra = ''
@@ -35,7 +37,9 @@ async function collectAndPush() {
       const cfgInterval = parseInt(cfg.watcher_interval_ms || '60000', 10)
       if (cfgInterval >= 10000) PRICE_INTERVAL = cfgInterval
       promptExtra = cfg.watcher_prompt_extra || ''
-    } catch {}
+    } catch (e) {
+      await log('warn', `Config fetch failed, using previous values: ${e}`)
+    }
 
     const now = Date.now()
     const btc = await fetchBtcPrice()
@@ -68,7 +72,9 @@ async function collectAndPush() {
         200,
         promptExtra || undefined
       )
-    } catch {}
+    } catch (e) {
+      await log('warn', `Claude analyze failed, snapshot will have no notes: ${e}`)
+    }
 
     const snapshot: MarketSnapshot = {
       btcPrice: btc.price,

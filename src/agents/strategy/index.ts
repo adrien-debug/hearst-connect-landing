@@ -17,7 +17,9 @@ async function log(level: 'info' | 'warn' | 'error', message: string) {
   console.log(`[Strategy][${level}] ${message}`)
   try {
     await pushWebhook({ action: 'log', data: { agent: 'strategy', level, message } })
-  } catch {}
+  } catch (e) {
+    console.warn('[Strategy] log webhook failed:', e)
+  }
 }
 
 function buildContextBlock(recentSignals: SignalRow[]): string {
@@ -81,7 +83,9 @@ async function evaluate() {
           promptExtra || undefined
         )
         if (refined) description = refined
-      } catch {}
+      } catch (e) {
+        await log('warn', `Claude refinement failed for ${candidate.type}, using raw description: ${e}`)
+      }
 
       const signal: RebalanceSignal = { ...candidate, description, createdBy: 'strategy' }
 

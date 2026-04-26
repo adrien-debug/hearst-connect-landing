@@ -40,7 +40,9 @@ export async function executeToolCall(name: string, input: unknown): Promise<unk
             miningHashprice: hashprice,
           }
         }
-      } catch {}
+      } catch (e) {
+        console.warn('[tool-executor] live market fetch failed, falling back to DB:', e)
+      }
 
       // Fall back to latest DB snapshot
       const snapshot = MarketRepository.latest()
@@ -100,8 +102,12 @@ export async function executeToolCall(name: string, input: unknown): Promise<unk
       // Parse complex fields for Claude
       let profitLevels = []
       let cooldowns = {}
-      try { profitLevels = JSON.parse(config.profit_levels || '[]') } catch {}
-      try { cooldowns = JSON.parse(config.signal_cooldown_hours || '{}') } catch {}
+      try { profitLevels = JSON.parse(config.profit_levels || '[]') } catch (e) {
+        console.warn('[tool-executor] invalid profit_levels JSON, using []:', e)
+      }
+      try { cooldowns = JSON.parse(config.signal_cooldown_hours || '{}') } catch (e) {
+        console.warn('[tool-executor] invalid signal_cooldown_hours JSON, using {}:', e)
+      }
       return {
         btcEntryPrice: parseFloat(config.btc_entry_price || '95000'),
         profitLevels,
