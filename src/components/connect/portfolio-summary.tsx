@@ -5,7 +5,7 @@ import { EmptyState } from './empty-states'
 import { VaultCardCompact } from './vault-card-compact'
 import { TOKENS, fmtUsdCompact, fmtUsd, VALUE_LETTER_SPACING, CHART_PALETTE } from './constants'
 import { formatVaultName } from './formatting'
-import { buildPortfolioSparklineFromActivity, getDaysToMaturity } from './utils/portfolio-chart-utils'
+import { buildMonthlyPortfolioCurve, generateNiceTicks, getDaysToMaturity } from './utils/portfolio-chart-utils'
 import { fitValue, type SmartFitMode, useSmartFit, useShellPadding } from './smart-fit'
 import { type VaultLine, type Aggregate, type ActiveVault, type AvailableVault } from './data'
 import { useUserData } from '@/hooks/useUserData'
@@ -71,9 +71,9 @@ export function PortfolioSummary({
   }
 
   // Memoized derived data — prevents recalculation on every render
-  const valueHistory = useMemo(
-    () => buildPortfolioSparklineFromActivity(userActivity, portfolioValue),
-    [userActivity, portfolioValue],
+  const { data: valueHistory, labels: valueHistoryLabels } = useMemo(
+    () => buildMonthlyPortfolioCurve(portfolioValue, safeAgg.avgApr),
+    [portfolioValue, safeAgg.avgApr],
   )
   const recentActivity = mounted ? userActivity.slice(0, 5) : []
   const donutData = useMemo(() => {
@@ -175,13 +175,14 @@ export function PortfolioSummary({
         flex: 1,
         display: 'grid',
         gridTemplateColumns: fitValue(mode, {
-          normal: '1fr 380px',
-          tight: '1fr 320px',
-          limit: '1fr',
+          normal: 'minmax(0, 1fr) 380px',
+          tight: 'minmax(0, 1fr) 320px',
+          limit: 'minmax(0, 1fr)',
         }),
         padding: `${shellPadding}px`,
         gap: `${shellGap}px`,
         minHeight: 0,
+        minWidth: 0,
         overflow: 'hidden',
       }}>
         <div style={{
@@ -245,11 +246,12 @@ export function PortfolioSummary({
               paddingLeft: mode !== 'limit' ? TOKENS.spacing[4] : 0,
               paddingTop: TOKENS.spacing[2],
             }}>
-              <LineChartArea 
-                data={valueHistory} 
-                portfolioValue={portfolioValue} 
-                totalDeposited={safeAgg.totalDeposited} 
-                mode={mode} 
+              <LineChartArea
+                data={valueHistory}
+                labels={valueHistoryLabels}
+                portfolioValue={portfolioValue}
+                totalDeposited={safeAgg.totalDeposited}
+                mode={mode}
               />
             </div>
           </div>
@@ -368,6 +370,7 @@ export function PortfolioSummary({
           }),
           gap: `${shellGap}px`,
           minHeight: 0,
+          minWidth: 0,
         }}>
           <DashboardSideCard
             mode={mode}
@@ -379,10 +382,12 @@ export function PortfolioSummary({
             {availableVaults.length === 0 ? (
               <PanelEmptyMessage message="No vaults available" />
             ) : (
-              <div style={{ 
-                display: 'grid', 
-                gridTemplateColumns: 'repeat(2, 1fr)', 
-                gap: TOKENS.spacing[5] 
+              <div style={{
+                display: 'grid',
+                gridTemplateColumns: 'repeat(2, minmax(0, 1fr))',
+                gap: TOKENS.spacing[5],
+                paddingInline: TOKENS.spacing[3],
+                minWidth: 0,
               }}>
                 {availableVaults.slice(0, 4).map((vault, index) => (
                   <AvailableVaultTeaser
@@ -404,7 +409,12 @@ export function PortfolioSummary({
             {recentActivity.length === 0 ? (
               <PanelEmptyMessage message="No recent activity yet" />
             ) : (
-              <div style={{ display: 'flex', flexDirection: 'column' }}>
+              <div style={{
+                display: 'flex',
+                flexDirection: 'column',
+                paddingInline: TOKENS.spacing[3],
+                minWidth: 0,
+              }}>
                 {recentActivity.map((item) => (
                   <ActivityRow
                     key={item.id}
@@ -755,39 +765,41 @@ function MiniStat({ label, value, accent = false }: { label: string; value: stri
 }
 
 /** LineChartArea — Full area chart with gradient fill */
-function LineChartArea({ 
-  data, 
-  portfolioValue, 
+function LineChartArea({
+  data,
+  labels,
+  portfolioValue,
   totalDeposited,
-  mode 
-}: { 
-  data: number[]; 
-  portfolioValue: number; 
-  totalDeposited: number;
-  mode: SmartFitMode 
+  mode,
+}: {
+  data: number[]
+  labels: string[]
+  portfolioValue: number
+  totalDeposited: number
+  mode: SmartFitMode
 }) {
-  const baseValue = totalDeposited > 0 ? totalDeposited : (data[0] || 0)
-  // Ensure max is strictly > baseValue to draw a visible range, give it 5% headroom
-  const maxVal = Math.max(...data, baseValue * 1.05)
-  const range = maxVal - baseValue || baseValue * 0.1 || 1
+  const dataMin = Math.min(...data)
+  const dataMax = Math.max(...data)
+  // Add 1% headroom so the curve doesn't kiss the top tick
+  const niceTicks = generateNiceTicks(dataMin, dataMax * 1.01, 7)
+  const baseValue = niceTicks[0]
+  const maxVal = niceTicks[niceTicks.length - 1]
+  const range = maxVal - baseValue || (totalDeposited > 0 ? totalDeposited * 0.1 : 1)
 
-  const change = baseValue > 0 ? ((portfolioValue - baseValue) / baseValue) * 100 : 0
+  const startValue = data[0] ?? portfolioValue
+  const change = startValue > 0 ? ((portfolioValue - startValue) / startValue) * 100 : 0
   const isPositive = change >= 0
 
   const width = 600
   const height = 240
-  const padding = { top: 20, right: 10, bottom: 24, left: 70 }
+  const padding = { top: 20, right: 10, bottom: 28, left: 70 }
   const chartWidth = width - padding.left - padding.right
   const chartHeight = height - padding.top - padding.bottom
 
-  const points = data.map((value, i) => {
-    // Clamp value to baseValue at minimum
-    const clampedValue = Math.max(baseValue, value)
-    return {
-      x: padding.left + (i / (Math.max(1, data.length - 1))) * chartWidth,
-      y: padding.top + chartHeight - ((clampedValue - baseValue) / range) * chartHeight,
-    }
-  })
+  const points = data.map((value, i) => ({
+    x: padding.left + (i / Math.max(1, data.length - 1)) * chartWidth,
+    y: padding.top + chartHeight - ((value - baseValue) / range) * chartHeight,
+  }))
 
   // Smooth cubic bezier curves
   const buildCurve = (pts: {x: number, y: number}[]) => {
@@ -819,11 +831,10 @@ function LineChartArea({
     'Z',
   ].join(' ')
 
-  const ticks = [
-    { label: fmtUsdCompact(baseValue), ratio: 0 },
-    { label: fmtUsdCompact(baseValue + range / 2), ratio: 0.5 },
-    { label: fmtUsdCompact(maxVal), ratio: 1 },
-  ]
+  const ticks = niceTicks.map((value) => ({
+    label: fmtUsdCompact(value),
+    ratio: range > 0 ? (value - baseValue) / range : 0,
+  }))
 
   return (
     <div style={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
@@ -844,21 +855,37 @@ function LineChartArea({
           paddingLeft: TOKENS.spacing[3],
           color: TOKENS.colors.textSecondary,
         }}>
-          Portfolio Value
+          Portfolio value — last 12 months
         </span>
-        {change !== 0 && (
+        <span style={{
+          display: 'flex',
+          alignItems: 'baseline',
+          gap: TOKENS.spacing[3],
+        }}>
+          {change !== 0 && (
+            <span style={{
+              fontSize: TOKENS.fontSizes.xs,
+              fontWeight: TOKENS.fontWeights.bold,
+              color: isPositive ? TOKENS.colors.accent : TOKENS.colors.danger,
+              fontFamily: TOKENS.fonts.mono,
+              background: isPositive ? `${TOKENS.colors.accent}14` : `${TOKENS.colors.danger}14`,
+              padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
+              borderRadius: TOKENS.radius.full,
+            }}>
+              {isPositive ? '+' : ''}{change.toFixed(1)}%
+            </span>
+          )}
           <span style={{
-            fontSize: TOKENS.fontSizes.xs,
-            fontWeight: TOKENS.fontWeights.bold,
-            color: isPositive ? TOKENS.colors.accent : TOKENS.colors.danger,
             fontFamily: TOKENS.fonts.mono,
-            background: isPositive ? `${TOKENS.colors.accent}14` : `${TOKENS.colors.danger}14`,
-            padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
-            borderRadius: TOKENS.radius.full,
+            fontSize: TOKENS.fontSizes.micro,
+            fontWeight: TOKENS.fontWeights.bold,
+            letterSpacing: TOKENS.letterSpacing.wide,
+            textTransform: 'uppercase',
+            color: TOKENS.colors.textGhost,
           }}>
-            {isPositive ? '+' : ''}{change.toFixed(1)}%
+            USD, daily
           </span>
-        )}
+        </span>
       </div>
 
       <div style={{ flex: 1, minHeight: 0 }}>
@@ -920,12 +947,24 @@ function LineChartArea({
             style={{ filter: `drop-shadow(0 0 8px ${TOKENS.colors.accent})` }}
           />
 
-          <text x={padding.left} y={height - 2} fill={TOKENS.colors.textGhost} fontSize="10" fontFamily={TOKENS.fonts.mono} textAnchor="start">
-            Start
-          </text>
-          <text x={width - padding.right} y={height - 2} textAnchor="end" fill={TOKENS.colors.textGhost} fontSize="10" fontFamily={TOKENS.fonts.mono}>
-            Today
-          </text>
+          {labels.map((label, i) => {
+            const x = padding.left + (i / Math.max(1, labels.length - 1)) * chartWidth
+            const isFirst = i === 0
+            const isLast = i === labels.length - 1
+            return (
+              <text
+                key={`${label}-${i}`}
+                x={x}
+                y={height - 4}
+                textAnchor={isFirst ? 'start' : isLast ? 'end' : 'middle'}
+                fill={TOKENS.colors.textGhost}
+                fontSize="10"
+                fontFamily={TOKENS.fonts.mono}
+              >
+                {label}
+              </text>
+            )
+          })}
         </svg>
       </div>
     </div>
@@ -935,7 +974,7 @@ function LineChartArea({
 /** MaturityTimelineCompact — Ultra-compact timeline for unified panel */
 function MaturityTimelineCompact({ vaults, mode }: { vaults: ActiveVault[]; mode: SmartFitMode }) {
   const items = vaults
-    .map(v => ({ ...v, days: getDaysToMaturity(v.maturity) }))
+    .map(v => ({ ...v, days: getDaysToMaturity(v.lockedUntil) }))
     .sort((a, b) => a.days - b.days)
     .slice(0, 3)
 
@@ -1094,11 +1133,12 @@ function ActivityRow({
   return (
     <div style={{
       display: 'grid',
-      gridTemplateColumns: `${TOKENS.spacing[4]} 1fr auto`,
+      gridTemplateColumns: `${TOKENS.spacing[4]} minmax(0, 1fr) auto`,
       gap: TOKENS.spacing[5],
       alignItems: 'center',
       padding: `${TOKENS.spacing[5]} 0`,
       borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
+      minWidth: 0,
     }}>
       {/* Tiny indicator */}
       <div style={{
@@ -1247,6 +1287,7 @@ function AvailableVaultTeaser({
         flexDirection: 'column',
         overflow: 'hidden',
         position: 'relative',
+        minWidth: 0,
       }}
       onMouseEnter={(e) => {
         if (onClick) {

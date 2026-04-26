@@ -17,10 +17,12 @@ export interface ActiveVault extends BaseVault {
   type: 'active'
   deposited: number
   claimable: number
+  createdAt: number
   lockedUntil: number
   canWithdraw: boolean
   maturity: string
   progress: number
+  risk: string
 }
 
 export interface MaturedVault extends BaseVault {

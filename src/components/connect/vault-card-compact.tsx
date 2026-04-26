@@ -4,6 +4,7 @@ import { useState } from 'react'
 import { TOKENS, fmtUsdCompact, VALUE_LETTER_SPACING } from './constants'
 import { formatVaultName } from './formatting'
 import { ActionButton } from './action-button'
+import { getDaysToMaturity } from './utils/portfolio-chart-utils'
 import type { ActiveVault } from './data'
 import type { SmartFitMode } from './smart-fit'
 
@@ -21,7 +22,7 @@ const palette = [TOKENS.colors.accent, TOKENS.colors.white, TOKENS.colors.gray50
 
 export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, onExit }: VaultCardCompactProps) {
   const color = palette[index % palette.length]
-  const daysToMaturity = Math.max(0, Math.ceil((new Date(vault.maturity).getTime() - Date.now()) / (1000 * 60 * 60 * 24)))
+  const daysToMaturity = getDaysToMaturity(vault.lockedUntil)
   const [isHovered, setIsHovered] = useState(false)
   
   const canClaim = vault.claimable > 0

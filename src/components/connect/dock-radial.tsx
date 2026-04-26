@@ -66,18 +66,6 @@ export function DockRadial({ onSelect }: DockRadialProps) {
         }}
         title="Tableau de bord"
       >
-        <span
-          aria-hidden
-          style={{
-            position: 'absolute',
-            bottom: TOKENS.dock.dotOffset,
-            width: TOKENS.dock.dotSize,
-            height: TOKENS.dock.dotSize,
-            borderRadius: TOKENS.radius.dot,
-            background: TOKENS.colors.accent,
-          }}
-        />
-
         {/* Official Hearst wordmark monogram (green HB from /logos/hearst-connect.svg); larger hit area reads clearer than 22px */}
         <svg
           viewBox="572.6 466.87 129.26 142.86"

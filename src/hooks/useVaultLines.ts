@@ -48,10 +48,12 @@ export function useVaultLines() {
             image: vaultConfig.image,
             deposited: userPosition.deposited,
             claimable: userPosition.claimable,
+            createdAt: userPosition.createdAt,
             lockedUntil: userPosition.maturityDate,
             canWithdraw: userPosition.canWithdraw,
             maturity: userPosition.isMatured ? 'Matured' : `${userPosition.daysRemaining} days`,
             progress: userPosition.progressPercent,
+            risk: userPosition.risk,
           }
           return activeVault
         }

@@ -6,7 +6,6 @@ import { useRouter } from 'next/navigation'
 import { Canvas } from '@/components/connect/canvas'
 import { NavigationProvider } from '@/components/connect/use-connect-routing'
 import { useSiweAuth } from '@/hooks/useSiweAuth'
-import { TOKENS, MONO } from '@/components/connect/constants'
 
 const WALLET_ICONS = [
   { name: 'MetaMask', icon: '/icons/wallets/metamask.svg' },
@@ -15,7 +14,379 @@ const WALLET_ICONS = [
   { name: 'Fireblocks', icon: '/icons/wallets/fireblocks.svg' },
   { name: 'Ledger', icon: '/icons/wallets/ledger.svg' },
   { name: 'Safe', icon: '/icons/wallets/safe.svg' },
-]
+] as const
+
+const FEATURES = [
+  { label: 'Real infrastructure', value: 'Mining operations' },
+  { label: 'Monthly distributions', value: 'USDC yield' },
+  { label: 'On-chain proof', value: 'Verified reserves' },
+] as const
+
+const TRUST_BADGES = ['Audited', 'Base', 'Institutional'] as const
+
+const ACCESS_GATE_CSS = `
+.access-gate {
+  /* Local layout tokens — values used only here. */
+  --gate-bp: 900px;
+  --gate-card-max: 24rem;
+  --gate-title-measure: 16ch;
+  --gate-lede-measure: 42ch;
+  --gate-trust-measure: 36ch;
+  --gate-spinner-duration: 1s;
+
+  position: fixed;
+  inset: 0;
+  display: grid;
+  grid-template-columns: 1fr;
+  grid-template-rows: 1fr;
+  background: var(--hc-bg-app);
+  overflow: auto;
+}
+
+.access-gate__pane {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-8) var(--space-6);
+  min-height: 0;
+  min-width: 0;
+}
+
+.access-gate__pane--marketing {
+  position: relative;
+  isolation: isolate;
+  background:
+    radial-gradient(
+      ellipse 55% 60% at 50% 50%,
+      var(--hc-bg-app) 0%,
+      transparent 60%,
+      var(--hc-bg-app) 100%
+    ),
+    url('/backgrounds/pattern-sidebar.svg') center / cover no-repeat,
+    var(--hc-bg-app);
+  text-align: center;
+  border-bottom: 1px solid var(--hc-border-subtle);
+  gap: var(--space-10);
+}
+
+.access-gate__pane--connect {
+  background: var(--hc-bg-app);
+}
+
+@media (min-width: 900px) {
+  .access-gate {
+    grid-template-columns: 1fr 1fr;
+    grid-template-rows: 1fr;
+    overflow: hidden;
+  }
+  .access-gate__pane--marketing {
+    border-bottom: 0;
+    border-right: 1px solid var(--hc-border-subtle);
+  }
+  .access-gate__pane {
+    padding: var(--space-10) var(--space-8);
+  }
+}
+
+.access-gate__brand {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.access-gate__brand-logo {
+  width: var(--space-16);
+  height: var(--space-16);
+  filter: drop-shadow(0 0 var(--space-8) var(--hc-accent-glow));
+}
+
+.access-gate__title {
+  font-size: var(--dashboard-text-display);
+  font-weight: var(--weight-black);
+  line-height: var(--leading-tight);
+  color: var(--hc-text-primary);
+  margin: 0;
+  max-width: var(--gate-title-measure);
+  letter-spacing: var(--tracking-tight);
+  text-wrap: balance;
+}
+.access-gate__title-accent {
+  color: var(--hc-accent);
+}
+
+.access-gate__lede {
+  font-size: var(--text-lg);
+  line-height: var(--leading-relaxed);
+  color: var(--hc-text-secondary);
+  margin: 0;
+  max-width: var(--gate-lede-measure);
+  font-weight: var(--weight-medium);
+  text-wrap: balance;
+}
+
+.access-gate__features-section {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-6);
+  width: 100%;
+}
+.access-gate__features-title {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-3);
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  color: var(--hc-text-ghost);
+  margin: 0;
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+}
+.access-gate__features-title::before,
+.access-gate__features-title::after {
+  content: '';
+  width: var(--space-8);
+  height: 1px;
+  background: var(--hc-border-subtle);
+}
+.access-gate__features {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  column-gap: var(--space-4);
+  row-gap: var(--space-4);
+  list-style: none;
+  padding: 0;
+  margin: 0;
+}
+.access-gate__feature {
+  display: contents;
+}
+.access-gate__feature-label {
+  font-family: var(--font-mono);
+  color: var(--hc-accent);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  font-size: var(--text-sm);
+  text-align: right;
+  white-space: nowrap;
+}
+.access-gate__feature-sep {
+  color: var(--hc-border-subtle);
+  text-align: center;
+}
+.access-gate__feature-value {
+  color: var(--hc-text-secondary);
+  font-weight: var(--weight-medium);
+  font-size: var(--text-md);
+  text-align: left;
+  white-space: nowrap;
+}
+
+.access-gate__trust {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-4);
+  border-top: 1px solid var(--hc-border-subtle);
+  padding-top: var(--space-6);
+  width: 100%;
+  max-width: var(--gate-trust-measure);
+  list-style: none;
+  margin: 0;
+}
+.access-gate__trust-item {
+  font-family: var(--font-mono);
+  font-size: var(--text-xs);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  color: var(--hc-text-ghost);
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-4);
+}
+.access-gate__trust-item:not(:last-child)::after {
+  content: '';
+  width: var(--space-1);
+  height: var(--space-1);
+  border-radius: var(--radius-full);
+  background: var(--hc-accent);
+  display: inline-block;
+}
+
+.access-gate__card {
+  width: 100%;
+  max-width: var(--gate-card-max);
+  background: transparent;
+  border: 0;
+  border-radius: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: var(--space-8);
+  box-shadow: none;
+}
+
+.access-gate__card-head {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-3);
+}
+.access-gate__card-title {
+  font-size: var(--text-lg);
+  font-weight: var(--weight-black);
+  color: var(--hc-text-primary);
+  margin: 0;
+  text-transform: uppercase;
+  letter-spacing: var(--tracking-display);
+  line-height: var(--leading-tight);
+}
+.access-gate__card-sub {
+  font-size: var(--text-sm);
+  color: var(--hc-text-ghost);
+  margin: 0;
+  line-height: var(--leading-relaxed);
+}
+
+.access-gate__wallets {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: var(--space-5) var(--space-3);
+  width: 100%;
+}
+
+.access-gate__wallet {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-start;
+  gap: var(--space-3);
+  padding: var(--space-2);
+  background: transparent;
+  border: 0;
+  transition: var(--transition-base);
+  cursor: pointer;
+}
+.access-gate__wallet:hover .access-gate__wallet-img {
+  transform: scale(1.08);
+}
+.access-gate__wallet:hover .access-gate__wallet-name {
+  color: var(--hc-accent);
+}
+.access-gate__wallet-img {
+  width: var(--dashboard-control-height-md);
+  height: var(--dashboard-control-height-md);
+  object-fit: contain;
+  transition: var(--transition-base);
+}
+.access-gate__wallet-name {
+  font-family: var(--font-mono);
+  font-size: var(--text-micro);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  color: var(--hc-text-ghost);
+  transition: var(--transition-base);
+}
+
+.access-gate__error {
+  font-size: var(--text-sm);
+  color: var(--dashboard-error);
+  margin: 0;
+  text-align: center;
+}
+
+.access-gate__cta {
+  width: 100%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--space-2);
+  height: var(--dashboard-control-height-lg);
+  padding: 0 var(--space-5);
+  background: var(--hc-accent);
+  color: var(--hc-bg-app);
+  border: 0;
+  border-radius: var(--radius-md);
+  font-family: var(--font-sans);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-black);
+  letter-spacing: var(--tracking-display);
+  text-transform: uppercase;
+  cursor: pointer;
+  transition: var(--transition-base);
+}
+.access-gate__cta:hover:not(:disabled) {
+  filter: brightness(1.08);
+}
+.access-gate__cta:disabled {
+  cursor: wait;
+  opacity: var(--opacity-strong);
+}
+.access-gate__cta svg {
+  width: var(--dashboard-icon-size-sm);
+  height: var(--dashboard-icon-size-sm);
+}
+
+.access-gate__note {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--space-2);
+  font-size: var(--text-xs);
+  color: var(--hc-text-ghost);
+  text-align: center;
+  margin: 0;
+}
+.access-gate__note svg {
+  width: var(--dashboard-icon-size-sm);
+  height: var(--dashboard-icon-size-sm);
+  color: var(--hc-accent);
+  flex-shrink: 0;
+}
+
+.access-gate__loader {
+  --gate-spinner-duration: 1s;
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--hc-bg-app);
+}
+.access-gate__loader-spinner {
+  width: var(--space-10);
+  height: var(--space-10);
+  border: 1px solid var(--hc-border-subtle);
+  border-top-color: var(--hc-accent);
+  border-radius: var(--radius-full);
+  animation: access-gate-spin var(--gate-spinner-duration) linear infinite;
+}
+@keyframes access-gate-spin {
+  to { transform: rotate(360deg); }
+}
+`
+
+function ShieldIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
+    </svg>
+  )
+}
+
+function WalletIcon() {
+  return (
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" aria-hidden>
+      <path d="M19 7H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z" />
+      <path d="M16 13a1 1 0 100-2 1 1 0 000 2z" fill="currentColor" />
+    </svg>
+  )
+}
 
 function AccessGate({ children }: { children: React.ReactNode }) {
   const [mounted, setMounted] = useState(false)
@@ -59,30 +430,9 @@ function AccessGate({ children }: { children: React.ReactNode }) {
 
   if (!mounted || isRedirecting || !sessionChecked) {
     return (
-      <div 
-        className="connect-scope"
-        style={{
-          position: 'fixed',
-          inset: 0,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-          background: TOKENS.colors.bgApp,
-        }}
-      >
-        <div 
-          style={{
-            width: '40px',
-            height: '40px',
-            border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-            borderTopColor: TOKENS.colors.accent,
-            borderRadius: TOKENS.radius.full,
-            animation: 'spin 1s linear infinite',
-          }}
-        />
-        <style>{`
-          @keyframes spin { to { transform: rotate(360deg); } }
-        `}</style>
+      <div className="connect-scope access-gate__loader">
+        <style>{ACCESS_GATE_CSS}</style>
+        <div className="access-gate__loader-spinner" />
       </div>
     )
   }
@@ -90,355 +440,116 @@ function AccessGate({ children }: { children: React.ReactNode }) {
   const hasAccess = isConnected && isAuthenticated
 
   if (!hasAccess) {
+    const showSignIn = isConnected && !isAuthenticated
+    const ctaLabel = showSignIn
+      ? authLoading
+        ? 'Signing…'
+        : hasRejected
+          ? 'Retry Sign In'
+          : 'Sign In with Wallet'
+      : isPending
+        ? 'Connecting…'
+        : 'Connect Wallet'
+    const ctaDisabled = showSignIn ? authLoading : isPending
+    const ctaOnClick = showSignIn
+      ? () => {
+          retryAuth()
+          authenticate()
+        }
+      : handleConnect
+
     return (
-      <div 
-        className="connect-scope access-gate-layout"
-        style={{
-          position: 'fixed',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          background: TOKENS.colors.bgApp,
-          overflow: 'auto',
-        }}
-      >
-        <style>{`
-          @media (min-width: 768px) {
-            .access-gate-layout { flex-direction: row !important; overflow: hidden !important; }
-            .access-gate-left { width: 50%; border-right: ${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}; border-bottom: none !important; max-height: none !important; }
-            .access-gate-right { width: 50%; }
-          }
-        `}</style>
-        {/* LEFT - Marketing */}
-        <div 
-          className="access-gate-left"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            padding: TOKENS.spacing[8],
-            background: TOKENS.colors.black,
-            borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-            maxHeight: '45vh',
-            overflow: 'auto',
-          }}
-        >
-          {/* Logo - Solo */}
-          <div style={{ marginBottom: TOKENS.spacing[10] }}>
-            <img 
-              src="/logos/hearst-connect.svg" 
-              alt="Hearst Connect" 
-              style={{ width: '72px', height: '72px', filter: 'drop-shadow(0 0 30px rgba(167, 251, 144, 0.15))' }} 
+      <div className="connect-scope access-gate">
+        <style>{ACCESS_GATE_CSS}</style>
+
+        <section className="access-gate__pane access-gate__pane--marketing" aria-label="Hearst Connect">
+          <div className="access-gate__brand">
+            <img
+              src="/logos/hearst-connect.svg"
+              alt="Hearst Connect"
+              className="access-gate__brand-logo"
             />
           </div>
 
-          {/* Refined Title */}
-          <h1 style={{
-            fontSize: 'clamp(36px, 5vw, 56px)',
-            fontWeight: TOKENS.fontWeights.black,
-            lineHeight: 1.08,
-            color: TOKENS.colors.textPrimary,
-            margin: `0 0 ${TOKENS.spacing[4]} 0`,
-            maxWidth: '520px',
-            letterSpacing: '-0.03em',
-          }}>
+          <h1 className="access-gate__title">
             Institutional
             <br />
-            <span style={{ color: TOKENS.colors.accent }}>Mining Yield</span>
+            <span className="access-gate__title-accent">Mining Yield</span>
             <br />
             Vaults
           </h1>
 
-          {/* Subtle Description */}
-          <p style={{
-            fontSize: TOKENS.fontSizes.md,
-            lineHeight: 1.8,
-            color: TOKENS.colors.textSecondary,
-            margin: `0 0 ${TOKENS.spacing[8]} 0`,
-            maxWidth: '380px',
-            fontWeight: TOKENS.fontWeights.regular,
-          }}>
+          <h2 className="access-gate__lede">
             Bitcoin mining yields, on-chain. Transparent. Audited. Institutional-grade.
-          </p>
+          </h2>
 
-          {/* Minimal Features */}
-          <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: TOKENS.spacing[3], marginBottom: TOKENS.spacing[8] }}>
-            {[
-              { label: 'Real infrastructure', value: 'Mining operations' },
-              { label: 'Monthly distributions', value: 'USDC yield' },
-              { label: 'On-chain proof', value: 'Verified reserves' },
-            ].map((item) => (
-              <div key={item.label} style={{ 
-                display: 'flex', 
-                alignItems: 'center', 
-                justifyContent: 'center', 
-                gap: TOKENS.spacing[2],
-              }}>
-                <span style={{ 
-                  fontFamily: MONO, 
-                  fontSize: TOKENS.fontSizes.xs, 
-                  color: TOKENS.colors.accent,
-                  fontWeight: TOKENS.fontWeights.bold,
-                  letterSpacing: TOKENS.letterSpacing.display,
-                }}>
-                  {item.label}
-                </span>
-                <span style={{ color: TOKENS.colors.borderSubtle }}>—</span>
-                <span style={{ 
-                  fontSize: TOKENS.fontSizes.xs, 
-                  color: TOKENS.colors.textGhost,
-                  fontWeight: TOKENS.fontWeights.medium,
-                }}>
-                  {item.value}
-                </span>
-              </div>
-            ))}
+          <div className="access-gate__features-section">
+            <h3 className="access-gate__features-title">Why Hearst</h3>
+            <ul className="access-gate__features">
+              {FEATURES.map(({ label, value }) => (
+                <li key={label} className="access-gate__feature">
+                  <span className="access-gate__feature-label">{label}</span>
+                  <span className="access-gate__feature-sep" aria-hidden>—</span>
+                  <span className="access-gate__feature-value">{value}</span>
+                </li>
+              ))}
+            </ul>
           </div>
 
-          {/* Minimal Trust Badges */}
-          <div style={{ 
-            display: 'flex', 
-            justifyContent: 'center', 
-            gap: TOKENS.spacing[6],
-            borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-            paddingTop: TOKENS.spacing[6],
-            marginTop: TOKENS.spacing[4],
-          }}>
-            {['Audited', 'Base', 'Institutional'].map((badge) => (
-              <span 
-                key={badge}
-                style={{
-                  fontFamily: MONO,
-                  fontSize: TOKENS.fontSizes.micro,
-                  fontWeight: TOKENS.fontWeights.bold,
-                  letterSpacing: TOKENS.letterSpacing.display,
-                  textTransform: 'uppercase',
-                  color: TOKENS.colors.textGhost,
-                }}
-              >
+          <ul className="access-gate__trust">
+            {TRUST_BADGES.map((badge) => (
+              <li key={badge} className="access-gate__trust-item">
                 {badge}
-              </span>
+              </li>
             ))}
-          </div>
-        </div>
+          </ul>
+        </section>
 
-        {/* RIGHT - Wallet Connect */}
-        <div 
-          className="access-gate-right"
-          style={{
-            width: '50%',
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            padding: TOKENS.spacing[8],
-            background: TOKENS.colors.bgApp,
-            overflow: 'auto',
-            minHeight: 0,
-          }}
-        >
-          {/* Wallet Connect Box */}
-          <div
-            style={{
-              width: '100%',
-              maxWidth: '440px',
-              background: TOKENS.colors.bgSurface,
-              border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-              borderRadius: TOKENS.radius.xl,
-              padding: `${TOKENS.spacing[10]} ${TOKENS.spacing[8]}`,
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: TOKENS.spacing[8],
-              boxShadow: `0 0 60px ${TOKENS.colors.accent}10`,
-            }}
-          >
-            {/* Title */}
-            <div style={{ textAlign: 'center' }}>
-              <h2 style={{
-                fontSize: TOKENS.fontSizes.xxl,
-                fontWeight: TOKENS.fontWeights.black,
-                color: TOKENS.colors.textPrimary,
-                margin: `0 0 ${TOKENS.spacing[3]} 0`,
-                textTransform: 'uppercase',
-                letterSpacing: TOKENS.letterSpacing.tight,
-              }}>
-                Connect Wallet
-              </h2>
-              <p style={{
-                fontSize: TOKENS.fontSizes.md,
-                color: TOKENS.colors.textSecondary,
-                margin: 0,
-                lineHeight: 1.6,
-              }}>
-                Access your vaults and portfolio
-              </p>
-            </div>
+        <section className="access-gate__pane access-gate__pane--connect" aria-label="Connect wallet">
+          <div className="access-gate__card">
+            <header className="access-gate__card-head">
+              <h2 className="access-gate__card-title">Connect Wallet</h2>
+              <p className="access-gate__card-sub">Access your vaults and portfolio</p>
+            </header>
 
-            {/* Wallet Icons Grid */}
-            <div
-              style={{
-                display: 'grid',
-                gridTemplateColumns: 'repeat(3, 1fr)',
-                gap: TOKENS.spacing[4],
-                width: '100%',
-              }}
-            >
+            <div className="access-gate__wallets">
               {WALLET_ICONS.map((wallet) => (
-                <div
-                  key={wallet.name}
-                  style={{
-                    display: 'flex',
-                    flexDirection: 'column',
-                    alignItems: 'center',
-                    gap: TOKENS.spacing[3],
-                    padding: `${TOKENS.spacing[4]} ${TOKENS.spacing[3]}`,
-                    borderRadius: TOKENS.radius.lg,
-                    background: TOKENS.colors.bgTertiary,
-                    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-                    transition: 'all 0.2s ease',
-                  }}
-                >
-                  <div
-                    style={{
-                      width: '48px',
-                      height: '48px',
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      borderRadius: TOKENS.radius.md,
-                      background: TOKENS.colors.bgApp,
-                      border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+                <div key={wallet.name} className="access-gate__wallet">
+                  <img
+                    src={wallet.icon}
+                    alt=""
+                    className="access-gate__wallet-img"
+                    onError={(e) => {
+                      ;(e.target as HTMLImageElement).style.display = 'none'
                     }}
-                  >
-                    <img
-                      src={wallet.icon}
-                      alt={wallet.name}
-                      style={{
-                        width: '28px',
-                        height: '28px',
-                        objectFit: 'contain',
-                      }}
-                      onError={(e) => {
-                        // Fallback if icon not found
-                        (e.target as HTMLImageElement).style.display = 'none'
-                      }}
-                    />
-                  </div>
-                  <span
-                    style={{
-                      fontFamily: MONO,
-                      fontSize: TOKENS.fontSizes.xs,
-                      fontWeight: TOKENS.fontWeights.bold,
-                      letterSpacing: TOKENS.letterSpacing.display,
-                      textTransform: 'uppercase',
-                      color: TOKENS.colors.textSecondary,
-                    }}
-                  >
-                    {wallet.name}
-                  </span>
+                  />
+                  <span className="access-gate__wallet-name">{wallet.name}</span>
                 </div>
               ))}
             </div>
 
-            {/* Auth error */}
             {authError && (
-              <p style={{
-                fontSize: TOKENS.fontSizes.sm,
-                color: '#f87171',
-                margin: 0,
-                textAlign: 'center',
-              }}>
+              <p className="access-gate__error" role="alert">
                 {authError}
               </p>
             )}
 
-            {/* Connect / Sign-in Button */}
-            {isConnected && !isAuthenticated ? (
-              <button
-                onClick={() => { retryAuth(); authenticate(); }}
-                disabled={authLoading}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: TOKENS.spacing[3],
-                  padding: `${TOKENS.spacing[5]} ${TOKENS.spacing[6]}`,
-                  background: TOKENS.colors.accent,
-                  color: TOKENS.colors.black,
-                  border: TOKENS.borders.none,
-                  borderRadius: TOKENS.radius.md,
-                  fontSize: TOKENS.fontSizes.lg,
-                  fontWeight: TOKENS.fontWeights.black,
-                  letterSpacing: TOKENS.letterSpacing.display,
-                  textTransform: 'uppercase',
-                  cursor: authLoading ? 'wait' : 'pointer',
-                  opacity: authLoading ? 0.7 : 1,
-                  transition: 'all 0.2s ease',
-                  boxShadow: `0 4px 24px ${TOKENS.colors.accent}40`,
-                }}
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-                </svg>
-                {authLoading ? 'Signing…' : hasRejected ? 'Retry Sign In' : 'Sign In with Wallet'}
-              </button>
-            ) : (
-              <button
-                onClick={handleConnect}
-                disabled={isPending}
-                style={{
-                  width: '100%',
-                  display: 'flex',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  gap: TOKENS.spacing[3],
-                  padding: `${TOKENS.spacing[5]} ${TOKENS.spacing[6]}`,
-                  background: TOKENS.colors.accent,
-                  color: TOKENS.colors.black,
-                  border: TOKENS.borders.none,
-                  borderRadius: TOKENS.radius.md,
-                  fontSize: TOKENS.fontSizes.lg,
-                  fontWeight: TOKENS.fontWeights.black,
-                  letterSpacing: TOKENS.letterSpacing.display,
-                  textTransform: 'uppercase',
-                  cursor: isPending ? 'wait' : 'pointer',
-                  opacity: isPending ? 0.7 : 1,
-                  transition: 'all 0.2s ease',
-                  boxShadow: `0 4px 24px ${TOKENS.colors.accent}40`,
-                }}
-              >
-                <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                  <path d="M19 7H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z" />
-                  <path d="M16 11h0" />
-                </svg>
-                {isPending ? 'Connecting…' : 'Connect Wallet'}
-              </button>
-            )}
+            <button
+              type="button"
+              onClick={ctaOnClick}
+              disabled={ctaDisabled}
+              className="access-gate__cta"
+            >
+              {showSignIn ? <ShieldIcon /> : <WalletIcon />}
+              {ctaLabel}
+            </button>
 
-            {/* Security Note */}
-            <div style={{
-              display: 'flex',
-              alignItems: 'center',
-              gap: TOKENS.spacing[2],
-            }}>
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke={TOKENS.colors.accent} strokeWidth="2">
-                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z" />
-              </svg>
-              <p style={{
-                fontSize: TOKENS.fontSizes.xs,
-                color: TOKENS.colors.textGhost,
-                margin: 0,
-                textAlign: 'center',
-              }}>
-                Secure connection. We never store your keys.
-              </p>
-            </div>
+            <p className="access-gate__note">
+              <ShieldIcon />
+              Secure connection. We never store your keys.
+            </p>
           </div>
-        </div>
+        </section>
       </div>
     )
   }

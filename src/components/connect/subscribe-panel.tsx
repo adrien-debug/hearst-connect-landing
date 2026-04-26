@@ -4,7 +4,7 @@ import { useState } from 'react'
 import { SubscriptionComposer } from './subscription-composer'
 import { TOKENS } from './constants'
 import type { AvailableVault } from './data'
-import { useSmartFit, useShellPadding, fitValue } from './smart-fit'
+import { useSmartFit, useShellPadding } from './smart-fit'
 import { useTokenAllowance } from '@/hooks/useTokenAllowance'
 import { useVaultById } from '@/hooks/useVaultRegistry'
 import { useAccount } from 'wagmi'
@@ -75,9 +75,6 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
     }
   }
 
-  const monthlyYield = num * (vault.apr / 100) / 12
-  const dailyYield = monthlyYield / 30
-
   if (!isVaultConfigured) {
     return (
       <div
@@ -126,34 +123,6 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
         color: TOKENS.colors.textPrimary,
       }}
     >
-      {/* Compact Header with Back + Lock Info */}
-      <div
-        style={{
-          padding: fitValue(mode, {
-            normal: `${shellPadding}px`,
-            tight: `${shellPadding * 0.75}px`,
-            limit: `${shellPadding * 0.5}px`,
-          }),
-          borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
-          flexShrink: 0,
-          background: TOKENS.colors.bgApp,
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-        }}
-      >
-        <BackButton onBack={onBack} />
-        <div style={{
-          fontFamily: TOKENS.fonts.mono,
-          fontSize: TOKENS.fontSizes.micro,
-          color: TOKENS.colors.textGhost,
-          letterSpacing: TOKENS.letterSpacing.display,
-          textTransform: 'uppercase',
-        }}>
-          {vault.lockPeriod} lock
-        </div>
-      </div>
-
       {/* Main content */}
       <div
         className="hide-scrollbar"
@@ -178,8 +147,6 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
           isValid={isValid}
           isReady={isReady}
           num={num}
-          monthlyYield={monthlyYield}
-          dailyYield={dailyYield}
           yearlyYield={yearlyYield}
           totalYield={totalYield}
           onApprove={handleApprove}
@@ -187,6 +154,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
           onDeposit={handleDeposit}
           isDepositing={isDepositing || isLivePending}
           onPreFlightReady={setPreFlightReady}
+          onBack={onBack}
         />
       </div>
     </div>

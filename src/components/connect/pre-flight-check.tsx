@@ -66,10 +66,8 @@ export function PreFlightCheck({
   
   return (
     <div style={{
-      background: TOKENS.colors.bgSecondary,
-      border: `1px solid ${TOKENS.colors.borderSubtle}`,
-      borderRadius: TOKENS.radius.lg,
-      padding: TOKENS.spacing[4],
+      paddingTop: TOKENS.spacing[3],
+      borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
     }}>
       {/* Header */}
       <div style={{
