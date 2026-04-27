@@ -3,7 +3,9 @@
 export const TOKENS = {
   colors: {
     white: 'var(--hc-text-primary)',
-    black: 'var(--hc-bg-app)',
+    /** Deep black — used for box / card surfaces and CTA-on-accent text. */
+    black: 'var(--hc-bg-surface)',
+    /** Body / canvas background (dark grey). */
     bgApp: 'var(--hc-bg-app)',
     bgPage: 'var(--hc-bg-page)',
     bgSidebar: 'var(--hc-bg-sidebar)',

@@ -123,9 +123,8 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
         color: TOKENS.colors.textPrimary,
       }}
     >
-      {/* Main content */}
+      {/* Main content — locked to viewport, no body scroll. */}
       <div
-        className="hide-scrollbar"
         style={{
           flex: 1,
           display: 'flex',
@@ -133,7 +132,7 @@ export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBac
           padding: shellPadding,
           gap: shellGap,
           minHeight: 0,
-          overflow: 'auto',
+          overflow: 'hidden',
         }}
       >
         <SubscriptionComposer

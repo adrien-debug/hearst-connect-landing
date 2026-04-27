@@ -3,17 +3,13 @@
 import { useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Label } from '@/components/ui/label'
-import { TOKENS, MONO, fmtUsd, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING } from './constants'
+import { TOKENS, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING } from './constants'
 import { formatVaultName } from './formatting'
-import { MonthlyGauge } from './monthly-gauge'
-import { CompressedMetricsStrip } from './compressed-metrics-strip'
-import { PositionCard } from './position-card'
 import { Modal, TransactionState } from './modal'
 import type { ActiveVault, MaturedVault } from './data'
+import type { VaultConfig } from '@/types/vault'
 import { useSmartFit, useShellPadding, fitValue } from './smart-fit'
 import type { SmartFitMode } from './smart-fit'
-import { CockpitGauge } from './cockpit-gauge'
-import { StatCard } from './stat-card'
 import { ActionButton } from './action-button'
 import { usePositionData } from '@/hooks/usePositionData'
 import { useVaultActions } from '@/hooks/useVault'
@@ -32,8 +28,8 @@ export function VaultDetailPanel({
   vault: ActiveVault | MaturedVault
   onBack?: () => void
 }) {
-  const { address: connectedAddress, isConnected } = useAccount()
-  const { mode, isLimit } = useSmartFit({
+  const { address: connectedAddress } = useAccount()
+  const { mode } = useSmartFit({
     tightHeight: 760,
     limitHeight: 680,
     tightWidth: 1100,
@@ -58,11 +54,14 @@ export function VaultDetailPanel({
     walletAddress: connectedAddress,
   })
 
-  const { claim, withdraw, isPending: isActionPending } = useVaultActions(
+  const { isPending: isActionPending } = useVaultActions(
     isVaultConfigured ? vaultAddress : undefined
   )
 
   const [activeModal, setActiveModal] = useState<ModalType>(null)
+  const [openStrategy, setOpenStrategy] = useState(false)
+  const [openTerms, setOpenTerms] = useState(false)
+  const [openTransactions, setOpenTransactions] = useState(false)
   const transaction = useTransaction()
 
   if (!isVaultConfigured) {
@@ -147,10 +146,6 @@ export function VaultDetailPanel({
   const isPositionReadyForExit = positionData?.canWithdraw ?? false
   const statusLabel = isPositionReadyForExit ? 'Ready for exit' : 'Active'
 
-  const totalTargetYield = capitalDeployed * (parseFloat(vault.target) / 100)
-  const remainingToTarget = Math.max(0, totalTargetYield - accruedYield)
-
-  // Use live actions for claim/withdraw with backend persistence
   const { claim: liveClaim, withdraw: liveWithdraw } = useLiveActions(vault.id)
 
   const handleClaim = async () => {
@@ -238,79 +233,20 @@ export function VaultDetailPanel({
         color: TOKENS.colors.textPrimary,
       }}
     >
-      {/* COCKPIT HEADER — Same structure as dashboard */}
-      <div
-        style={{
-          padding: fitValue(mode, {
-            normal: `${shellPadding}px`,
-            tight: `${shellPadding * 0.75}px`,
-            limit: `${shellPadding * 0.5}px`,
-          }),
-          borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
-          flexShrink: 0,
-          background: TOKENS.colors.bgApp,
-        }}
-      >
-        {/* Top row — Context */}
-        <div style={{
-          display: 'flex',
-          justifyContent: 'flex-end',
-          alignItems: 'center',
-          marginBottom: TOKENS.spacing[3],
-        }}>
-          <div style={{
-            fontFamily: MONO,
-            fontSize: TOKENS.fontSizes.micro,
-            color: TOKENS.colors.textGhost,
-            letterSpacing: TOKENS.letterSpacing.display,
-            textTransform: 'uppercase',
-          }}>
-            {statusLabel}
-          </div>
-        </div>
-
-        {/* Main cockpit gauges — Capital / Yield / Progress */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: fitValue(mode, {
-            normal: 'repeat(3, 1fr)',
-            tight: 'repeat(3, 1fr)',
-            limit: '1fr',
-          }),
-          gap: fitValue(mode, {
-            normal: TOKENS.spacing[6],
-            tight: TOKENS.spacing[4],
-            limit: TOKENS.spacing[3],
-          }),
-        }}>
-          <CockpitGauge
-            label="Capital Deployed"
-            value={fmtUsd(capitalDeployed)}
-            valueCompact={fmtUsdCompact(capitalDeployed)}
-            subtext={formatVaultName(vault.name)}
-            mode={mode}
-            primary
-            align="center"
-          />
-          <CockpitGauge
-            label="Accrued Yield"
-            value={`+${fmtUsd(accruedYield)}`}
-            valueCompact={`+${fmtUsdCompact(accruedYield)}`}
-            subtext={`${vault.apr}% APY`}
-            mode={mode}
-            accent
-            align="center"
-          />
-          <CockpitGauge
-            label="Target Progress"
-            value={`${progressToTarget}%`}
-            valueCompact={`${progressToTarget}%`}
-            subtext={isTargetReached ? 'Target reached' : `${fmtUsdCompact(remainingToTarget)} remaining`}
-            mode={mode}
-            align="center"
-          />
-        </div>
-      </div>
+      {/* HEADER — LIVE pill, name, APY */}
+      <PositionHeader
+        vault={vault}
+        description={vaultConfig?.description}
+        chainName={vaultConfig?.chain?.name}
+        accruedYield={accruedYield}
+        statusLabel={statusLabel}
+        isReadyForExit={isPositionReadyForExit}
+        onClaim={() => setActiveModal('claim')}
+        onManage={() => setActiveModal('manage')}
+        onExit={() => setActiveModal('exit')}
+        mode={mode}
+        shellPadding={shellPadding}
+      />
 
       {/* Main content */}
       <div
@@ -324,232 +260,99 @@ export function VaultDetailPanel({
           overflow: 'hidden',
         }}
       >
-        {/* Primary metrics strip */}
-        <CompressedMetricsStrip
-          mode={mode}
-          items={[
-            { id: 'p', label: 'Capital Deployed', value: fmtUsdCompact(capitalDeployed) },
-            { id: 'y', label: 'Accrued Yield', value: fmtUsdCompact(accruedYield), accent: true },
-            { id: 't', label: 'Target', value: vault.target },
-            { id: 'm', label: 'Maturity', value: vault.maturity },
-          ]}
-        />
-
-        {/* Secondary metrics */}
+        {/* KPI row */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: fitValue(mode, {
             normal: 'repeat(4, 1fr)',
             tight: 'repeat(2, 1fr)',
-            limit: '1fr',
+            limit: '1fr 1fr',
           }),
-          gap: TOKENS.spacing[2],
+          gap: TOKENS.spacing[6],
           flexShrink: 0,
         }}>
-          <StatCard
-            label="Target Yield"
-            value={fmtUsdCompact(totalTargetYield)}
-            subtext={`${vault.target} of deployed capital`}
-            mode={mode}
+          <KpiCell label="Deposited" value={fmtUsdCompact(capitalDeployed)} />
+          <KpiCell
+            label="Current value"
+            value={fmtUsdCompact(currentValue)}
+            subtext={
+              currentValue - capitalDeployed > 0
+                ? `+${fmtUsdCompact(currentValue - capitalDeployed)}`
+                : currentValue - capitalDeployed < 0
+                  ? `−${fmtUsdCompact(Math.abs(currentValue - capitalDeployed))}`
+                  : '—'
+            }
+            subtextAccent={currentValue - capitalDeployed > 0}
           />
-          <StatCard
-            label="Remaining to Target"
-            value={fmtUsdCompact(remainingToTarget)}
-            subtext={`${progressToTarget}% progress`}
-            mode={mode}
-            accent
+          <KpiCell
+            label="Yield paid"
+            value={fmtUsdCompact(accruedYield)}
+            valueAccent={accruedYield > 0}
           />
-          <StatCard
-            label="APY"
-            value={`${vault.apr}%`}
-            subtext="Annual yield"
-            mode={mode}
-          />
-          <StatCard
-            label={isMatured ? 'Status' : 'Unlock Timeline'}
-            value={isMatured ? 'Matured' : `${unlockDays} days`}
-            subtext={isMatured ? 'Position ready for exit' : 'Until capital unlock'}
-            mode={mode}
+          <KpiCell
+            label="Matures"
+            value={isMatured ? 'Matured' : formatMaturityDate(positionData?.unlockTimeline.maturityDate, unlockDays)}
+            subtext={vault.maturity}
           />
         </div>
-
-        {/* Position Card */}
-        {positionData && !isLoading && (
-          <PositionCard data={positionData} mode={mode} />
-        )}
 
         {/* Loading state */}
         {isLoading && <Skeleton mode={mode} />}
 
         {/* Error state */}
         {error && (
-          <div style={{
-            background: TOKENS.colors.bgSecondary,
-            borderRadius: TOKENS.radius.lg,
-            padding: TOKENS.spacing[4],
-            border: `1px solid color-mix(in srgb, ${TOKENS.colors.danger} 30%, transparent)`,
-          }}>
-            <span style={{
-              fontSize: TOKENS.fontSizes.sm,
-              color: TOKENS.colors.danger,
-            }}>{error.message}</span>
-          </div>
+          <span style={{
+            fontSize: TOKENS.fontSizes.sm,
+            color: TOKENS.colors.danger,
+          }}>{error.message}</span>
         )}
 
-        {/* Target progress */}
-        <div style={{
-          background: TOKENS.colors.bgSecondary,
-          borderRadius: TOKENS.radius.lg,
-          padding: fitValue(mode, {
-            normal: TOKENS.spacing[4],
-            tight: TOKENS.spacing[3],
-            limit: TOKENS.spacing[3],
-          }),
-          flexShrink: 0,
-        }}>
-          <div style={{
-            display: 'flex',
-            justifyContent: 'space-between',
-            marginBottom: TOKENS.spacing[2],
-            alignItems: 'baseline',
-          }}>
-            <Label id="tp-label" tone="scene" variant="text">
-              Target progress
-            </Label>
-            <span
-              style={{
-                fontFamily: TOKENS.fonts.mono,
-                fontSize: TOKENS.fontSizes.xs,
-                fontWeight: TOKENS.fontWeights.bold,
-                letterSpacing: TOKENS.letterSpacing.display,
-                color: TOKENS.colors.textSecondary,
-              }}
-              aria-label={`${progressToTarget} percent of ${vault.target} target`}
-            >
-              {progressToTarget}% of {vault.target}
-            </span>
-          </div>
-          <div
-            style={{
-              height: 12,
-              background: TOKENS.colors.black,
-              borderRadius: TOKENS.radius.sm,
-              overflow: 'hidden',
-              marginBottom: TOKENS.spacing[2],
-            }}
-          >
-            <div
-              style={{
-                height: '100%',
-                width: `${Math.min(100, progressToTarget)}%`,
-                background: isTargetReached ? TOKENS.colors.accent : TOKENS.colors.gray700,
-                borderRadius: TOKENS.radius.sm,
-                transition: 'width 1s ease',
-              }}
-            />
-          </div>
-          <div
-            style={{
-              fontFamily: TOKENS.fonts.mono,
-              fontSize: TOKENS.fontSizes.xs,
-              color: TOKENS.colors.textSecondary,
-              lineHeight: LINE_HEIGHT.body,
-            }}
-          >
-            Capital unlocks when {vault.target} cumulative target is reached or at maturity.
-            {remainingToTarget > 0 && (
-              <span> {fmtUsdCompact(remainingToTarget)} remaining to reach target.</span>
-            )}
-          </div>
-        </div>
-
-        {/* Month distribution */}
-        <div style={{
-          background: TOKENS.colors.bgSecondary,
-          borderRadius: TOKENS.radius.lg,
-          padding: fitValue(mode, {
-            normal: TOKENS.spacing[4],
-            tight: TOKENS.spacing[3],
-            limit: TOKENS.spacing[3],
-          }),
-          flexShrink: 0,
-        }}>
-          <Label id="mo-label" tone="scene" variant="text">
-            Month distribution
-          </Label>
-          <div style={{ marginTop: TOKENS.spacing[3] }}>
-            <MonthlyGauge deposited={capitalDeployed} apr={vault.apr} mode={mode} />
-          </div>
-        </div>
-
-        {/* Capital Protection Gauge */}
-        <CapitalProtectionGauge
-          deposited={capitalDeployed}
-          currentValue={currentValue}
+        {/* Cumulative target progress */}
+        <CumulativeTargetProgress
+          progress={progressToTarget}
+          targetLabel={vault.target}
+          isTargetReached={isTargetReached}
+          maturityLabel={vault.maturity}
           mode={mode}
         />
 
-        {/* Performance History Chart */}
-        <PerformanceHistoryChart
-          deposited={capitalDeployed}
-          claimable={accruedYield}
-          apr={vault.apr}
-          daysRemaining={unlockDays}
+        {/* Strategy details (collapsible) */}
+        <CollapsibleSection
+          title="Strategy details"
+          isOpen={openStrategy}
+          onToggle={() => setOpenStrategy((v) => !v)}
           mode={mode}
-        />
+        >
+          <StrategyDetailsBody
+            vault={vault}
+            risk={vaultConfig?.risk}
+          />
+        </CollapsibleSection>
 
-        {/* Narrative Blocks */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: isLimit ? '1fr' : '1fr 1fr',
-          gap: shellGap,
-          flexShrink: 0,
-        }}>
-          <NarrativeBlock
-            kicker="Capital Protection"
-            body="Safeguard active — not triggered. If principal falls below the initial deposit at maturity, the infrastructure layer can extend the recovery window."
-            mode={mode}
+        {/* Terms (collapsible) */}
+        <CollapsibleSection
+          title="Terms"
+          isOpen={openTerms}
+          onToggle={() => setOpenTerms((v) => !v)}
+          mode={mode}
+        >
+          <TermsBody
+            vault={vault}
+            vaultConfig={vaultConfig}
+            maturityDate={positionData?.unlockTimeline.maturityDate}
+            unlockDays={unlockDays}
           />
-          <NarrativeBlock
-            kicker="Strategy"
-            body={!isLimit ? vault.strategy : `${vault.apr}% APY · ${progressToTarget}% progress · ${vault.target} target`}
-            mode={mode}
-            isMono={isLimit}
-          />
-        </div>
+        </CollapsibleSection>
 
-        {/* Actions */}
-        <div style={{
-          display: 'grid',
-          gridTemplateColumns: fitValue(mode, {
-            normal: 'repeat(3, 1fr)',
-            tight: 'repeat(3, 1fr)',
-            limit: '1fr',
-          }),
-          gap: TOKENS.spacing[3],
-          flexShrink: 0,
-          paddingTop: TOKENS.spacing[2],
-        }}>
-          {accruedYield > 0 && (
-            <ActionButton
-              label="Claim Yield"
-              variant="primary"
-              onClick={() => setActiveModal('claim')}
-            />
-          )}
-          <ActionButton
-            label="Manage"
-            variant="secondary"
-            onClick={() => setActiveModal('manage')}
-          />
-          {isPositionReadyForExit && (
-            <ActionButton
-              label="Exit Position"
-              variant="accent"
-              onClick={() => setActiveModal('exit')}
-            />
-          )}
-        </div>
+        {/* Transactions (collapsible) */}
+        <CollapsibleSection
+          title="Transactions"
+          isOpen={openTransactions}
+          onToggle={() => setOpenTransactions((v) => !v)}
+          mode={mode}
+        >
+          <TransactionsBody />
+        </CollapsibleSection>
       </div>
 
       {/* Claim Modal */}
@@ -713,269 +516,509 @@ export function VaultDetailPanel({
   )
 }
 
-function CapitalProtectionGauge({
-  deposited,
-  currentValue,
-  mode,
-}: {
-  deposited: number
-  currentValue: number
-  mode: SmartFitMode
-}) {
-  const protectionLevel = deposited > 0 ? Math.min(100, (currentValue / deposited) * 100) : 0
-  const isProtected = currentValue >= deposited
 
+function formatMaturityDate(iso: string | undefined, fallbackDays: number): string {
+  if (iso) {
+    const date = new Date(iso)
+    if (!Number.isNaN(date.getTime())) {
+      return date.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+    }
+  }
+  if (fallbackDays > 0) {
+    const projected = new Date(Date.now() + fallbackDays * 86_400_000)
+    return projected.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' })
+  }
+  return '—'
+}
+
+function PositionHeader({
+  vault,
+  description,
+  chainName,
+  accruedYield,
+  statusLabel,
+  isReadyForExit,
+  onClaim,
+  onManage,
+  onExit,
+  mode,
+  shellPadding,
+}: {
+  vault: ActiveVault | MaturedVault
+  description?: string
+  chainName?: string
+  accruedYield: number
+  statusLabel: string
+  isReadyForExit: boolean
+  onClaim: () => void
+  onManage: () => void
+  onExit: () => void
+  mode: SmartFitMode
+  shellPadding: number
+}) {
+  const subtitle = description ?? vault.strategy
   return (
     <div style={{
-      background: TOKENS.colors.black,
-      borderRadius: TOKENS.radius.lg,
       padding: fitValue(mode, {
-        normal: TOKENS.spacing[4],
-        tight: TOKENS.spacing[3],
-        limit: TOKENS.spacing[3],
+        normal: `${shellPadding}px`,
+        tight: `${shellPadding * 0.75}px`,
+        limit: `${shellPadding * 0.5}px`,
       }),
-      border: `1px solid ${TOKENS.colors.borderSubtle}`,
+      borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
       flexShrink: 0,
+      background: TOKENS.colors.bgApp,
+      display: 'flex',
+      alignItems: 'flex-start',
+      justifyContent: 'space-between',
+      gap: TOKENS.spacing[6],
+      flexWrap: mode === 'limit' ? 'wrap' : 'nowrap',
     }}>
+      {/* Left: LIVE pill + name + subtitle */}
+      <div style={{ minWidth: 0, display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2] }}>
+        <div style={{
+          display: 'flex',
+          alignItems: 'center',
+          gap: TOKENS.spacing[3],
+          fontFamily: TOKENS.fonts.mono,
+          fontSize: TOKENS.fontSizes.micro,
+          fontWeight: TOKENS.fontWeights.bold,
+          letterSpacing: TOKENS.letterSpacing.display,
+          textTransform: 'uppercase',
+        }}>
+          <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: TOKENS.spacing[2],
+            color: TOKENS.colors.accent,
+          }}>
+            <span style={{
+              width: 6,
+              height: 6,
+              borderRadius: TOKENS.radius.full,
+              background: TOKENS.colors.accent,
+              boxShadow: `0 0 6px ${TOKENS.colors.accentGlow}`,
+            }} />
+            {isReadyForExit ? statusLabel : 'Live'}
+          </span>
+          {chainName && (
+            <span style={{ color: TOKENS.colors.textGhost }}>· {chainName}</span>
+          )}
+        </div>
+        <h2 style={{
+          margin: 0,
+          fontSize: fitValue(mode, {
+            normal: TOKENS.fontSizes.xxl,
+            tight: TOKENS.fontSizes.xl,
+            limit: TOKENS.fontSizes.lg,
+          }),
+          fontWeight: TOKENS.fontWeights.black,
+          letterSpacing: TOKENS.letterSpacing.tight,
+          color: TOKENS.colors.textPrimary,
+          lineHeight: LINE_HEIGHT.tight,
+        }}>
+          {formatVaultName(vault.name)}
+        </h2>
+        {subtitle && (
+          <div style={{
+            fontSize: TOKENS.fontSizes.sm,
+            color: TOKENS.colors.textSecondary,
+            lineHeight: LINE_HEIGHT.body,
+          }}>
+            {subtitle}
+          </div>
+        )}
+      </div>
+
+      {/* Right: APY + actions */}
+      <div style={{
+        display: 'flex',
+        flexDirection: 'column',
+        alignItems: 'flex-end',
+        gap: TOKENS.spacing[3],
+        flexShrink: 0,
+      }}>
+        <div style={{ textAlign: 'right' }}>
+          <div style={{
+            display: 'flex',
+            alignItems: 'baseline',
+            gap: TOKENS.spacing[2],
+            justifyContent: 'flex-end',
+          }}>
+            <span style={{
+              fontSize: fitValue(mode, {
+                normal: TOKENS.fontSizes.xxl,
+                tight: TOKENS.fontSizes.xl,
+                limit: TOKENS.fontSizes.lg,
+              }),
+              fontWeight: TOKENS.fontWeights.black,
+              letterSpacing: VALUE_LETTER_SPACING,
+              color: TOKENS.colors.textPrimary,
+              fontVariantNumeric: 'tabular-nums',
+              lineHeight: LINE_HEIGHT.tight,
+            }}>
+              {vault.apr}%
+            </span>
+            <span style={{
+              fontFamily: TOKENS.fonts.mono,
+              fontSize: TOKENS.fontSizes.xs,
+              fontWeight: TOKENS.fontWeights.bold,
+              letterSpacing: TOKENS.letterSpacing.display,
+              textTransform: 'uppercase',
+              color: TOKENS.colors.textSecondary,
+            }}>
+              APY
+            </span>
+          </div>
+        </div>
+        <div style={{ display: 'flex', gap: TOKENS.spacing[2], flexWrap: 'wrap', justifyContent: 'flex-end' }}>
+          {accruedYield > 0 && (
+            <HeaderActionPill label="Claim" onClick={onClaim} accent />
+          )}
+          {isReadyForExit ? (
+            <HeaderActionPill label="Exit" onClick={onExit} />
+          ) : (
+            <HeaderActionPill label="Manage" onClick={onManage} />
+          )}
+        </div>
+      </div>
+    </div>
+  )
+}
+
+function HeaderActionPill({ label, onClick, accent = false }: { label: string; onClick: () => void; accent?: boolean }) {
+  return (
+    <button
+      type="button"
+      onClick={onClick}
+      style={{
+        padding: 0,
+        background: 'transparent',
+        color: accent ? TOKENS.colors.accent : TOKENS.colors.textSecondary,
+        border: 'none',
+        fontFamily: TOKENS.fonts.sans,
+        fontSize: TOKENS.fontSizes.xs,
+        fontWeight: TOKENS.fontWeights.black,
+        letterSpacing: TOKENS.letterSpacing.display,
+        textTransform: 'uppercase',
+        cursor: 'pointer',
+        transition: 'color 120ms ease',
+      }}
+      onMouseEnter={(e) => {
+        e.currentTarget.style.color = accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary
+      }}
+      onMouseLeave={(e) => {
+        e.currentTarget.style.color = accent ? TOKENS.colors.accent : TOKENS.colors.textSecondary
+      }}
+    >
+      {label} →
+    </button>
+  )
+}
+
+function KpiCell({
+  label,
+  value,
+  subtext,
+  valueAccent = false,
+  subtextAccent = false,
+}: {
+  label: string
+  value: string
+  subtext?: string
+  valueAccent?: boolean
+  subtextAccent?: boolean
+}) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2], minWidth: 0 }}>
+      <div style={{
+        fontSize: TOKENS.fontSizes.micro,
+        fontWeight: TOKENS.fontWeights.bold,
+        fontFamily: TOKENS.fonts.mono,
+        letterSpacing: TOKENS.letterSpacing.display,
+        textTransform: 'uppercase',
+        color: TOKENS.colors.textSecondary,
+      }}>
+        {label}
+      </div>
+      <div style={{
+        fontSize: TOKENS.fontSizes.xl,
+        fontWeight: TOKENS.fontWeights.black,
+        letterSpacing: VALUE_LETTER_SPACING,
+        color: valueAccent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
+        fontVariantNumeric: 'tabular-nums',
+        lineHeight: LINE_HEIGHT.tight,
+      }}>
+        {value}
+      </div>
+      {subtext && (
+        <div style={{
+          fontSize: TOKENS.fontSizes.xs,
+          color: subtextAccent ? TOKENS.colors.accent : TOKENS.colors.textGhost,
+          fontVariantNumeric: 'tabular-nums',
+          fontFamily: TOKENS.fonts.mono,
+        }}>
+          {subtext}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function CumulativeTargetProgress({
+  progress,
+  targetLabel,
+  isTargetReached,
+  maturityLabel,
+  mode: _mode,
+}: {
+  progress: number
+  targetLabel: string
+  isTargetReached: boolean
+  maturityLabel: string
+  mode: SmartFitMode
+}) {
+  const targetPct = parseFloat(targetLabel) || 36
+  const fillPct = Math.min(100, (progress / targetPct) * 100)
+
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[3], flexShrink: 0 }}>
       <div style={{
         display: 'flex',
         justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: TOKENS.spacing[3],
+        alignItems: 'baseline',
       }}>
-        <Label id="capital-protection" tone="scene" variant="text">
-          Capital Protection
-        </Label>
+        <span style={{
+          fontSize: TOKENS.fontSizes.sm,
+          fontWeight: TOKENS.fontWeights.black,
+          color: TOKENS.colors.textPrimary,
+          letterSpacing: TOKENS.letterSpacing.normal,
+        }}>
+          Cumulative target progress
+        </span>
         <span style={{
           fontFamily: TOKENS.fonts.mono,
           fontSize: TOKENS.fontSizes.xs,
           fontWeight: TOKENS.fontWeights.bold,
           letterSpacing: TOKENS.letterSpacing.display,
-          color: isProtected ? TOKENS.colors.accent : TOKENS.colors.white,
-          textTransform: 'uppercase',
+          color: TOKENS.colors.textSecondary,
+          fontVariantNumeric: 'tabular-nums',
         }}>
-          {isProtected ? 'Protected' : 'At Risk'}
+          {progress}% of {targetLabel}
         </span>
       </div>
 
       <div style={{
-        display: 'flex',
-        height: '32px',
-        borderRadius: TOKENS.radius.sm,
+        height: 6,
+        background: TOKENS.colors.bgTertiary,
+        borderRadius: TOKENS.radius.full,
         overflow: 'hidden',
-        background: TOKENS.colors.bgSecondary,
-        position: 'relative',
       }}>
         <div style={{
-          width: '100%',
           height: '100%',
-          background: isProtected
-            ? `linear-gradient(90deg, ${TOKENS.colors.accentGlow} 0%, ${TOKENS.colors.accentDim} 100%)`
-            : `linear-gradient(90deg, ${TOKENS.colors.surfaceActive} 0%, ${TOKENS.colors.surfaceHover} 100%)`,
-          position: 'relative',
-        }}>
-          <div style={{
-            position: 'absolute',
-            left: `${Math.min(100, protectionLevel)}%`,
-            top: 0,
-            bottom: 0,
-            width: '2px',
-            background: isProtected ? TOKENS.colors.accent : TOKENS.colors.white,
-            transform: 'translateX(-50%)',
-          }} />
-        </div>
+          width: `${fillPct}%`,
+          background: TOKENS.colors.accent,
+          borderRadius: TOKENS.radius.full,
+          boxShadow: `0 0 12px ${TOKENS.colors.accentGlow}`,
+          transition: 'width 1s ease',
+        }} />
       </div>
 
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginTop: TOKENS.spacing[2],
-        fontFamily: TOKENS.fonts.mono,
-        fontSize: TOKENS.fontSizes.micro,
-        color: TOKENS.colors.textGhost,
-      }}>
-        <span>Principal: {fmtUsdCompact(deposited)}</span>
-        <span style={{ color: isProtected ? TOKENS.colors.accent : TOKENS.colors.white }}>
-          Current: {fmtUsdCompact(currentValue)} ({protectionLevel.toFixed(1)}%)
-        </span>
-      </div>
-    </div>
-  )
-}
-
-function PerformanceHistoryChart({
-  deposited,
-  claimable,
-  apr,
-  daysRemaining,
-  mode,
-}: {
-  deposited: number
-  claimable: number
-  apr: number
-  daysRemaining: number
-  mode: SmartFitMode
-}) {
-  const months = 6
-  const monthlyYield = (deposited * (apr / 100)) / 12
-  const data = Array.from({ length: months }, (_, i) => {
-    const month = i + 1
-    const projectedYield = Math.min(claimable + (monthlyYield * month), deposited * 0.5)
-    return {
-      month,
-      value: deposited + projectedYield,
-      yield: projectedYield,
-    }
-  })
-
-  const maxValue = Math.max(...data.map(d => d.value))
-  const minValue = deposited * 0.98
-
-  return (
-    <div style={{
-      background: TOKENS.colors.black,
-      borderRadius: TOKENS.radius.lg,
-      padding: fitValue(mode, {
-        normal: TOKENS.spacing[4],
-        tight: TOKENS.spacing[3],
-        limit: TOKENS.spacing[3],
-      }),
-      border: `1px solid ${TOKENS.colors.borderSubtle}`,
-      flexShrink: 0,
-    }}>
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        alignItems: 'center',
-        marginBottom: TOKENS.spacing[3],
-      }}>
-        <Label id="performance-chart" tone="scene" variant="text">
-          Value Projection
-        </Label>
-        <span style={{
-          fontFamily: TOKENS.fonts.mono,
-          fontSize: TOKENS.fontSizes.micro,
-          color: TOKENS.colors.textGhost,
-          letterSpacing: TOKENS.letterSpacing.display,
-          textTransform: 'uppercase',
-        }}>
-          {daysRemaining}d remaining
-        </span>
-      </div>
-
-      <div style={{
-        height: '120px',
-        display: 'flex',
-        alignItems: 'flex-end',
-        justifyContent: 'space-between',
-        gap: TOKENS.spacing[2],
-        paddingBottom: TOKENS.spacing[4],
-        borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
-      }}>
-        {data.map((point, index) => {
-          const height = ((point.value - minValue) / (maxValue - minValue)) * 100
-          const isCurrent = index === 0
-
-          return (
-            <div key={point.month} style={{
-              display: 'flex',
-              flexDirection: 'column',
-              alignItems: 'center',
-              gap: TOKENS.spacing[2],
-              flex: 1,
-            }}>
-              <div style={{
-                width: '100%',
-                height: `${Math.max(10, height)}%`,
-                background: isCurrent
-                  ? TOKENS.colors.accent
-                  : TOKENS.colors.textGhost,
-                borderRadius: `${TOKENS.radius.sm} ${TOKENS.radius.sm} 0 0`,
-                minHeight: '4px',
-              }} />
-              <div style={{
-                fontFamily: TOKENS.fonts.mono,
-                fontSize: TOKENS.fontSizes.micro,
-                color: TOKENS.colors.textGhost,
-              }}>
-                M{point.month}
-              </div>
-            </div>
-          )
-        })}
-      </div>
-
-      <div style={{
-        display: 'flex',
-        justifyContent: 'space-between',
-        marginTop: TOKENS.spacing[3],
-        fontSize: TOKENS.fontSizes.xs,
-      }}>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: TOKENS.spacing[2],
-        }}>
-          <div style={{
-            width: '8px',
-            height: '8px',
-            background: TOKENS.colors.accent,
-            borderRadius: TOKENS.radius.sm,
-          }} />
-          <span style={{ color: TOKENS.colors.textSecondary }}>
-            Current: {fmtUsdCompact(deposited + claimable)}
-          </span>
-        </div>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: TOKENS.spacing[2],
-        }}>
-          <div style={{
-            width: '8px',
-            height: '8px',
-            background: TOKENS.colors.gray500,
-            borderRadius: TOKENS.radius.sm,
-          }} />
-          <span style={{ color: TOKENS.colors.textSecondary }}>
-            Projected (6M): {fmtUsdCompact(data[data.length - 1].value)}
-          </span>
-        </div>
-      </div>
-    </div>
-  )
-}
-
-function NarrativeBlock({ kicker, body, mode, isMono = false }: {
-  kicker: string
-  body: string
-  mode: SmartFitMode
-  isMono?: boolean
-}) {
-  return (
-    <div style={{
-      minWidth: 0,
-      background: TOKENS.colors.bgSecondary,
-      borderRadius: TOKENS.radius.lg,
-      padding: fitValue(mode, {
-        normal: TOKENS.spacing[4],
-        tight: TOKENS.spacing[3],
-        limit: TOKENS.spacing[3],
-      }),
-      flexShrink: 0,
-    }}>
-      <Label id={`narrative-${kicker.toLowerCase().replace(/\s+/g, '-')}`} tone="scene">
-        {kicker}
-      </Label>
       <p style={{
-        margin: `${TOKENS.spacing[2]} 0 0 0`,
-        fontSize: isMono ? TOKENS.fontSizes.xs : TOKENS.fontSizes.sm,
-        lineHeight: LINE_HEIGHT.body,
+        margin: 0,
+        fontSize: TOKENS.fontSizes.xs,
         color: TOKENS.colors.textSecondary,
-        fontFamily: isMono ? TOKENS.fonts.mono : TOKENS.fonts.sans,
+        lineHeight: LINE_HEIGHT.body,
       }}>
-        {body}
+        Capital unlocks when the {targetLabel} cumulative target is reached or at {maturityLabel},
+        whichever comes first.
+        {isTargetReached && (
+          <span style={{ color: TOKENS.colors.accent }}> Target reached.</span>
+        )}
       </p>
+    </div>
+  )
+}
+
+
+function CollapsibleSection({
+  title,
+  isOpen,
+  onToggle,
+  mode,
+  children,
+}: {
+  title: string
+  isOpen: boolean
+  onToggle: () => void
+  mode: SmartFitMode
+  children: React.ReactNode
+}) {
+  const verticalPadding = fitValue(mode, {
+    normal: TOKENS.spacing[3],
+    tight: TOKENS.spacing[3],
+    limit: TOKENS.spacing[2],
+  })
+  return (
+    <div style={{
+      flexShrink: 0,
+      borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+    }}>
+      <button
+        type="button"
+        onClick={onToggle}
+        aria-expanded={isOpen}
+        style={{
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          width: '100%',
+          padding: `${verticalPadding} 0`,
+          background: 'transparent',
+          border: 'none',
+          cursor: 'pointer',
+          color: TOKENS.colors.textPrimary,
+          fontSize: TOKENS.fontSizes.sm,
+          fontWeight: TOKENS.fontWeights.black,
+          textAlign: 'left',
+          letterSpacing: TOKENS.letterSpacing.normal,
+        }}
+      >
+        <span>{title}</span>
+        <ChevronGlyph open={isOpen} />
+      </button>
+      {isOpen && (
+        <div style={{ paddingBottom: verticalPadding }}>
+          {children}
+        </div>
+      )}
+    </div>
+  )
+}
+
+function ChevronGlyph({ open }: { open: boolean }) {
+  return (
+    <svg
+      width="14"
+      height="14"
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke={TOKENS.colors.textSecondary}
+      strokeWidth="2"
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      aria-hidden
+      style={{
+        transition: 'transform 200ms ease',
+        transform: open ? 'rotate(180deg)' : 'rotate(0deg)',
+        flexShrink: 0,
+      }}
+    >
+      <polyline points="6 9 12 15 18 9" />
+    </svg>
+  )
+}
+
+
+function StrategyDetailsBody({
+  vault,
+  risk,
+}: {
+  vault: ActiveVault | MaturedVault
+  risk?: string
+}) {
+  const resolvedRisk = risk ?? (vault.type === 'active' ? vault.risk : undefined)
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[3] }}>
+      <p style={{
+        margin: 0,
+        fontSize: TOKENS.fontSizes.sm,
+        color: TOKENS.colors.textSecondary,
+        lineHeight: LINE_HEIGHT.body,
+      }}>
+        {vault.strategy}
+      </p>
+      {resolvedRisk && <MetaRow label="Risk" value={resolvedRisk} />}
+    </div>
+  )
+}
+
+function TermsBody({
+  vault,
+  vaultConfig,
+  maturityDate,
+  unlockDays,
+}: {
+  vault: ActiveVault | MaturedVault
+  vaultConfig: VaultConfig | null
+  maturityDate: string | undefined
+  unlockDays: number
+}) {
+  const lockPeriod = vaultConfig?.lockPeriodDays
+    ? `${vaultConfig.lockPeriodDays} days`
+    : vault.maturity
+  const formattedMaturity = formatMaturityDate(maturityDate, unlockDays)
+  const minDeposit = vaultConfig?.minDeposit != null ? fmtUsdCompact(vaultConfig.minDeposit) : undefined
+  const truncatedVault = vaultConfig?.vaultAddress
+    ? `${vaultConfig.vaultAddress.slice(0, 6)}…${vaultConfig.vaultAddress.slice(-4)}`
+    : undefined
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+      columnGap: TOKENS.spacing[6],
+      rowGap: TOKENS.spacing[3],
+    }}>
+      <MetaRow label="Lock period" value={lockPeriod} />
+      <MetaRow label="Maturity" value={formattedMaturity} />
+      <MetaRow label="Target unlock" value={vault.target} />
+      {minDeposit && <MetaRow label="Min deposit" value={minDeposit} />}
+      {vaultConfig?.fees && <MetaRow label="Fees" value={vaultConfig.fees} />}
+      {vaultConfig?.chain?.name && <MetaRow label="Chain" value={vaultConfig.chain.name} />}
+      {truncatedVault && <MetaRow label="Vault" value={truncatedVault} mono />}
+    </div>
+  )
+}
+
+function MetaRow({ label, value, mono = false }: { label: string; value: string; mono?: boolean }) {
+  return (
+    <div style={{
+      display: 'flex',
+      alignItems: 'baseline',
+      justifyContent: 'space-between',
+      gap: TOKENS.spacing[3],
+      fontSize: TOKENS.fontSizes.xs,
+    }}>
+      <span style={{
+        fontFamily: TOKENS.fonts.mono,
+        color: TOKENS.colors.textGhost,
+        letterSpacing: TOKENS.letterSpacing.display,
+        textTransform: 'uppercase',
+      }}>
+        {label}
+      </span>
+      <span style={{
+        fontFamily: mono ? TOKENS.fonts.mono : TOKENS.fonts.sans,
+        color: TOKENS.colors.textPrimary,
+        textAlign: 'right',
+      }}>
+        {value}
+      </span>
+    </div>
+  )
+}
+
+function TransactionsBody() {
+  return (
+    <div style={{
+      padding: `${TOKENS.spacing[3]} 0`,
+      fontSize: TOKENS.fontSizes.xs,
+      color: TOKENS.colors.textGhost,
+      fontFamily: TOKENS.fonts.mono,
+      letterSpacing: TOKENS.letterSpacing.display,
+      textTransform: 'uppercase',
+    }}>
+      No transactions yet
     </div>
   )
 }

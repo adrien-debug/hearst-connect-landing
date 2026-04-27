@@ -277,12 +277,14 @@
    ============================================ */
 
 .connect-scope {
-  --hc-bg-app: #050505;
-  --hc-bg-page: #141414;
+  /* Body / canvas — dark grey (noir-gris). */
+  --hc-bg-app: #141416;
+  --hc-bg-page: #141416;
+  /* Boxes / cards — deep black, contrasts against the grey body. */
+  --hc-bg-surface: #050505;
   --hc-bg-sidebar: #050505;
-  --hc-bg-surface: #0a0a0a;
-  --hc-bg-secondary: #0f0f0f;
-  --hc-bg-tertiary: #1a1a1a;
+  --hc-bg-secondary: #0a0a0a;
+  --hc-bg-tertiary: #1f1f22;
 
   --hc-text-primary: rgba(255, 255, 255, 0.92);
   --hc-text-secondary: rgba(255, 255, 255, 0.55);
