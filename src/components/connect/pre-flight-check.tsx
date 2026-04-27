@@ -281,9 +281,9 @@ function CheckItem({
           disabled={action.disabled}
           style={{
             padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}`,
-            background: TOKENS.colors.accent,
-            color: TOKENS.colors.black,
-            border: 'none',
+            background: TOKENS.colors.accentSubtle,
+            color: TOKENS.colors.accent,
+            border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`,
             borderRadius: TOKENS.radius.md,
             fontFamily: MONO,
             fontSize: TOKENS.fontSizes.xs,

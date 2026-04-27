@@ -165,6 +165,11 @@
   --dashboard-chart-series-2: var(--dashboard-info);
   --dashboard-chart-series-3: var(--dashboard-warning);
   --dashboard-chart-area-fill: var(--dashboard-accent-soft);
+  /* Donut / palette chart spectrum: accent → mid green → grey scale */
+  --dashboard-chart-palette-mid: #52c97a;
+  --dashboard-chart-palette-grey-1: #d4d4d8;
+  --dashboard-chart-palette-grey-2: #71717a;
+  --dashboard-chart-palette-grey-3: #3f3f46;
   /* --font-sans intentionally NOT redeclared: owned by next/font/local in layout.tsx */
   --ds-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ds-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);

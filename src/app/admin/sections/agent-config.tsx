@@ -59,7 +59,6 @@ function parseCooldowns(raw: string): Record<string, number> {
 
 export function AgentConfigSection() {
   const [config, setConfig] = useState<Record<string, string>>({})
-  const [defaults, setDefaults] = useState<Record<string, string>>({})
   const [draft, setDraft] = useState<Record<string, string>>({})
   const [loading, setLoading] = useState(true)
   const [saving, setSaving] = useState(false)
@@ -72,7 +71,6 @@ export function AgentConfigSection() {
       setLoading(true)
       const res = await AgentsApi.getConfig()
       setConfig(res.config)
-      setDefaults(res.defaults)
       setDraft(res.config)
     } catch (e) {
       setError(`Erreur de chargement: ${e}`)

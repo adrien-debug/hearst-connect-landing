@@ -6,7 +6,8 @@
     "dev": "lsof -ti:8100 | xargs kill -9 2>/dev/null; sleep 1; next dev --port 8100 --webpack",
     "build": "next build --webpack",
     "start": "next start --port 8100",
-    "lint": "tsc -p . --noEmit",
+    "lint": "tsc -p . --noEmit && node scripts/check-design-system.mjs",
+    "lint:design": "node scripts/check-design-system.mjs",
     "test": "vitest run"
   },
   "dependencies": {

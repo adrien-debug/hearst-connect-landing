@@ -137,7 +137,7 @@ export function SubscriptionComposer({
       }}>
 
         {/* ── LEFT ──────────────────────────────────────────────────────── */}
-        <div style={{ display: 'flex', flexDirection: 'column', gap, minHeight: 0, overflow: 'hidden' }}>
+        <div className="hide-scrollbar" style={{ display: 'flex', flexDirection: 'column', gap, minHeight: 0, overflow: 'auto' }}>
 
           {/* COCKPIT HEADER — grid bg + risk badge */}
           <div style={{
@@ -307,7 +307,7 @@ export function SubscriptionComposer({
           )}
 
           {/* STRATEGY / TERMS TABS — flex 1 */}
-          <VaultTabs vault={vault} vaultConfig={vaultConfig} mode={mode} lockPeriodDays={lockPeriodDays} />
+          <VaultTabs vault={vault} vaultConfig={vaultConfig} />
         </div>
 
         {/* ── RIGHT COLUMN ──────────────────────────────────────────────── */}
@@ -875,7 +875,6 @@ function YieldHistoryChart({
         {!hoverPt && (
           <circle cx={last.x} cy={last.y} r={5}
             fill={TOKENS.colors.accent} stroke={TOKENS.colors.black} strokeWidth={2.5}
-            style={{ filter: `drop-shadow(0 0 8px ${TOKENS.colors.accent})` }}
           />
         )}
 
@@ -930,8 +929,7 @@ function CompositionDonut({
               strokeLinecap="round"
               style={{
                 cursor: 'pointer',
-                transition: 'all var(--transition-fast)',
-                filter: hovIdx === i ? `drop-shadow(0 0 8px ${seg.color})` : 'none',
+                transition: TOKENS.transitions.fast,
               }}
               onMouseEnter={() => setHovIdx(i)}
               onMouseLeave={() => setHovIdx(null)}
@@ -1115,21 +1113,20 @@ function GeoDistribution({ geo }: { geo: Array<{ region: string; pct: number }> 
 
 /* ─── VAULT TABS ─────────────────────────────────────────────────────────── */
 function VaultTabs({
-  vault, vaultConfig, mode, lockPeriodDays,
+  vault, vaultConfig,
 }: {
   vault: AvailableVault
   vaultConfig: VaultConfig | null
-  mode: SmartFitMode
-  lockPeriodDays: number
 }) {
   const [activeTab, setActiveTab] = useState<VaultTab>('strategy')
 
   return (
     <div style={{
-      flex: 1, display: 'flex', flexDirection: 'column', minHeight: 0, overflow: 'hidden',
+      display: 'flex', flexDirection: 'column',
       background: TOKENS.colors.black,
       border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
       borderRadius: TOKENS.radius.lg,
+      flexShrink: 0,
     }}>
       <div role="tablist" aria-label="Vault details" style={{
         display: 'flex', gap: TOKENS.spacing[5],
@@ -1174,13 +1171,11 @@ function VaultTabs({
         id={`sc-tab-panel-${activeTab}`}
         aria-labelledby={`sc-tab-${activeTab}`}
         style={{
-          padding: `${TOKENS.spacing[5]} ${TOKENS.spacing[5]} ${TOKENS.spacing[5]}`,
-          overflow: 'auto', flex: 1, minHeight: 0,
+          padding: TOKENS.spacing[5],
         }}
-        className="hide-scrollbar"
       >
         {activeTab === 'strategy' && <StrategyTabBody vault={vault} vaultConfig={vaultConfig} />}
-        {activeTab === 'terms' && <TermsTabBody vault={vault} vaultConfig={vaultConfig} lockPeriodDays={lockPeriodDays} />}
+        {activeTab === 'terms' && <TermsTabBody vault={vault} vaultConfig={vaultConfig} />}
       </div>
     </div>
   )
@@ -1258,8 +1253,8 @@ function StrategyTabBody({ vault, vaultConfig }: { vault: AvailableVault; vaultC
   )
 }
 
-function TermsTabBody({ vault, vaultConfig, lockPeriodDays }: {
-  vault: AvailableVault; vaultConfig: VaultConfig | null; lockPeriodDays: number
+function TermsTabBody({ vault, vaultConfig }: {
+  vault: AvailableVault; vaultConfig: VaultConfig | null
 }) {
   const lockPeriod = vaultConfig?.lockPeriodDays ? `${vaultConfig.lockPeriodDays} days` : vault.lockPeriod
   const truncatedVault = vaultConfig?.vaultAddress

@@ -51,7 +51,7 @@ function buildSiweMessage(params: {
 }
 
 export function useSiweAuth() {
-  const { address, isConnected, chainId, connector } = useAccount()
+  const { address, chainId, connector } = useAccount()
   const { signMessageAsync } = useSignMessage()
 
   const [state, setState] = useState<SiweAuthState>({

@@ -13,9 +13,9 @@ interface ActionButtonProps {
 
 const variantStyles: Record<ActionButtonVariant, React.CSSProperties> = {
   accent: {
-    background: TOKENS.colors.accent,
-    color: TOKENS.colors.black,
-    border: 'none',
+    background: TOKENS.colors.accentSubtle,
+    color: TOKENS.colors.accent,
+    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`,
   },
   primary: {
     background: TOKENS.colors.accentSubtle,
@@ -28,7 +28,7 @@ const variantStyles: Record<ActionButtonVariant, React.CSSProperties> = {
     border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
   },
   danger: {
-    background: 'rgba(var(--color-error-rgb, 239,68,68), 0.08)',
+    background: TOKENS.colors.dangerDim,
     color: TOKENS.colors.danger,
     border: `${TOKENS.borders.thin} solid ${TOKENS.colors.danger}`,
   },

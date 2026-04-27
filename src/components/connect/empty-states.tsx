@@ -73,12 +73,12 @@ export function WalletNotConnected({ onConnect }: { onConnect?: () => void }) {
           onClick={onConnect}
           style={{
             padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[4]}`,
-            background: TOKENS.colors.accent,
-            color: TOKENS.colors.black,
-            border: 'none',
+            background: TOKENS.colors.accentSubtle,
+            color: TOKENS.colors.accent,
+            border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`,
             borderRadius: TOKENS.radius.md,
             fontSize: TOKENS.fontSizes.sm,
-            fontWeight: 600,
+            fontWeight: TOKENS.fontWeights.semibold,
             cursor: 'pointer',
           }}
         >

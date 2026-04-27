@@ -62,7 +62,6 @@ export function DockRadial({ onSelect }: DockRadialProps) {
           alignItems: 'center',
           justifyContent: 'center',
           transition: `opacity ${TOKENS.transitions.durBase}, transform ${TOKENS.transitions.durBase}`,
-          boxShadow: `0 0 22px ${TOKENS.colors.accentGlow}, 0 4px 20px ${TOKENS.colors.black}`,
         }}
         title="Tableau de bord"
       >

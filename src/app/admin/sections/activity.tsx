@@ -73,7 +73,6 @@ export function ActivitySection() {
   const totalEvents = allActivity.length
   const systemCount = systemActivity.length
   const liveCount = liveActivity.length
-  const last24h = allActivity.filter((a) => isRecent(a.time, 24)).length
 
   return (
     <div className="activity-container">
@@ -200,10 +199,4 @@ function getIcon(type: string) {
         </svg>
       )
   }
-}
-
-function isRecent(time: string, hours: number): boolean {
-  const eventTime = new Date(time).getTime()
-  const cutoff = Date.now() - hours * 3600000
-  return eventTime > cutoff
 }

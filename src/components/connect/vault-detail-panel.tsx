@@ -157,17 +157,6 @@ export function VaultDetailPanel({
   const unlockDays = Math.max(0, daysRemaining)
   const isTargetReached = positionData?.isTargetReached ?? false
 
-  // Realized APR — annualizes the yield earned over the elapsed lock days, so
-  // a 30-day-old position with $100 yield on $10k shows the implied APR rather
-  // than a misleadingly small instant ratio. Falls back to the vault target
-  // when we don't have lock-day data yet.
-  const totalLockDays = Math.max(1, vaultConfig?.lockPeriodDays ?? 365)
-  const elapsedLockDays = Math.max(1, totalLockDays - unlockDays)
-  const realizedApr = capitalDeployed > 0
-    ? (accruedYield / capitalDeployed) * (365 / elapsedLockDays) * 100
-    : 0
-  const targetApr = vaultConfig?.apr ?? vault.apr ?? 0
-  const aprDelta = realizedApr - targetApr
   const isPositionReadyForExit = positionData?.canWithdraw ?? false
   const statusLabel = isPositionReadyForExit ? 'Ready for exit' : 'Active'
 
@@ -1443,7 +1432,7 @@ function VaultActivityTimeline({
       {activity.map((event, i) => {
         const isWithdraw = event.type === 'withdraw'
         const accent = isWithdraw ? TOKENS.colors.danger : TOKENS.colors.accent
-        const accentBg = isWithdraw ? 'rgba(var(--color-error-rgb, 239,68,68), 0.12)' : 'rgba(var(--brand-accent-rgb), 0.12)'
+        const accentBg = isWithdraw ? TOKENS.colors.dangerSubtle : TOKENS.colors.accentSubtle
         const label = event.type === 'claim' ? 'Yield claimed'
           : event.type === 'withdraw' ? 'Position withdrawn'
           : 'Capital deposited'

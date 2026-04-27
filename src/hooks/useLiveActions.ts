@@ -16,7 +16,7 @@ interface LiveActionResult {
 }
 
 export function useLiveActions(vaultId: string) {
-  const { address, isConnected } = useAccount()
+  const { isConnected } = useAccount()
   const { isAuthenticated } = useBackendUser()
   const { actions: userActions, positions: livePositions } = useUserData()
 

@@ -15,7 +15,7 @@ import { SIMULATION_VIEW_ID, AVAILABLE_VAULTS_VIEW_ID } from './view-ids'
 import { DockRadial } from './dock-radial'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
-import { useDemoMode, setDemoMode } from '@/lib/demo/use-demo-mode'
+import { useDemoMode } from '@/lib/demo/use-demo-mode'
 import { DEMO_WALLET_ADDRESS } from '@/lib/demo/demo-data'
 
 
@@ -285,9 +285,9 @@ function WalletButton() {
           alignItems: 'center',
           gap: TOKENS.spacing[2],
           padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[4]}`,
-          background: TOKENS.colors.accent,
-          color: TOKENS.colors.black,
-          border: TOKENS.borders.none,
+          background: TOKENS.colors.accentSubtle,
+          color: TOKENS.colors.accent,
+          border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`,
           borderRadius: TOKENS.radius.md,
           fontFamily: MONO,
           fontSize: TOKENS.fontSizes.xs,
@@ -296,7 +296,7 @@ function WalletButton() {
           textTransform: 'uppercase',
           cursor: !mounted ? 'default' : isConnecting ? 'wait' : 'pointer',
           opacity: !mounted || isConnecting ? 0.7 : 1,
-          transition: 'all var(--transition-fast)',
+          transition: TOKENS.transitions.fast,
         }}
         onMouseEnter={(e) => {
           if (mounted && !isConnecting) e.currentTarget.style.opacity = '0.9'

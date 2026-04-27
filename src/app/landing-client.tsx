@@ -7,7 +7,7 @@ import '@/styles/marketing/intro.css';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
-import { NAV_LINKS, CTA_LINKS, HUB_MAILTO_SALES, HEARST_EMAIL } from '@/config/navigation';
+import { NAV_LINKS, CTA_LINKS, HEARST_EMAIL } from '@/config/navigation';
 
 function MenuIcon() {
   return (
@@ -175,7 +175,7 @@ function useAutoCarousel(itemCount: number, intervalMs = 5000) {
 }
 
 export default function HubPageClient() {
-  const { activeIndex, setActiveIndex, isPaused, setIsPaused, scrollNext, scrollPrev } = useAutoCarousel(VAULT_PRODUCT_SLIDES.length);
+  const { activeIndex, setActiveIndex, setIsPaused, scrollNext, scrollPrev } = useAutoCarousel(VAULT_PRODUCT_SLIDES.length);
 
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
 

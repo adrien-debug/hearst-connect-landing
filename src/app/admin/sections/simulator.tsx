@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useRef } from 'react'
 import { Chart as ChartJS, ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement } from 'chart.js'
 import { Doughnut, Bar } from 'react-chartjs-2'
-import { ADMIN_TOKENS as T, MONO } from '../constants'
+import { ADMIN_TOKENS as T } from '../constants'
 
 ChartJS.register(ArcElement, Tooltip, Legend, CategoryScale, LinearScale, BarElement)
 
@@ -66,11 +66,6 @@ const CHART_DANGER_BG = `rgba(${readVar('--color-error-rgb', '239, 68, 68')}, 0.
 const CHART_FONT_SIZE_SMALL = 9
 const CHART_FONT_SIZE_MEDIUM = 10
 const CHART_BORDER_RADIUS = 4
-
-// Layout dimensions
-const SIDEBAR_WIDTH = 340
-const CHART_HEIGHT = 220
-const KPI_MIN_WIDTH = 150
 
 // ── Simulation engine ──────────────────────────────────────────────────
 

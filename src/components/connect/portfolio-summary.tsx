@@ -110,6 +110,7 @@ export function PortfolioSummary({
         color: TOKENS.colors.textPrimary,
       }}
     >
+      <h1 className="sr-only">Portfolio</h1>
       {/* COCKPIT HEADER — Command center feel */}
       <div
         style={{
@@ -549,7 +550,6 @@ function AllocationDonut({
                 style={{
                   cursor: onSegmentClick ? 'pointer' : 'default',
                   transition: TOKENS.transitions.fast,
-                  filter: isHovered ? `drop-shadow(0 0 8px ${seg.color})` : 'none',
                 }}
                 onMouseEnter={() => setHoveredId(seg.id)}
                 onMouseLeave={() => setHoveredId(null)}
@@ -908,7 +908,7 @@ function LineChartArea({
               fontWeight: TOKENS.fontWeights.bold,
               color: isPositive ? TOKENS.colors.accent : TOKENS.colors.danger,
               fontFamily: TOKENS.fonts.mono,
-              background: isPositive ? 'rgba(var(--brand-accent-rgb), 0.08)' : 'rgba(239, 68, 68, 0.08)',
+              background: isPositive ? TOKENS.colors.accentSubtle : TOKENS.colors.dangerSubtle,
               padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
               borderRadius: TOKENS.radius.full,
             }}>
@@ -980,7 +980,6 @@ function LineChartArea({
               strokeWidth={TOKENS.chart.lineStroke}
               strokeLinecap="round"
               strokeLinejoin="round"
-              style={{ filter: 'drop-shadow(0 4px 6px rgba(var(--brand-accent-rgb), 0.25))' }}
             />
 
             <circle
@@ -990,7 +989,6 @@ function LineChartArea({
               fill={TOKENS.colors.accent}
               stroke={TOKENS.colors.black}
               strokeWidth={TOKENS.chart.dotStroke}
-              style={{ filter: `drop-shadow(0 0 8px ${TOKENS.colors.accent})` }}
             />
 
             {labels.map((label, i) => {
@@ -1124,7 +1122,7 @@ function ActivityRow({
 }) {
   const isNegative = type === 'withdraw'
   const accentColor = isNegative ? TOKENS.colors.danger : TOKENS.colors.accent
-  const iconBg = isNegative ? 'rgba(239, 68, 68, 0.08)' : 'rgba(var(--brand-accent-rgb), 0.08)'
+  const iconBg = isNegative ? TOKENS.colors.dangerSubtle : TOKENS.colors.accentSubtle
 
   return (
     <div style={{
@@ -1304,7 +1302,7 @@ function DashboardVaultCard({
         left: 0,
         right: 0,
         height: TOKENS.borders.thick,
-        background: `linear-gradient(90deg, ${color}, transparent)`,
+        background: color,
       }} />
 
       {/* Left — name + risk badge */}

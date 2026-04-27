@@ -36,11 +36,6 @@ export function SimulationPanel() {
     [btcPrice, months],
   )
   const active = projections[scenario]
-  const maxYield = Math.max(
-    projections.bear.cumulativeYield,
-    projections.base.cumulativeYield,
-    projections.bull.cumulativeYield,
-  )
 
   const series = useMemo(() => {
     const steps = Array.from({ length: 6 }, (_, i) => {
@@ -69,7 +64,6 @@ export function SimulationPanel() {
   }, [btcPrice, months])
 
   const { padding: pad, gap: shellGap } = useShellPadding(mode)
-  const compact = isLimit || mode === 'tight'
 
   return (
     <div
@@ -85,6 +79,7 @@ export function SimulationPanel() {
         fontFamily: TOKENS.fonts.sans,
       }}
     >
+      <h1 className="sr-only">Simulation</h1>
       {/* COCKPIT HEADER — Same structure as dashboard */}
       <div
         style={{
@@ -318,16 +313,17 @@ export function SimulationPanel() {
                       style={{
                         padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[6]}`,
                         borderRadius: TOKENS.radius.xl,
-                        background: scenario === s ? TOKENS.colors.accent : 'transparent',
-                        color: scenario === s ? TOKENS.colors.black : TOKENS.colors.textSecondary,
+                        background: scenario === s ? TOKENS.colors.accentSubtle : 'transparent',
+                        color: scenario === s ? TOKENS.colors.accent : TOKENS.colors.textSecondary,
                         fontSize: TOKENS.fontSizes.xs,
                         fontWeight: TOKENS.fontWeights.bold,
                         textTransform: 'uppercase',
                         letterSpacing: TOKENS.letterSpacing.display,
-                        border: 'none',
+                        border: scenario === s
+                          ? `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`
+                          : `${TOKENS.borders.thin} solid transparent`,
                         cursor: 'pointer',
                         transition: TOKENS.transitions.base,
-                        boxShadow: scenario === s ? `0 2px 8px rgba(var(--brand-accent-rgb), 0.25)` : 'none',
                       }}
                     >
                       {s}

@@ -80,6 +80,7 @@ export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsP
         color: TOKENS.colors.textPrimary,
       }}
     >
+      <h1 className="sr-only">Available vaults</h1>
       {/* COCKPIT HEADER — Same structure as dashboard */}
       <div
         style={{
@@ -244,9 +245,7 @@ function FilterPills({
               padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
               borderRadius: TOKENS.radius.full,
               border: `${TOKENS.borders.thin} solid ${active && opt.hue ? opt.hue : active ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
-              background: active
-                ? (opt.hue ? 'rgba(var(--brand-accent-rgb), 0.08)' : TOKENS.colors.accentSubtle)
-                : TOKENS.colors.bgTertiary,
+              background: active ? TOKENS.colors.accentSubtle : TOKENS.colors.bgTertiary,
               color: active && opt.hue ? opt.hue : active ? TOKENS.colors.accent : TOKENS.colors.textSecondary,
               fontFamily: MONO,
               fontSize: TOKENS.fontSizes.micro,
@@ -400,8 +399,8 @@ export function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVau
         top: 0,
         left: 0,
         right: 0,
-        height: 2,
-        background: `linear-gradient(90deg, ${accentColor}, transparent)`,
+        height: TOKENS.borders.thick,
+        background: accentColor,
       }} />
 
       {/* Header — name + APY */}
@@ -434,8 +433,8 @@ export function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVau
               gap: TOKENS.spacing[1],
               padding: `${TOKENS.spacing.half} ${TOKENS.spacing[2]}`,
               borderRadius: TOKENS.radius.full,
-              background: 'rgba(var(--brand-accent-rgb), 0.08)',
-              border: `${TOKENS.borders.thin} solid rgba(var(--brand-accent-rgb), 0.25)`,
+              background: TOKENS.colors.accentSubtle,
+              border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`,
               fontFamily: MONO,
               fontSize: TOKENS.fontSizes.micro,
               fontWeight: TOKENS.fontWeights.bold,
@@ -545,13 +544,13 @@ export function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVau
         </div>
         <button style={{
           padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[4]}`,
-          background: TOKENS.colors.accent,
-          border: 'none',
+          background: TOKENS.colors.accentSubtle,
+          border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`,
           borderRadius: TOKENS.radius.md,
-          color: TOKENS.colors.black,
+          color: TOKENS.colors.accent,
           fontFamily: TOKENS.fonts.sans,
           fontSize: TOKENS.fontSizes.xs,
-          fontWeight: TOKENS.fontWeights.black,
+          fontWeight: TOKENS.fontWeights.bold,
           letterSpacing: TOKENS.letterSpacing.display,
           textTransform: 'uppercase',
           cursor: 'pointer',

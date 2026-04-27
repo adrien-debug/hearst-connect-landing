@@ -33,6 +33,8 @@ export const TOKENS = {
     surfaceHover: 'var(--hc-accent-dim)',
     surfaceActive: 'var(--hc-border-subtle)',
     danger: 'var(--dashboard-error, #EF4444)',
+    dangerDim: 'var(--hc-danger-dim)',
+    dangerSubtle: 'var(--hc-danger-glow)',
     success: 'var(--dashboard-success, #2DC558)',
     warning: 'var(--dashboard-warning, #F59E0B)',
     info: 'var(--dashboard-info, #3B82F6)',
@@ -248,13 +250,14 @@ export const LINE_HEIGHT = {
 export const VALUE_LETTER_SPACING = 'var(--dashboard-letter-spacing-value)'
 
 /** Donut / timeline / position charts — green + grey spectrum on dark background.
- * Keep accent first (brand consistency) then four grey-spectrum secondary hues. */
+ * Keep accent first (brand consistency) then four grey-spectrum secondary hues.
+ * Values live in src/generated/dashboard-vars.css under --dashboard-chart-palette-*. */
 export const CHART_PALETTE = [
-  TOKENS.colors.accent,  // #a7fb90 brand green
-  '#52c97a',             // mid green
-  '#d4d4d8',             // zinc-300 light grey
-  '#71717a',             // zinc-500 medium grey
-  '#3f3f46',             // zinc-700 dark grey
+  TOKENS.colors.accent,
+  'var(--dashboard-chart-palette-mid)',
+  'var(--dashboard-chart-palette-grey-1)',
+  'var(--dashboard-chart-palette-grey-2)',
+  'var(--dashboard-chart-palette-grey-3)',
 ] as const
 
 export function fmtUsd(n: number): string {

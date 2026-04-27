@@ -3,7 +3,7 @@
  * Lightweight SQLite layer for user data, vaults, positions, and activity
  */
 
-import type { Address, Chain } from 'viem'
+import type { Address } from 'viem'
 
 // User model - identified by wallet address
 export interface DbUser {

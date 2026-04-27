@@ -11,7 +11,6 @@ import { NextRequest, NextResponse } from 'next/server'
 import { initDb } from '@/lib/db/connection'
 import { PositionRepository, ActivityRepository, UserRepository } from '@/lib/db/repositories'
 import { getSessionFromRequest, requireSession, AuthError } from '@/lib/auth/session'
-import type { DbUserPositionUpdate } from '@/lib/db/schema'
 
 initDb()
 

@@ -101,7 +101,6 @@ export function usePositionData({
     // additional contract data
     const lockDuration = vaultConfig.lockPeriodDays
     const elapsedDays = Math.max(0, lockDuration - daysRemaining)
-    const targetPercent = parseFloat(vaultConfig.target.replace('%', ''))
     const progressPercent = Math.min(100, Math.round((elapsedDays / lockDuration) * 100))
     const isTargetReached = progressPercent >= 100
 
