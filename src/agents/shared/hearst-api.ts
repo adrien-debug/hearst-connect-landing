@@ -3,9 +3,35 @@
  */
 
 import type { WebhookPayload } from './types'
+import { existsSync, readFileSync } from 'fs'
+import { join } from 'path'
 
-const API_URL = process.env.HEARST_API_URL || 'http://localhost:8100'
-const AGENT_KEY = process.env.AGENT_WEBHOOK_KEY || process.env.ADMIN_PANEL_KEY || 'hearst-admin-dev-key'
+function loadLocalEnv(): Record<string, string> {
+  const env: Record<string, string> = {}
+  const root = process.cwd()
+  for (const fileName of ['.env.local', '.env']) {
+    const path = join(root, fileName)
+    if (!existsSync(path)) continue
+    const content = readFileSync(path, 'utf8')
+    for (const line of content.split(/\r?\n/)) {
+      const trimmed = line.trim()
+      if (!trimmed || trimmed.startsWith('#')) continue
+      const idx = trimmed.indexOf('=')
+      if (idx === -1) continue
+      const key = trimmed.slice(0, idx).trim()
+      let value = trimmed.slice(idx + 1).trim()
+      if ((value.startsWith('"') && value.endsWith('"')) || (value.startsWith("'") && value.endsWith("'"))) {
+        value = value.slice(1, -1)
+      }
+      env[key] = value
+    }
+  }
+  return env
+}
+
+const localEnv = loadLocalEnv()
+const API_URL = process.env.HEARST_API_URL || localEnv.HEARST_API_URL || 'http://localhost:8100'
+const AGENT_KEY = process.env.AGENT_WEBHOOK_KEY || localEnv.AGENT_WEBHOOK_KEY || process.env.ADMIN_PANEL_KEY || localEnv.ADMIN_PANEL_KEY || 'hearst-admin-dev-key'
 
 async function apiCall<T>(path: string, options?: RequestInit): Promise<T> {
   const res = await fetch(`${API_URL}/api${path}`, {

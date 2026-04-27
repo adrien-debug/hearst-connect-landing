@@ -16,16 +16,42 @@ interface VaultCardCompactProps {
   onClick?: () => void
   onClaim?: () => void
   onExit?: () => void
+  /** Most-recent claim event for this vault (used for the "last claim" row). */
+  lastClaim?: { amount: number; timestamp: number } | null
 }
 
-export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, onExit }: VaultCardCompactProps) {
+/** Risk hue mirrors the AvailableVaultsPanel ladder so a position's badge
+ * stays consistent across surfaces. Returns a CHART_PALETTE entry. */
+function riskHue(risk: string | undefined): string {
+  const r = (risk ?? '').toLowerCase()
+  if (r.includes('very low')) return CHART_PALETTE[1]
+  if (r === 'low') return CHART_PALETTE[0]
+  if (r === 'medium') return CHART_PALETTE[3]
+  if (r === 'high') return CHART_PALETTE[2]
+  return TOKENS.colors.textGhost
+}
+
+function relativeTime(ts: number): string {
+  const delta = Math.max(0, Date.now() - ts)
+  const m = Math.floor(delta / 60_000)
+  if (m < 60) return `${Math.max(1, m)}m ago`
+  const h = Math.floor(m / 60)
+  if (h < 24) return `${h}h ago`
+  const d = Math.floor(h / 24)
+  if (d < 30) return `${d}d ago`
+  return new Date(ts).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
+}
+
+export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, onExit, lastClaim }: VaultCardCompactProps) {
   const color = CHART_PALETTE[index % CHART_PALETTE.length]
   const daysToMaturity = getDaysToMaturity(vault.lockedUntil)
   const [isHovered, setIsHovered] = useState(false)
-  
+
   const canClaim = vault.claimable > 0
   const canExit = vault.canWithdraw || daysToMaturity <= 0
   const showActions = isHovered && (canClaim || canExit)
+  const risk = vault.risk
+  const riskColor = riskHue(risk)
 
   return (
     <div
@@ -79,25 +105,74 @@ export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, 
           gap: TOKENS.spacing[2],
         }}>
           <span style={{
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: TOKENS.spacing[2],
+            minWidth: 0,
             fontSize: mode === 'limit' ? TOKENS.fontSizes.xs : TOKENS.fontSizes.sm,
             fontWeight: TOKENS.fontWeights.black,
             color: TOKENS.colors.textPrimary,
             textTransform: 'uppercase',
             letterSpacing: VALUE_LETTER_SPACING,
             overflow: 'hidden',
-            textOverflow: 'ellipsis',
-            whiteSpace: 'nowrap',
           }}>
-            {formatVaultName(vault.name)}
+            <span style={{
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+              whiteSpace: 'nowrap',
+            }}>
+              {formatVaultName(vault.name)}
+            </span>
+            {risk && mode !== 'limit' && (
+              <span
+                title={`${risk} risk`}
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: TOKENS.spacing[1],
+                  padding: `${TOKENS.spacing.half} ${TOKENS.spacing[2]}`,
+                  borderRadius: TOKENS.radius.full,
+                  background: `${riskColor}1f`,
+                  border: `1px solid ${riskColor}55`,
+                  fontFamily: TOKENS.fonts.mono,
+                  fontSize: TOKENS.fontSizes.nano,
+                  fontWeight: TOKENS.fontWeights.bold,
+                  color: riskColor,
+                  letterSpacing: TOKENS.letterSpacing.display,
+                  flexShrink: 0,
+                }}
+              >
+                <span style={{ width: 4, height: 4, borderRadius: '50%', background: riskColor }} />
+                {risk}
+              </span>
+            )}
           </span>
           <span style={{
-            fontSize: mode === 'limit' ? TOKENS.fontSizes.sm : TOKENS.fontSizes.md,
-            fontWeight: TOKENS.fontWeights.black,
-            color: TOKENS.colors.textPrimary,
-            letterSpacing: VALUE_LETTER_SPACING,
+            display: 'flex',
+            flexDirection: 'column',
+            alignItems: 'flex-end',
+            gap: 0,
             flexShrink: 0,
           }}>
-            {fmtUsdCompact(vault.deposited + vault.claimable)}
+            <span style={{
+              fontSize: mode === 'limit' ? TOKENS.fontSizes.sm : TOKENS.fontSizes.md,
+              fontWeight: TOKENS.fontWeights.black,
+              color: TOKENS.colors.textPrimary,
+              letterSpacing: VALUE_LETTER_SPACING,
+              lineHeight: 1.1,
+            }}>
+              {fmtUsdCompact(vault.deposited + vault.claimable)}
+            </span>
+            <span style={{
+              fontFamily: TOKENS.fonts.mono,
+              fontSize: TOKENS.fontSizes.nano,
+              fontWeight: TOKENS.fontWeights.bold,
+              color: TOKENS.colors.textGhost,
+              letterSpacing: TOKENS.letterSpacing.display,
+              textTransform: 'uppercase',
+            }}>
+              {vault.apr.toFixed(1)}% APR
+            </span>
           </span>
         </div>
 
@@ -138,6 +213,24 @@ export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, 
             · {daysToMaturity}d
           </span>
         </div>
+
+        {lastClaim && mode !== 'limit' && (
+          <div style={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'baseline',
+            fontFamily: TOKENS.fonts.mono,
+            fontSize: TOKENS.fontSizes.nano,
+            color: TOKENS.colors.textGhost,
+            letterSpacing: TOKENS.letterSpacing.display,
+            textTransform: 'uppercase',
+          }}>
+            <span>Last claim · {relativeTime(lastClaim.timestamp)}</span>
+            <span style={{ color: TOKENS.colors.accent, fontWeight: TOKENS.fontWeights.bold }}>
+              +{fmtUsdCompact(lastClaim.amount)}
+            </span>
+          </div>
+        )}
       </div>
 
       {/* Mini yield indicator */}

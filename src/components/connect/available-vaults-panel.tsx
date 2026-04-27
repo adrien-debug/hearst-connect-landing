@@ -1,5 +1,6 @@
 'use client'
 
+import { useMemo, useState } from 'react'
 import { TOKENS, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING, MONO, CHART_PALETTE } from './constants'
 import { formatVaultName } from './formatting'
 import type { AvailableVault } from './data'
@@ -13,6 +14,20 @@ interface AvailableVaultsPanelProps {
   onBack?: () => void
 }
 
+type RiskFilter = 'all' | 'very low' | 'low' | 'medium' | 'high'
+type SortKey = 'apr' | 'lock' | 'min'
+
+function lockDays(lockPeriod: string): number {
+  // Inputs look like "12 months", "30 days", etc — coerce to days for sorting.
+  const m = lockPeriod.match(/(\d+(?:\.\d+)?)\s*(day|month|year|d|m|y)/i)
+  if (!m) return 0
+  const n = parseFloat(m[1])
+  const unit = m[2].toLowerCase()
+  if (unit.startsWith('y')) return n * 365
+  if (unit.startsWith('m')) return n * 30
+  return n
+}
+
 export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsPanelProps) {
   const { mode, isLimit } = useSmartFit({
     tightHeight: 880,
@@ -24,9 +39,33 @@ export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsP
   })
   const { padding: shellPadding, gap: shellGap } = useShellPadding(mode)
 
+  const [riskFilter, setRiskFilter] = useState<RiskFilter>('all')
+  const [sortKey, setSortKey] = useState<SortKey>('apr')
+
   // Get top 3 vaults for cockpit gauges (sorted by APR)
-  const topVaults = [...vaults].sort((a, b) => b.apr - a.apr).slice(0, 3)
+  const topVaults = useMemo(() => [...vaults].sort((a, b) => b.apr - a.apr).slice(0, 3), [vaults])
   const displayVaults = topVaults.length >= 3 ? topVaults : [...topVaults, ...Array(3 - topVaults.length).fill(null)]
+
+  const filteredSortedVaults = useMemo(() => {
+    let list = riskFilter === 'all'
+      ? vaults
+      : vaults.filter((v) => v.risk.toLowerCase() === riskFilter)
+    list = [...list].sort((a, b) => {
+      if (sortKey === 'apr') return b.apr - a.apr
+      if (sortKey === 'min') return a.minDeposit - b.minDeposit
+      return lockDays(a.lockPeriod) - lockDays(b.lockPeriod)
+    })
+    return list
+  }, [vaults, riskFilter, sortKey])
+
+  const riskCounts = useMemo(() => {
+    const counts: Record<string, number> = { all: vaults.length, 'very low': 0, low: 0, medium: 0, high: 0 }
+    for (const v of vaults) {
+      const k = v.risk.toLowerCase()
+      if (k in counts) counts[k]++
+    }
+    return counts
+  }, [vaults])
 
   return (
     <div
@@ -114,9 +153,21 @@ export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsP
           padding: shellPadding,
           gap: shellGap,
           minHeight: 0,
-          overflow: 'hidden',
+          overflow: 'auto',
         }}
       >
+        {/* Filter / sort toolbar */}
+        <div style={{
+          display: 'flex',
+          flexWrap: 'wrap',
+          alignItems: 'center',
+          justifyContent: 'space-between',
+          gap: TOKENS.spacing[3],
+        }}>
+          <FilterPills value={riskFilter} onChange={setRiskFilter} counts={riskCounts} />
+          <SortMenu value={sortKey} onChange={setSortKey} />
+        </div>
+
         <div style={{
           display: 'grid',
           gridTemplateColumns: fitValue(mode, {
@@ -126,16 +177,162 @@ export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsP
           }),
           gap: TOKENS.spacing[4],
         }}>
-          {vaults.map((vault, index) => (
-            <AvailableVaultCard
-              key={vault.id}
-              vault={vault}
-              index={index}
-              mode={mode}
-              onClick={() => onVaultSelect(vault.id)}
-            />
-          ))}
+          {filteredSortedVaults.length === 0 ? (
+            <div style={{
+              gridColumn: '1 / -1',
+              padding: TOKENS.spacing[8],
+              textAlign: 'center',
+              color: TOKENS.colors.textGhost,
+              fontSize: TOKENS.fontSizes.sm,
+              fontFamily: TOKENS.fonts.mono,
+              border: `1px dashed ${TOKENS.colors.borderSubtle}`,
+              borderRadius: TOKENS.radius.lg,
+            }}>
+              No vaults match the current filter.
+            </div>
+          ) : (
+            filteredSortedVaults.map((vault, index) => (
+              <AvailableVaultCard
+                key={vault.id}
+                vault={vault}
+                index={index}
+                mode={mode}
+                onClick={() => onVaultSelect(vault.id)}
+              />
+            ))
+          )}
         </div>
+      </div>
+    </div>
+  )
+}
+
+/** Risk filter pills — shows live counts so users see at a glance how the
+ * universe slices. Mirrors the AvailableVaultCard risk badge palette. */
+function FilterPills({
+  value,
+  onChange,
+  counts,
+}: {
+  value: RiskFilter
+  onChange: (v: RiskFilter) => void
+  counts: Record<string, number>
+}) {
+  const opts: Array<{ id: RiskFilter; label: string; hue?: string }> = [
+    { id: 'all', label: 'All' },
+    { id: 'very low', label: 'Very Low', hue: CHART_PALETTE[1] },
+    { id: 'low', label: 'Low', hue: CHART_PALETTE[0] },
+    { id: 'medium', label: 'Medium', hue: CHART_PALETTE[3] },
+    { id: 'high', label: 'High', hue: CHART_PALETTE[2] },
+  ]
+  return (
+    <div style={{
+      display: 'inline-flex',
+      flexWrap: 'wrap',
+      gap: TOKENS.spacing[2],
+    }}>
+      {opts.map((opt) => {
+        const active = value === opt.id
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => onChange(opt.id)}
+            style={{
+              display: 'inline-flex',
+              alignItems: 'center',
+              gap: TOKENS.spacing[2],
+              padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
+              borderRadius: TOKENS.radius.full,
+              border: `1px solid ${active && opt.hue ? opt.hue : active ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
+              background: active
+                ? (opt.hue ? `${opt.hue}1a` : TOKENS.colors.accentSubtle)
+                : TOKENS.colors.bgTertiary,
+              color: active && opt.hue ? opt.hue : active ? TOKENS.colors.accent : TOKENS.colors.textSecondary,
+              fontFamily: MONO,
+              fontSize: TOKENS.fontSizes.micro,
+              fontWeight: TOKENS.fontWeights.bold,
+              letterSpacing: TOKENS.letterSpacing.display,
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              transition: TOKENS.transitions.fast,
+            }}
+          >
+            {opt.hue && (
+              <span style={{ width: 6, height: 6, borderRadius: '50%', background: opt.hue }} />
+            )}
+            <span>{opt.label}</span>
+            <span style={{
+              fontSize: TOKENS.fontSizes.nano,
+              color: active ? 'currentColor' : TOKENS.colors.textGhost,
+              opacity: 0.85,
+            }}>
+              {counts[opt.id] ?? 0}
+            </span>
+          </button>
+        )
+      })}
+    </div>
+  )
+}
+
+/** Sort menu — dense pill triple (APR / Lock / Min). Stays inline with filters. */
+function SortMenu({ value, onChange }: { value: SortKey; onChange: (v: SortKey) => void }) {
+  const opts: Array<{ id: SortKey; label: string }> = [
+    { id: 'apr', label: 'APR' },
+    { id: 'lock', label: 'Lock' },
+    { id: 'min', label: 'Min deposit' },
+  ]
+  return (
+    <div style={{
+      display: 'inline-flex',
+      alignItems: 'center',
+      gap: TOKENS.spacing[2],
+    }}>
+      <span style={{
+        fontFamily: MONO,
+        fontSize: TOKENS.fontSizes.nano,
+        fontWeight: TOKENS.fontWeights.bold,
+        color: TOKENS.colors.textGhost,
+        letterSpacing: TOKENS.letterSpacing.display,
+        textTransform: 'uppercase',
+      }}>
+        Sort by
+      </span>
+      <div style={{
+        display: 'inline-flex',
+        gap: TOKENS.spacing.half,
+        padding: TOKENS.spacing.half,
+        background: TOKENS.colors.bgTertiary,
+        borderRadius: TOKENS.radius.full,
+        border: `1px solid ${TOKENS.colors.borderSubtle}`,
+      }}>
+        {opts.map((opt) => {
+          const active = value === opt.id
+          return (
+            <button
+              key={opt.id}
+              type="button"
+              onClick={() => onChange(opt.id)}
+              style={{
+                padding: `${TOKENS.spacing.half} ${TOKENS.spacing[3]}`,
+                borderRadius: TOKENS.radius.full,
+                border: 'none',
+                background: active ? TOKENS.colors.accent : 'transparent',
+                color: active ? TOKENS.colors.bgApp : TOKENS.colors.textSecondary,
+                fontFamily: MONO,
+                fontSize: TOKENS.fontSizes.nano,
+                fontWeight: TOKENS.fontWeights.bold,
+                letterSpacing: TOKENS.letterSpacing.display,
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+                transition: TOKENS.transitions.fast,
+              }}
+            >
+              {opt.label}
+            </button>
+          )
+        })}
       </div>
     </div>
   )

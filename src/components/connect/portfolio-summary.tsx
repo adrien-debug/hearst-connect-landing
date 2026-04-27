@@ -84,8 +84,16 @@ export function PortfolioSummary({
       pct: portfolioValue > 0 ? ((vault.deposited + vault.claimable) / portfolioValue) * 100 : 0,
       value: vault.deposited + vault.claimable,
       claimable: vault.claimable,
+      apr: vault.apr,
     }))
   }, [activeVaults, portfolioValue])
+
+  /** ID of the highest-APR active vault — used by the donut legend to surface
+   * a "Top" badge so the screenshot answers "which vault is pulling weight?" at a glance. */
+  const topPerformerId = useMemo(() => {
+    if (activeVaults.length === 0) return null
+    return activeVaults.reduce((best, v) => (v.apr > best.apr ? v : best), activeVaults[0]).id
+  }, [activeVaults])
 
   return (
     <div
@@ -233,6 +241,7 @@ export function PortfolioSummary({
                 data={donutData}
                 total={portfolioValue}
                 mode={mode}
+                topPerformerId={topPerformerId}
                 onSegmentClick={(vaultId) => onVaultSelect?.(vaultId)}
               />
               <div style={{
@@ -347,18 +356,22 @@ export function PortfolioSummary({
                     description="When you deploy capital, your positions will appear here."
                   />
                 ) : (
-                  activeVaults.map((vault, index) => (
-                    <VaultCardCompact
-                      key={vault.id}
-                      vault={vault}
-                      index={index}
-                      total={safeAgg.totalDeposited}
-                      mode={mode}
-                      onClick={() => onVaultSelect?.(vault.id)}
-                      onClaim={() => onVaultSelect?.(vault.id)}
-                      onExit={() => onVaultSelect?.(vault.id)}
-                    />
-                  ))
+                  activeVaults.map((vault, index) => {
+                    const last = userActivity.find((a) => a.vaultId === vault.id && a.type === 'claim')
+                    return (
+                      <VaultCardCompact
+                        key={vault.id}
+                        vault={vault}
+                        index={index}
+                        total={safeAgg.totalDeposited}
+                        mode={mode}
+                        lastClaim={last ? { amount: last.amount, timestamp: last.timestamp } : null}
+                        onClick={() => onVaultSelect?.(vault.id)}
+                        onClaim={() => onVaultSelect?.(vault.id)}
+                        onExit={() => onVaultSelect?.(vault.id)}
+                      />
+                    )
+                  })
                 )}
               </div>
 
@@ -454,20 +467,23 @@ type DonutVaultItem = {
   pct: number
   value: number
   claimable: number
+  apr?: number
 }
 
 /** AllocationDonut — Circular portfolio allocation chart with interactive tooltips */
-function AllocationDonut({ 
-  data, 
-  total, 
-  mode, 
+function AllocationDonut({
+  data,
+  total,
+  mode,
   compact = false,
+  topPerformerId,
   onSegmentClick,
-}: { 
-  data: DonutVaultItem[]; 
-  total: number; 
-  mode: SmartFitMode; 
+}: {
+  data: DonutVaultItem[]
+  total: number
+  mode: SmartFitMode
   compact?: boolean
+  topPerformerId?: string | null
   onSegmentClick?: (vaultId: string) => void
 }) {
   const [hoveredId, setHoveredId] = useState<string | null>(null)
@@ -736,6 +752,25 @@ function AllocationDonut({
               }}>
                 {formatVaultName(vault.name)}
               </span>
+              {topPerformerId === vault.id && (
+                <span
+                  title="Highest APR in your portfolio"
+                  style={{
+                    padding: `0 ${TOKENS.spacing[1]}`,
+                    background: TOKENS.colors.accentSubtle,
+                    color: TOKENS.colors.accent,
+                    fontFamily: TOKENS.fonts.mono,
+                    fontSize: TOKENS.fontSizes.nano,
+                    fontWeight: TOKENS.fontWeights.bold,
+                    letterSpacing: TOKENS.letterSpacing.display,
+                    textTransform: 'uppercase',
+                    borderRadius: TOKENS.radius.sm,
+                    flexShrink: 0,
+                  }}
+                >
+                  Top
+                </span>
+              )}
             </div>
             <span style={{
               fontSize: TOKENS.fontSizes.micro,

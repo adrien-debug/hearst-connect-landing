@@ -88,8 +88,9 @@ Three autonomous agents (deploy on Railway) monitor markets and generate rebalan
 **Data sources:** CoinGecko (BTC price), DeFiLlama (Aave v3 yields), Alternative.me (Fear & Greed)
 
 ```bash
-# Run agents locally
-ANTHROPIC_API_KEY=sk-... HEARST_API_URL=http://localhost:8100 npx tsx src/agents/watcher/index.ts
+# Run agents locally (load .env.local values from repo root)
+cd /path/to/hearst-connect
+npx tsx src/agents/watcher/index.ts
 npx tsx src/agents/strategy/index.ts
 npx tsx src/agents/audit/index.ts
 ```
