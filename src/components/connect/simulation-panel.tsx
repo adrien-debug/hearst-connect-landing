@@ -25,10 +25,10 @@ function formatPercent(value: number) {
 
 export function SimulationPanel() {
   const { mode, isLimit } = useSmartFit({
-    tightHeight: 700,
-    limitHeight: 620,
-    tightWidth: 1100,
-    limitWidth: 1200,
+    tightHeight: 880,
+    limitHeight: 720,
+    tightWidth: 1280,
+    limitWidth: 1024,
     reserveHeight: 64,
     reserveWidth: 280,
   })

@@ -13,10 +13,10 @@ import { useLiveActions } from '@/hooks/useLiveActions'
 
 export function SubscribePanel({ vault, onBack }: { vault: AvailableVault; onBack?: () => void }) {
   const { mode, isLimit } = useSmartFit({
-    tightHeight: 740,
-    limitHeight: 660,
-    tightWidth: 1100,
-    limitWidth: 1200,
+    tightHeight: 880,
+    limitHeight: 720,
+    tightWidth: 1280,
+    limitWidth: 1024,
     reserveHeight: 64,
     reserveWidth: 280,
   })

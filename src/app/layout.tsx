@@ -4,6 +4,7 @@ import { ErrorBoundary } from '@/components/error-boundary';
 import { Web3Provider } from '@/components/providers/web3-provider';
 import { ThemeProvider } from '@/components/theme/theme-provider';
 import { THEME_INLINE_SCRIPT } from '@/components/theme/theme-script';
+import { DemoBanner } from '@/components/demo/demo-banner';
 import '@/styles/tailwind.css';
 import '@/styles/theme/tokens.css';
 import '@/styles/components/subscription.css';
@@ -45,6 +46,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
           <ClickRipple />
           <Web3Provider>
             <ThemeProvider defaultTheme="system" enableSystem>
+              <DemoBanner />
               {children}
             </ThemeProvider>
           </Web3Provider>

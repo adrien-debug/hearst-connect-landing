@@ -15,6 +15,8 @@ import { SIMULATION_VIEW_ID, AVAILABLE_VAULTS_VIEW_ID } from './view-ids'
 import { DockRadial } from './dock-radial'
 import { useAccount, useConnect, useDisconnect } from 'wagmi'
 import { ThemeToggle } from '@/components/theme/theme-toggle'
+import { useDemoMode, setDemoMode } from '@/lib/demo/use-demo-mode'
+import { DEMO_WALLET_ADDRESS } from '@/lib/demo/demo-data'
 
 
 export function Canvas() {
@@ -191,6 +193,7 @@ function WalletButton() {
   const { address, isConnected } = useAccount()
   const { connect, connectors, isPending: isConnecting } = useConnect()
   const { disconnect } = useDisconnect()
+  const isDemo = useDemoMode()
 
   useEffect(() => {
     setMounted(true)
@@ -204,6 +207,61 @@ function WalletButton() {
     const connector =
       connectors.find((c) => c.id === 'metaMask' || c.name === 'MetaMask') ?? connectors[0]
     if (connector) connect({ connector })
+  }
+
+  // Demo mode: show fake address + exit button
+  if (isDemo) {
+    return (
+      <div style={{ display: 'flex', alignItems: 'center', gap: TOKENS.spacing[2] }}>
+        <span
+          style={{
+            fontFamily: MONO,
+            fontSize: TOKENS.fontSizes.xs,
+            fontWeight: TOKENS.fontWeights.bold,
+            letterSpacing: TOKENS.letterSpacing.display,
+            color: TOKENS.colors.accent,
+            textTransform: 'uppercase',
+            display: 'inline-flex',
+            alignItems: 'center',
+            gap: TOKENS.spacing[2],
+          }}
+        >
+          <span
+            style={{
+              width: TOKENS.spacing[2],
+              height: TOKENS.spacing[2],
+              borderRadius: '50%',
+              background: TOKENS.colors.accent,
+              boxShadow: `0 0 6px ${TOKENS.colors.accent}`,
+            }}
+          />
+          Demo · {formatAddress(DEMO_WALLET_ADDRESS)}
+        </span>
+        <button
+          type="button"
+          onClick={() => {
+            setDemoMode(false)
+            if (typeof window !== 'undefined') window.location.href = '/'
+          }}
+          style={{
+            padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}`,
+            background: 'transparent',
+            border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
+            borderRadius: TOKENS.radius.md,
+            cursor: 'pointer',
+            color: TOKENS.colors.textSecondary,
+            fontFamily: MONO,
+            fontSize: TOKENS.fontSizes.micro,
+            fontWeight: TOKENS.fontWeights.bold,
+            letterSpacing: TOKENS.letterSpacing.display,
+            textTransform: 'uppercase',
+          }}
+          title="Exit demo mode"
+        >
+          Exit
+        </button>
+      </div>
+    )
   }
 
   if (!mounted || !isConnected) {

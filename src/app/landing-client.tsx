@@ -351,12 +351,25 @@ export default function HubPageClient() {
           <br />
           into structured yield.
         </h1>
-        <Link href={CTA_LINKS.launchApp.href} className="welcome-btn hub-chapter" prefetch>
-          <span>{CTA_LINKS.launchApp.label}</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18" style={{ marginLeft: '4px' }}>
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
-        </Link>
+        <div className="hub-chapter" style={{ display: 'inline-flex', gap: '12px', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
+          <Link href={CTA_LINKS.launchApp.href} className="welcome-btn" prefetch>
+            <span>{CTA_LINKS.launchApp.label}</span>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18" style={{ marginLeft: '4px' }}>
+              <path d="M5 12h14M12 5l7 7-7 7" />
+            </svg>
+          </Link>
+          <Link
+            href={CTA_LINKS.viewDemo.href}
+            className="welcome-btn"
+            prefetch
+            style={{
+              background: 'transparent',
+              border: '1px solid currentColor',
+            }}
+          >
+            <span>{CTA_LINKS.viewDemo.label}</span>
+          </Link>
+        </div>
       </section>
 
       {/* Intro */}

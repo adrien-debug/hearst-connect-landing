@@ -6,6 +6,8 @@ import type { PositionData, PositionError } from '@/types/position'
 import { useVaultPosition, useVaultGlobal } from './useVault'
 import { useVaultById } from './useVaultRegistry'
 import { MS_PER_DAY, EPOCH_PROGRESS_NEAR_END, EPOCH_PROGRESS_DEFAULT } from '@/lib/constants'
+import { useDemoMode } from '@/lib/demo/use-demo-mode'
+import { getDemoPositionData } from '@/lib/demo/demo-data'
 
 interface UsePositionDataOptions {
   vaultId: string
@@ -30,6 +32,7 @@ export function usePositionData({
 }: UsePositionDataOptions): UsePositionDataReturn {
   const { address: connectedAddress } = useAccount()
   const vaultConfig = useVaultById(vaultId)
+  const isDemo = useDemoMode()
 
   // Use provided wallet address or connected address
   const effectiveWalletAddress = propWalletAddress || connectedAddress
@@ -130,6 +133,20 @@ export function usePositionData({
   const refresh = () => {
     refetchPosition()
     refetchGlobal()
+  }
+
+  if (isDemo) {
+    const demoData = getDemoPositionData(vaultId)
+    return {
+      data: demoData as PositionData | null,
+      isLoading: false,
+      error: null,
+      refresh: () => {},
+      vaultAddress: vaultConfig?.vaultAddress,
+      usdcAddress: vaultConfig?.usdcAddress,
+      isVaultConfigured: !!vaultConfig,
+      isWalletConnected: true,
+    }
   }
 
   return {

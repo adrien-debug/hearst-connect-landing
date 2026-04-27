@@ -25,10 +25,10 @@ export function PortfolioSummary({
   onAvailableVaultsClick?: () => void
 }) {
   const { mode } = useSmartFit({
-    tightHeight: 740,
-    limitHeight: 660,
-    tightWidth: 940,
-    limitWidth: 820,
+    tightHeight: 860,
+    limitHeight: 720,
+    tightWidth: 1280,
+    limitWidth: 1024,
     reserveHeight: 64,
     reserveWidth: 280,
   })
@@ -194,18 +194,26 @@ export function PortfolioSummary({
           <div style={{
             display: 'grid',
             gridTemplateColumns: fitValue(mode, {
-              normal: '260px 1fr',
-              tight: '220px 1fr',
+              normal: '240px 1fr',
+              tight: '200px 1fr',
               limit: '1fr',
             }),
-            gap: TOKENS.spacing[6],
+            gap: fitValue(mode, {
+              normal: TOKENS.spacing[6],
+              tight: TOKENS.spacing[4],
+              limit: TOKENS.spacing[3],
+            }),
             background: TOKENS.colors.black,
             border: `1px solid ${TOKENS.colors.borderSubtle}`,
             borderRadius: TOKENS.radius.lg,
-            padding: TOKENS.spacing[6],
+            padding: fitValue(mode, {
+              normal: TOKENS.spacing[6],
+              tight: TOKENS.spacing[4],
+              limit: TOKENS.spacing[3],
+            }),
             minHeight: fitValue(mode, {
-              normal: '340px',
-              tight: '280px',
+              normal: '300px',
+              tight: '240px',
               limit: 'auto',
             }),
             flexShrink: 0,
@@ -275,7 +283,11 @@ export function PortfolioSummary({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'center',
-        marginBottom: TOKENS.spacing[8],
+        marginBottom: fitValue(mode, {
+          normal: TOKENS.spacing[5],
+          tight: TOKENS.spacing[4],
+          limit: TOKENS.spacing[3],
+        }),
         flexShrink: 0,
         height: 'var(--dashboard-card-header-height)',
       }}>
@@ -842,7 +854,11 @@ function LineChartArea({
         display: 'flex',
         justifyContent: 'space-between',
         alignItems: 'baseline',
-        marginBottom: TOKENS.spacing[6],
+        marginBottom: fitValue(mode, {
+          normal: TOKENS.spacing[4],
+          tight: TOKENS.spacing[3],
+          limit: TOKENS.spacing[2],
+        }),
         flexShrink: 0,
       }}>
         <span style={{
@@ -1044,9 +1060,14 @@ function DashboardSideCard({
   noScroll?: boolean
 }) {
   const pad = fitValue(mode, {
-    normal: TOKENS.spacing[8],
-    tight: TOKENS.spacing[6],
-    limit: TOKENS.spacing[4],
+    normal: TOKENS.spacing[5],
+    tight: TOKENS.spacing[4],
+    limit: TOKENS.spacing[3],
+  })
+  const headerGap = fitValue(mode, {
+    normal: TOKENS.spacing[5],
+    tight: TOKENS.spacing[4],
+    limit: TOKENS.spacing[3],
   })
 
   return (
@@ -1064,7 +1085,7 @@ function DashboardSideCard({
         justifyContent: 'space-between',
         alignItems: 'center',
         padding: `${pad}px ${pad}px 0`,
-        marginBottom: TOKENS.spacing[8],
+        marginBottom: headerGap,
         flexShrink: 0,
         height: 'var(--dashboard-card-header-height)',
         boxSizing: 'content-box',

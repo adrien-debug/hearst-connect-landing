@@ -30,10 +30,10 @@ export function VaultDetailPanel({
 }) {
   const { address: connectedAddress } = useAccount()
   const { mode } = useSmartFit({
-    tightHeight: 760,
-    limitHeight: 680,
-    tightWidth: 1100,
-    limitWidth: 1200,
+    tightHeight: 880,
+    limitHeight: 720,
+    tightWidth: 1280,
+    limitWidth: 1024,
     reserveHeight: 64,
     reserveWidth: 280,
   })

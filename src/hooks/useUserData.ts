@@ -5,6 +5,8 @@ import { useBackendUser } from './useBackendUser'
 import { PositionsApi, ActivityApi } from '@/lib/api-client'
 import type { DbUserPositionWithVault, DbActivityEvent } from '@/lib/db/schema'
 import { MS_PER_DAY, USDC_DECIMALS } from '@/lib/constants'
+import { useDemoMode } from '@/lib/demo/use-demo-mode'
+import { DEMO_POSITIONS, DEMO_ACTIVITY, DEMO_STATS } from '@/lib/demo/demo-data'
 
 const USDC_DIVISOR = 10 ** USDC_DECIMALS
 
@@ -83,6 +85,7 @@ function hydratePosition(position: DbUserPositionWithVault): UserPositionLine {
 export function useUserData() {
   const { isAuthenticated } = useBackendUser()
   const queryClient = useQueryClient()
+  const isDemo = useDemoMode()
 
   // Query positions - derived from JWT session cookie (set by SIWE)
   const {
@@ -95,7 +98,7 @@ export function useUserData() {
       const result = await PositionsApi.listByUser()
       return result.positions
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !isDemo,
     staleTime: 1000 * 30, // 30 seconds
   })
 
@@ -110,7 +113,7 @@ export function useUserData() {
       const result = await ActivityApi.listByUser(50)
       return result.events
     },
-    enabled: isAuthenticated,
+    enabled: isAuthenticated && !isDemo,
     staleTime: 1000 * 30, // 30 seconds
   })
 
@@ -228,6 +231,31 @@ export function useUserData() {
     amount: event.amount / USDC_DIVISOR,
     timestamp: event.timestamp,
   }))
+
+  if (isDemo) {
+    const noop = async () => ({ success: true } as const)
+    return {
+      positions: DEMO_POSITIONS,
+      activity: DEMO_ACTIVITY,
+      stats: DEMO_STATS,
+      isLoading: false,
+      isPositionsLoading: false,
+      isActivityLoading: false,
+      error: null,
+      isAuthenticated: true,
+      hasPositions: DEMO_POSITIONS.length > 0,
+      hasActivity: DEMO_ACTIVITY.length > 0,
+      actions: {
+        deposit: noop,
+        claim: noop,
+        withdraw: noop,
+        refresh: () => {},
+      },
+      isDepositing: false,
+      isClaiming: false,
+      isWithdrawing: false,
+    }
+  }
 
   return {
     positions: hydratedPositions,

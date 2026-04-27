@@ -16,10 +16,10 @@ interface AvailableVaultsPanelProps {
 
 export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsPanelProps) {
   const { mode, isLimit } = useSmartFit({
-    tightHeight: 740,
-    limitHeight: 660,
-    tightWidth: 940,
-    limitWidth: 820,
+    tightHeight: 880,
+    limitHeight: 720,
+    tightWidth: 1280,
+    limitWidth: 1024,
     reserveHeight: 64,
     reserveWidth: 280,
   })

@@ -16,8 +16,12 @@ interface UseSmartFitOptions {
 }
 
 export function useSmartFit(options?: UseSmartFitOptions) {
-  const { tightHeight = 740, limitHeight = 660, tightWidth = 940, limitWidth = 820 } = options || {}
+  // Calibrated for: 1920x1080 → normal, 1440x900 → normal,
+  // 1280x800 (MacBook 13") → tight, < 1024x720 → limit.
+  const { tightHeight = 880, limitHeight = 720, tightWidth = 1300, limitWidth = 1024 } = options || {}
 
+  // SSR/first paint: assume normal so admin/portfolio render with full layout
+  // and recompute on mount.
   const [mode, setMode] = useState<SmartFitMode>('normal')
 
   useEffect(() => {

@@ -3,6 +3,8 @@
 import { useState } from 'react'
 import { useQuery } from '@tanstack/react-query'
 import type { DbActivityEvent } from '@/lib/db/schema'
+import { useDemoMode } from '@/lib/demo/use-demo-mode'
+import { DEMO_ADMIN_ACTIVITY } from '@/lib/demo/demo-data'
 
 const SYSTEM_EVENTS: { id: string; type: string; message: string; time: string; level: string }[] = []
 
@@ -17,9 +19,10 @@ interface ActivityEvent {
 
 export function ActivitySection() {
   const [activeFilter, setActiveFilter] = useState<'all' | 'system' | 'live'>('all')
+  const isDemo = useDemoMode()
 
   // Fetch real user activities from DB (admin endpoint)
-  const { data: liveActivities = [], isLoading } = useQuery<DbActivityEvent[]>({
+  const { data: queriedActivities = [], isLoading: isQueryLoading } = useQuery<DbActivityEvent[]>({
     queryKey: ['admin-all-activity'],
     queryFn: async () => {
       try {
@@ -38,8 +41,12 @@ export function ActivitySection() {
         return []
       }
     },
+    enabled: !isDemo,
     staleTime: 1000 * 30, // 30 seconds
   })
+
+  const liveActivities = isDemo ? (DEMO_ADMIN_ACTIVITY as unknown as DbActivityEvent[]) : queriedActivities
+  const isLoading = isDemo ? false : isQueryLoading
 
   // Convert live DB activities to activity format
   const liveActivity: ActivityEvent[] = liveActivities.map((event) => ({

@@ -4,6 +4,8 @@ import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
 import type { VaultConfig, VaultConfigInput } from '@/types/vault'
 import { VaultsApi, dbVaultToConfig } from '@/lib/api-client'
 import type { DbVaultInput } from '@/lib/db/schema'
+import { useDemoMode } from '@/lib/demo/use-demo-mode'
+import { DEMO_VAULTS } from '@/lib/demo/demo-data'
 
 const VAULT_REGISTRY_QUERY_KEY = 'vault-registry'
 
@@ -30,6 +32,7 @@ function toDbVaultInput(input: VaultConfigInput): DbVaultInput {
 
 export function useVaultRegistry() {
   const queryClient = useQueryClient()
+  const isDemo = useDemoMode()
 
   // Fetch vaults from backend API
   const { data: dbVaults = [], isLoading } = useQuery({
@@ -38,6 +41,7 @@ export function useVaultRegistry() {
       const result = await VaultsApi.list(true) // active only
       return result.vaults
     },
+    enabled: !isDemo,
     staleTime: 1000 * 30, // 30 seconds
   })
 
@@ -109,6 +113,26 @@ export function useVaultRegistry() {
       queryClient.invalidateQueries({ queryKey: [VAULT_REGISTRY_QUERY_KEY] })
     },
   })
+
+  if (isDemo) {
+    const noopAsync = async () => DEMO_VAULTS[0]
+    const noopVoid = async () => undefined
+    return {
+      vaults: DEMO_VAULTS,
+      activeVaults: DEMO_VAULTS.filter((v) => v.isActive),
+      activeVaultId: activeVaultId,
+      activeVault: activeVaultId ? DEMO_VAULTS.find((v) => v.id === activeVaultId) ?? DEMO_VAULTS[0] : DEMO_VAULTS[0],
+      isLoading: false,
+      hasVaults: true,
+      addVault: noopAsync,
+      removeVault: noopVoid,
+      setActiveVault: noopVoid,
+      updateVault: noopAsync,
+      isAdding: false,
+      isRemoving: false,
+      isUpdating: false,
+    }
+  }
 
   return {
     vaults,

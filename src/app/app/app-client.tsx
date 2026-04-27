@@ -6,6 +6,7 @@ import { useRouter } from 'next/navigation'
 import { Canvas } from '@/components/connect/canvas'
 import { NavigationProvider } from '@/components/connect/use-connect-routing'
 import { useSiweAuth } from '@/hooks/useSiweAuth'
+import { useDemoMode, isDemoModeSync } from '@/lib/demo/use-demo-mode'
 
 const WALLET_ICONS = [
   { name: 'MetaMask', icon: '/icons/wallets/metamask.svg' },
@@ -395,6 +396,7 @@ function AccessGate({ children }: { children: React.ReactNode }) {
   const { connect, connectors, isPending, reset } = useConnect()
   const router = useRouter()
   const wasAuthenticated = useRef(false)
+  const isDemo = useDemoMode()
   const {
     isAuthenticated,
     isLoading: authLoading,
@@ -428,7 +430,16 @@ function AccessGate({ children }: { children: React.ReactNode }) {
     }
   }, [connectors, connect, reset])
 
-  if (!mounted || isRedirecting || !sessionChecked) {
+  // Demo mode bypass — no wallet, no signature, straight to the canvas.
+  if (isDemo) {
+    return <>{children}</>
+  }
+
+  // Hold the loader during the first paint if ?demo=true is in the URL but
+  // useDemoMode hasn't synced yet — prevents the AccessGate from flashing.
+  const demoPending = mounted && !isDemo && isDemoModeSync()
+
+  if (!mounted || isRedirecting || !sessionChecked || demoPending) {
     return (
       <div className="connect-scope access-gate__loader">
         <style>{ACCESS_GATE_CSS}</style>

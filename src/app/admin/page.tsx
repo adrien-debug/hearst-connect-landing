@@ -14,6 +14,7 @@ import { AgentConfigSection } from './sections/agent-config'
 import AgentsSection from './sections/agents'
 import { useAdminAuth } from '@/hooks/useAdminAuth'
 import { ADMIN_TOKENS as TOKENS } from './constants'
+import { useDemoMode } from '@/lib/demo/use-demo-mode'
 
 
 const SECTIONS: Record<string, React.ComponentType> = {
@@ -46,13 +47,14 @@ export default function AdminPage() {
 
 function AdminContent() {
   const { isAuthenticated, isLoading, error, login, logout } = useAdminAuth()
+  const isDemo = useDemoMode()
   const [activeSection, setActiveSection] = useState('dashboard')
 
-  if (isLoading) {
+  if (isLoading && !isDemo) {
     return <LoadingScreen />
   }
 
-  if (!isAuthenticated) {
+  if (!isAuthenticated && !isDemo) {
     return <LoginScreen onLogin={login} error={error} />
   }
 

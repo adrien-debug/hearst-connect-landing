@@ -6,6 +6,7 @@ import { useVaultRegistry } from './useVaultRegistry'
 import { useUserData } from './useUserData'
 import { useAccount } from 'wagmi'
 import { toAvailableVault } from '@/lib/default-vaults'
+import { useDemoMode } from '@/lib/demo/use-demo-mode'
 
 function calculateAggregate(vaults: VaultLine[]): Aggregate {
   const active = vaults.filter((v): v is ActiveVault => v.type === 'active')
@@ -29,9 +30,10 @@ export function useVaultLines() {
   const { activeVaults, isLoading: isRegistryLoading } = useVaultRegistry()
   const { positions: userPositions, stats: userStats, isLoading: isUserDataLoading } = useUserData()
   const { isConnected } = useAccount()
+  const isDemo = useDemoMode()
 
   return useMemo(() => {
-    if (isConnected) {
+    if (isConnected || isDemo) {
       // Combine registry vaults with user positions
       const vaultLines: VaultLine[] = activeVaults.map((vaultConfig) => {
         const userPosition = userPositions.find((p) => p.vaultId === vaultConfig.id && p.state !== 'withdrawn')
@@ -94,5 +96,6 @@ export function useVaultLines() {
     isRegistryLoading,
     isUserDataLoading,
     isConnected,
+    isDemo,
   ])
 }

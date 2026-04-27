@@ -15,6 +15,7 @@ export const NAV_LINKS = [
 
 export const CTA_LINKS = {
   launchApp: { href: '/app', label: 'Launch App' },
+  viewDemo: { href: '/app?demo=true', label: 'View Demo' },
   viewOffering: { href: '#beforeyougo', label: 'View offering' },
   contactSales: { href: HUB_MAILTO_SALES, label: 'Contact Sales' },
 } as const
