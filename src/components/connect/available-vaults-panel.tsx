@@ -1,7 +1,7 @@
 'use client'
 
 import { Label } from '@/components/ui/label'
-import { TOKENS, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING, MONO } from './constants'
+import { TOKENS, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING, MONO, CHART_PALETTE } from './constants'
 import { formatVaultName } from './formatting'
 import type { AvailableVault } from './data'
 import { useSmartFit, useShellPadding, fitValue } from './smart-fit'
@@ -149,10 +149,8 @@ interface AvailableVaultCardProps {
   onClick: () => void
 }
 
-const palette = [TOKENS.colors.accent, TOKENS.colors.white]
-
 function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardProps) {
-  const accentColor = palette[index % palette.length]
+  const accentColor = CHART_PALETTE[index % CHART_PALETTE.length]
   const targetPct = parseFloat(vault.target.replace('%', '')) || 0
 
   return (

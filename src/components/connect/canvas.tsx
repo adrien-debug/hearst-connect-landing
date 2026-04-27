@@ -35,8 +35,9 @@ export function Canvas() {
     return (
       <div
         className="connect-scope fixed inset-0 z-1 flex flex-col overflow-hidden antialiased isolate"
-      data-demo-offset="canvas"
+        data-demo-offset="canvas"
         style={{
+          top: 'var(--demo-banner-h, 0px)',
           background: TOKENS.colors.bgApp,
           color: TOKENS.colors.textPrimary,
           fontFamily: TOKENS.fonts.sans,
@@ -86,7 +87,9 @@ export function Canvas() {
       data-demo-offset="canvas"
       style={{
         top: 'var(--demo-banner-h, 0px)',
-        height: 'calc(100dvh - var(--demo-banner-h, 0px))',
+        right: 0,
+        bottom: 0,
+        left: 0,
         background: TOKENS.colors.bgApp,
         color: TOKENS.colors.textPrimary,
         fontFamily: TOKENS.fonts.sans,

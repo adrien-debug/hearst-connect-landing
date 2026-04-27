@@ -317,40 +317,9 @@
   color-scheme: dark;
 }
 
-[data-theme="light"] .connect-scope {
-  /* "Light Stylé" - Bone White / High Contrast */
-  --hc-bg-app: #F9F9F7;
-  --hc-bg-page: #F9F9F7;
-  --hc-bg-sidebar: #FFFFFF;
-  --hc-bg-surface: #FFFFFF;
-  --hc-bg-secondary: #F4F4F5;
-  --hc-bg-tertiary: #F4F4F5;
-
-  --hc-text-primary: #000000;
-  --hc-text-secondary: #52525B;
-  --hc-text-ghost: #71717A;
-
-  --hc-border-subtle: rgba(0, 0, 0, 0.05);
-  --hc-border-default: rgba(0, 0, 0, 0.10);
-  --hc-border-strong: rgba(0, 0, 0, 0.20);
-
-  /* Citrus accent - identical to Dark theme */
-  --hc-accent: var(--brand-accent);
-  --hc-accent-dim: rgba(var(--brand-accent-rgb), 0.10);
-  --hc-accent-glow: rgba(var(--brand-accent-rgb), 0.15);
-
-  --hc-overlay: rgba(0, 0, 0, 0.4);
-
-  /* Multi-layer shadows for Light theme */
-  --hc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.02);
-  --hc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.03);
-  --hc-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.04);
-
-  --hc-scrollbar-thumb: rgba(0, 0, 0, 0.15);
-  --hc-scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
-
-  color-scheme: light;
-}
+/* Connect is intentionally dark-only — overrides above stay in effect even
+   when [data-theme="light"] is set on <html>. Marketing keeps the light/dark
+   toggle; the command-center surface is one-mode for visual cohesion. */
 
 /* ============================================
    GLOBAL SCROLLBAR STYLING

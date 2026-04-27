@@ -64,6 +64,10 @@ export function VaultDetailPanel({
   const [openTransactions, setOpenTransactions] = useState(false)
   const transaction = useTransaction()
 
+  // Hooks must run on every render — keep BEFORE the early returns below
+  // (Rules of Hooks: order must be stable across renders).
+  const { claim: liveClaim, withdraw: liveWithdraw } = useLiveActions(vault.id)
+
   if (!isVaultConfigured) {
     return (
       <div
@@ -145,8 +149,6 @@ export function VaultDetailPanel({
   const isTargetReached = positionData?.isTargetReached ?? false
   const isPositionReadyForExit = positionData?.canWithdraw ?? false
   const statusLabel = isPositionReadyForExit ? 'Ready for exit' : 'Active'
-
-  const { claim: liveClaim, withdraw: liveWithdraw } = useLiveActions(vault.id)
 
   const handleClaim = async () => {
     await transaction.execute(

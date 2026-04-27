@@ -1,7 +1,7 @@
 'use client'
 
 import { useState } from 'react'
-import { TOKENS, fmtUsdCompact, VALUE_LETTER_SPACING } from './constants'
+import { TOKENS, fmtUsdCompact, VALUE_LETTER_SPACING, CHART_PALETTE } from './constants'
 import { formatVaultName } from './formatting'
 import { ActionButton } from './action-button'
 import { getDaysToMaturity } from './utils/portfolio-chart-utils'
@@ -18,10 +18,8 @@ interface VaultCardCompactProps {
   onExit?: () => void
 }
 
-const palette = [TOKENS.colors.accent, TOKENS.colors.white, TOKENS.colors.gray500, TOKENS.colors.textGhost]
-
 export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, onExit }: VaultCardCompactProps) {
-  const color = palette[index % palette.length]
+  const color = CHART_PALETTE[index % CHART_PALETTE.length]
   const daysToMaturity = getDaysToMaturity(vault.lockedUntil)
   const [isHovered, setIsHovered] = useState(false)
   
@@ -38,13 +36,17 @@ export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, 
       style={{
         background: isHovered ? TOKENS.colors.bgSurface : TOKENS.colors.bgTertiary,
         borderRadius: TOKENS.radius.md,
-        padding: mode === 'limit' ? `${TOKENS.spacing[4]} ${TOKENS.spacing[5]}` : `${TOKENS.spacing[6]} ${TOKENS.spacing[8]}`,
+        padding: mode === 'limit'
+          ? `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}`
+          : mode === 'tight'
+            ? `${TOKENS.spacing[3]} ${TOKENS.spacing[4]}`
+            : `${TOKENS.spacing[3]} ${TOKENS.spacing[5]}`,
         border: `${TOKENS.borders.thin} solid ${isHovered ? TOKENS.colors.borderStrong : TOKENS.colors.borderSubtle}`,
         cursor: onClick ? 'pointer' : 'default',
         transition: 'all 120ms ease-out',
         display: 'flex',
         alignItems: 'center',
-        gap: TOKENS.spacing[4],
+        gap: TOKENS.spacing[3],
         position: 'relative',
         overflow: 'hidden',
       }}
@@ -66,7 +68,7 @@ export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, 
         minWidth: 0,
         display: 'flex',
         flexDirection: 'column',
-        gap: TOKENS.spacing[3],
+        gap: TOKENS.spacing[2],
         opacity: showActions ? 0.3 : 1,
         transition: 'opacity 150ms ease-out',
       }}>

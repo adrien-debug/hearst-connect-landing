@@ -105,9 +105,9 @@ export function PortfolioSummary({
       <div
         style={{
           padding: fitValue(mode, {
-            normal: `${shellPadding}px`,
-            tight: `${shellPadding * 0.75}px`,
-            limit: `${shellPadding * 0.5}px`,
+            normal: `${shellPadding * 0.75}px ${shellPadding}px`,
+            tight: `${shellPadding * 0.5}px ${shellPadding * 0.75}px`,
+            limit: `${shellPadding * 0.4}px ${shellPadding * 0.5}px`,
           }),
           borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
           flexShrink: 0,
@@ -212,11 +212,12 @@ export function PortfolioSummary({
               limit: TOKENS.spacing[3],
             }),
             minHeight: fitValue(mode, {
-              normal: '300px',
-              tight: '240px',
+              normal: '240px',
+              tight: '200px',
               limit: 'auto',
             }),
             flexShrink: 0,
+            overflow: 'hidden',
           }}>
             <div style={{
               display: 'flex',
@@ -236,14 +237,14 @@ export function PortfolioSummary({
               />
               <div style={{
                 display: 'flex',
-                gap: TOKENS.spacing[6],
-                marginTop: TOKENS.spacing[6],
+                gap: TOKENS.spacing[4],
+                marginTop: TOKENS.spacing[3],
               }}>
                 <MiniStat
-                  label="Progress"
+                  label="Avg Maturity"
                   value={`${mounted ? Math.round(activeVaults.reduce((sum, v) => sum + v.progress, 0) / (activeVaults.length || 1)) : 0}%`}
                 />
-                <MiniStat label="Yield" value={`+${fmtUsdCompact(safeAgg.totalClaimable)}`} accent />
+                <MiniStat label="Claimable" value={`+${fmtUsdCompact(safeAgg.totalClaimable)}`} accent />
               </div>
             </div>
 
@@ -472,12 +473,12 @@ function AllocationDonut({
   const [hoveredId, setHoveredId] = useState<string | null>(null)
   
   const size = compact
-    ? fitValue(mode, { normal: 140, tight: 120, limit: 100 })
-    : fitValue(mode, { normal: 200, tight: 160, limit: 140 })
+    ? fitValue(mode, { normal: 120, tight: 100, limit: 88 })
+    : fitValue(mode, { normal: 150, tight: 130, limit: 110 })
   const strokeHoverBoost = TOKENS.chart.strokeHoverBoost
   const strokeWidth = compact
-    ? fitValue(mode, { normal: 18, tight: 16, limit: 14 })
-    : fitValue(mode, { normal: 24, tight: 20, limit: 16 })
+    ? fitValue(mode, { normal: 16, tight: 14, limit: 12 })
+    : fitValue(mode, { normal: 20, tight: 18, limit: 14 })
   const radius = (size - strokeWidth) / 2
   const circumference = 2 * Math.PI * radius
 
@@ -686,14 +687,14 @@ function AllocationDonut({
         )}
       </div>
 
-      {/* Legend — clickable */}
+      {/* Legend — clickable, capped at 3 to prevent overflow */}
       <div style={{
         display: 'flex',
         flexDirection: 'column',
-        gap: TOKENS.spacing[2],
+        gap: '2px',
         width: '100%',
       }}>
-        {data.slice(0, 4).map((vault) => (
+        {data.slice(0, 3).map((vault) => (
           <div
             key={vault.id}
             onClick={() => onSegmentClick?.(vault.id)}
@@ -701,9 +702,9 @@ function AllocationDonut({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'space-between',
-              gap: TOKENS.spacing[3],
+              gap: TOKENS.spacing[2],
               cursor: onSegmentClick ? 'pointer' : 'default',
-              padding: `${TOKENS.spacing[2]}px`,
+              padding: `2px ${TOKENS.spacing[2]}`,
               borderRadius: TOKENS.radius.sm,
               transition: 'all 120ms ease-out',
               background: hoveredId === vault.id ? TOKENS.colors.bgTertiary : 'transparent',
@@ -715,31 +716,47 @@ function AllocationDonut({
               display: 'flex',
               alignItems: 'center',
               gap: TOKENS.spacing[2],
+              minWidth: 0,
             }}>
               <div style={{
-                width: TOKENS.spacing[2],
-                height: TOKENS.spacing[2],
+                width: 6,
+                height: 6,
                 borderRadius: '50%',
                 background: vault.color,
+                flexShrink: 0,
               }} />
               <span style={{
-                fontSize: TOKENS.fontSizes.xs,
+                fontSize: TOKENS.fontSizes.micro,
                 fontWeight: TOKENS.fontWeights.bold,
                 color: hoveredId === vault.id ? TOKENS.colors.textPrimary : TOKENS.colors.textSecondary,
                 transition: 'color 120ms ease-out',
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
               }}>
                 {formatVaultName(vault.name)}
               </span>
             </div>
             <span style={{
-              fontSize: TOKENS.fontSizes.xs,
+              fontSize: TOKENS.fontSizes.micro,
               fontWeight: TOKENS.fontWeights.black,
               color: TOKENS.colors.textPrimary,
+              flexShrink: 0,
             }}>
               {vault.pct.toFixed(0)}%
             </span>
           </div>
         ))}
+        {data.length > 3 && (
+          <div style={{
+            fontSize: TOKENS.fontSizes.micro,
+            color: TOKENS.colors.textGhost,
+            textAlign: 'center',
+            padding: `2px 0`,
+          }}>
+            +{data.length - 3} more
+          </div>
+        )}
       </div>
     </div>
   )

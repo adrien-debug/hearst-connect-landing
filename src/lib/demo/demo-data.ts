@@ -23,7 +23,7 @@ export const DEMO_VAULTS: VaultConfig[] = [
   {
     id: 'demo-vault-flagship',
     name: 'Flagship Mining Yield',
-    description: 'Anchor allocation across hashprice-hedged industrial mining operations.',
+    description: 'Our anchor allocation. Diversified exposure across tier-1 industrial Bitcoin mining operations in North America, hedged through hashprice swaps to smooth cashflow volatility. Monthly USDC distributions sourced directly from operating margin.',
     vaultAddress: ZERO_ADDR,
     usdcAddress: USDC_BASE,
     chain: base,
@@ -31,7 +31,7 @@ export const DEMO_VAULTS: VaultConfig[] = [
     target: '12.4%',
     lockPeriodDays: 365,
     minDeposit: 5000,
-    strategy: 'Hash-rate diversified · monthly distribution',
+    strategy: 'Hash-rate diversified · monthly distribution · hashprice-hedged',
     fees: '1.5% performance · 0.25% management',
     risk: 'Medium',
     image: undefined,
@@ -42,7 +42,7 @@ export const DEMO_VAULTS: VaultConfig[] = [
   {
     id: 'demo-vault-conservative',
     name: 'Conservative USDC Core',
-    description: 'Capital-preservation tier — short-term USDC ladders backed by mining receivables.',
+    description: 'Capital-preservation tier engineered for institutional treasuries. Short-duration USDC ladders backed by senior receivables from active mining operations. Monthly redemption windows, capital protected by overcollateralized claims.',
     vaultAddress: ZERO_ADDR,
     usdcAddress: USDC_BASE,
     chain: base,
@@ -50,7 +50,7 @@ export const DEMO_VAULTS: VaultConfig[] = [
     target: '7.8%',
     lockPeriodDays: 90,
     minDeposit: 1000,
-    strategy: 'Receivable-backed USDC ladders',
+    strategy: 'Receivable-backed USDC ladders · 90-day rolling · senior tranche',
     fees: '0.5% management',
     risk: 'Low',
     image: undefined,
@@ -61,7 +61,7 @@ export const DEMO_VAULTS: VaultConfig[] = [
   {
     id: 'demo-vault-growth',
     name: 'Growth Hashrate +',
-    description: 'Higher-beta allocation tracking new-build hashrate expansions.',
+    description: 'Higher-beta allocation tracking newly-commissioned hashrate expansions. Capital deployed into greenfield sites with 18-month build-out cycles, capturing the premium between forward hashprice curves and spot. Designed for accumulators with conviction on long-term BTC issuance economics.',
     vaultAddress: ZERO_ADDR,
     usdcAddress: USDC_BASE,
     chain: base,
@@ -69,7 +69,7 @@ export const DEMO_VAULTS: VaultConfig[] = [
     target: '16.2%',
     lockPeriodDays: 540,
     minDeposit: 10000,
-    strategy: 'New-build hashrate exposure',
+    strategy: 'New-build hashrate · forward-curve arbitrage · 18mo build cycle',
     fees: '2.0% performance · 0.25% management',
     risk: 'High',
     image: undefined,
@@ -80,7 +80,7 @@ export const DEMO_VAULTS: VaultConfig[] = [
   {
     id: 'demo-vault-treasury',
     name: 'Treasury Plus',
-    description: 'Idle USDC parked into curated short-duration mining-backed notes.',
+    description: 'A parking lot for idle USDC with a yield premium. Curated short-duration notes (30-day average maturity) collateralized by mining-derived cashflows. Withdraw anytime after the lock window, no exit penalties.',
     vaultAddress: ZERO_ADDR,
     usdcAddress: USDC_BASE,
     chain: base,
@@ -88,7 +88,7 @@ export const DEMO_VAULTS: VaultConfig[] = [
     target: '5.6%',
     lockPeriodDays: 30,
     minDeposit: 500,
-    strategy: 'Curated short-duration notes',
+    strategy: 'Curated short-duration notes · 30-day average maturity · zero exit fee',
     fees: '0.4% management',
     risk: 'Very Low',
     image: undefined,
@@ -99,7 +99,7 @@ export const DEMO_VAULTS: VaultConfig[] = [
   {
     id: 'demo-vault-frontier',
     name: 'Frontier Hashrate',
-    description: 'Opportunistic exposure — emerging-market mining sites.',
+    description: 'Opportunistic exposure to emerging-market mining sites — Africa, Latin America, Central Asia. Captures geographic energy arbitrage and frontier-market premium. 24-month commitment with quarterly distribution windows. Highest yield, highest variance.',
     vaultAddress: ZERO_ADDR,
     usdcAddress: USDC_BASE,
     chain: base,
@@ -107,7 +107,7 @@ export const DEMO_VAULTS: VaultConfig[] = [
     target: '19.5%',
     lockPeriodDays: 730,
     minDeposit: 25000,
-    strategy: 'Frontier-market opportunistic',
+    strategy: 'Frontier-market sites · energy-arbitrage · quarterly windows',
     fees: '2.5% performance · 0.5% management',
     risk: 'High',
     image: undefined,
@@ -370,6 +370,12 @@ export const DEMO_ADMIN_ACTIVITY = [
   { id: 'l5', userId: 'sys', vaultId: 'demo-vault-flagship',     vaultName: 'Flagship Mining Yield',  type: 'deposit'  as const, amount: 145000,timestamp: NOW() - 220 * 24 * 60 * 60 * 1000 },
   { id: 'l6', userId: 'sys', vaultId: 'demo-vault-growth',       vaultName: 'Growth Hashrate +',      type: 'claim'    as const, amount: 884,   timestamp: NOW() - 5 * 24 * 60 * 60 * 1000 },
 ]
+
+// ───────────────────────────────────────────── Per-vault activity (for vault detail page)
+
+export function getDemoVaultActivity(vaultId: string): UserActivityItem[] {
+  return DEMO_ACTIVITY.filter((a) => a.vaultId === vaultId).sort((a, b) => b.timestamp - a.timestamp)
+}
 
 // ───────────────────────────────────────────── Position data (on-chain shape)
 
