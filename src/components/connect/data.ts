@@ -2,8 +2,9 @@ import {
   type Aggregate as VaultAggregate,
   computeMonthlyYield as computeMonthlyYieldCore,
 } from '@/lib/vault-math'
+import type { VaultMeta } from '@/types/vault'
 
-interface BaseVault {
+interface BaseVault extends VaultMeta {
   id: string
   name: string
   apr: number

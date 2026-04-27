@@ -1,9 +1,9 @@
 'use client'
 
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import { useAccount } from 'wagmi'
 import { Label } from '@/components/ui/label'
-import { TOKENS, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING } from './constants'
+import { TOKENS, fmtUsdCompact, LINE_HEIGHT, VALUE_LETTER_SPACING, CHART_PALETTE } from './constants'
 import { formatVaultName } from './formatting'
 import { Modal, TransactionState } from './modal'
 import type { ActiveVault, MaturedVault } from './data'
@@ -66,7 +66,17 @@ export function VaultDetailPanel({
   // (Rules of Hooks: order must be stable across renders).
   const { claim: liveClaim, withdraw: liveWithdraw } = useLiveActions(vault.id)
   const { activity: allActivity } = useUserData()
-  const vaultActivity = allActivity.filter((a) => a.vaultId === vault.id).slice(0, 4)
+  const [activityFilter, setActivityFilter] = useState<'all' | 'claim' | 'deposit'>('all')
+  const vaultActivityRaw = useMemo(
+    () => allActivity.filter((a) => a.vaultId === vault.id),
+    [allActivity, vault.id],
+  )
+  const vaultActivity = useMemo(() => {
+    const filtered = activityFilter === 'all'
+      ? vaultActivityRaw
+      : vaultActivityRaw.filter((a) => a.type === activityFilter)
+    return filtered.slice(0, 6)
+  }, [vaultActivityRaw, activityFilter])
 
   if (!isVaultConfigured) {
     return (
@@ -147,6 +157,18 @@ export function VaultDetailPanel({
   const isMatured = vault.type === 'matured'
   const unlockDays = Math.max(0, daysRemaining)
   const isTargetReached = positionData?.isTargetReached ?? false
+
+  // Realized APR — annualizes the yield earned over the elapsed lock days, so
+  // a 30-day-old position with $100 yield on $10k shows the implied APR rather
+  // than a misleadingly small instant ratio. Falls back to the vault target
+  // when we don't have lock-day data yet.
+  const totalLockDays = Math.max(1, vaultConfig?.lockPeriodDays ?? 365)
+  const elapsedLockDays = Math.max(1, totalLockDays - unlockDays)
+  const realizedApr = capitalDeployed > 0
+    ? (accruedYield / capitalDeployed) * (365 / elapsedLockDays) * 100
+    : 0
+  const targetApr = vaultConfig?.apr ?? vault.apr ?? 0
+  const aprDelta = realizedApr - targetApr
   const isPositionReadyForExit = positionData?.canWithdraw ?? false
   const statusLabel = isPositionReadyForExit ? 'Ready for exit' : 'Active'
 
@@ -263,15 +285,19 @@ export function VaultDetailPanel({
           overflow: 'hidden',
         }}
       >
-        {/* KPI row */}
+        {/* KPI row — 5 cells (Deposited, Current value, Yield paid, Performance, Matures) */}
         <div style={{
           display: 'grid',
           gridTemplateColumns: fitValue(mode, {
-            normal: 'repeat(4, 1fr)',
-            tight: 'repeat(2, 1fr)',
-            limit: '1fr 1fr',
+            normal: 'repeat(5, 1fr)',
+            tight: 'repeat(3, 1fr)',
+            limit: 'repeat(2, 1fr)',
           }),
-          gap: TOKENS.spacing[6],
+          gap: fitValue(mode, {
+            normal: TOKENS.spacing[6],
+            tight: TOKENS.spacing[4],
+            limit: TOKENS.spacing[3],
+          }),
           flexShrink: 0,
         }}>
           <KpiCell label="Deposited" value={fmtUsdCompact(capitalDeployed)} />
@@ -291,6 +317,15 @@ export function VaultDetailPanel({
             label="Yield paid"
             value={fmtUsdCompact(accruedYield)}
             valueAccent={accruedYield > 0}
+          />
+          <KpiCell
+            label="Performance"
+            value={`${realizedApr.toFixed(1)}%`}
+            valueAccent={aprDelta >= 0}
+            subtext={aprDelta >= 0
+              ? `+${aprDelta.toFixed(1)}pp vs ${targetApr.toFixed(1)}%`
+              : `${aprDelta.toFixed(1)}pp vs ${targetApr.toFixed(1)}%`}
+            subtextAccent={aprDelta >= 0}
           />
           <KpiCell
             label="Matures"
@@ -319,7 +354,7 @@ export function VaultDetailPanel({
           mode={mode}
         />
 
-        {/* 2-column detail layout — Description+Strategy on left, Terms+Activity on right */}
+        {/* 2-column detail layout — 4 enriched cards (About+History, Strategy+Composition, Terms, Activity) */}
         <div
           style={{
             display: 'grid',
@@ -334,59 +369,67 @@ export function VaultDetailPanel({
             overflow: 'hidden',
           }}
         >
-          {/* Left column — About + Strategy */}
-          <DetailCard title="About this vault" accent>
-            <p style={{
-              margin: 0,
-              fontSize: TOKENS.fontSizes.sm,
-              color: TOKENS.colors.textSecondary,
-              lineHeight: LINE_HEIGHT.body,
-            }}>
-              {vaultConfig?.description ?? vault.strategy}
-            </p>
-            <div style={{
-              display: 'flex',
-              gap: TOKENS.spacing[2],
-              flexWrap: 'wrap',
-              marginTop: TOKENS.spacing[3],
-            }}>
-              <DetailPill label={vaultConfig?.risk ?? (vault.type === 'active' ? vault.risk : 'Medium')} icon="risk" />
-              <DetailPill label={vaultConfig?.chain?.name ?? 'Base'} icon="chain" />
-              <DetailPill label={vaultConfig?.fees?.split('·')[0]?.trim() ?? '—'} icon="fees" />
-            </div>
-            <div style={{
-              borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
-              marginTop: TOKENS.spacing[4],
-              paddingTop: TOKENS.spacing[3],
-            }}>
-              <div style={{
-                fontFamily: TOKENS.fonts.mono,
-                fontSize: TOKENS.fontSizes.micro,
-                fontWeight: TOKENS.fontWeights.bold,
-                letterSpacing: TOKENS.letterSpacing.display,
-                textTransform: 'uppercase',
-                color: TOKENS.colors.textGhost,
-                marginBottom: TOKENS.spacing[2],
-              }}>
-                Strategy
-              </div>
-              <p style={{
-                margin: 0,
-                fontSize: TOKENS.fontSizes.xs,
-                color: TOKENS.colors.textSecondary,
-                lineHeight: LINE_HEIGHT.body,
-              }}>
-                {vault.strategy}
-              </p>
-            </div>
-          </DetailCard>
-
-          {/* Right column — Terms + Activity */}
+          {/* LEFT: About+History → Strategy+Composition */}
           <div style={{
             display: 'flex',
             flexDirection: 'column',
             gap: shellGap,
             minHeight: 0,
+            overflow: 'auto',
+          }}>
+            <DetailCard title="About this vault" accent>
+              <p style={{
+                margin: 0,
+                fontSize: TOKENS.fontSizes.sm,
+                color: TOKENS.colors.textSecondary,
+                lineHeight: LINE_HEIGHT.body,
+              }}>
+                {vaultConfig?.description ?? vault.strategy}
+              </p>
+              <div style={{
+                display: 'flex',
+                gap: TOKENS.spacing[2],
+                flexWrap: 'wrap',
+                marginTop: TOKENS.spacing[3],
+              }}>
+                <DetailPill label={vaultConfig?.risk ?? (vault.type === 'active' ? vault.risk : 'Medium')} icon="risk" />
+                <DetailPill label={vaultConfig?.chain?.name ?? 'Base'} icon="chain" />
+                <DetailPill label={vaultConfig?.fees?.split('·')[0]?.trim() ?? '—'} icon="fees" />
+              </div>
+              {vaultConfig?.historicalReturns && vaultConfig.historicalReturns.length > 1 && (
+                <VaultHistoryChart returns={vaultConfig.historicalReturns} targetApr={targetApr} />
+              )}
+              {(vaultConfig?.tvl != null || vaultConfig?.investorCount != null || vaultConfig?.inception != null) && (
+                <div style={{
+                  display: 'grid',
+                  gridTemplateColumns: 'repeat(3, 1fr)',
+                  gap: TOKENS.spacing[3],
+                  marginTop: TOKENS.spacing[4],
+                  paddingTop: TOKENS.spacing[3],
+                  borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+                }}>
+                  {vaultConfig?.tvl != null && <MicroStat label="TVL" value={fmtUsdCompact(vaultConfig.tvl)} />}
+                  {vaultConfig?.investorCount != null && <MicroStat label="Investors" value={vaultConfig.investorCount.toLocaleString('en-US')} />}
+                  {vaultConfig?.inception != null && <MicroStat label="Inception" value={new Date(vaultConfig.inception).toLocaleDateString('en-US', { month: 'short', year: 'numeric' })} />}
+                </div>
+              )}
+            </DetailCard>
+
+            <DetailCard title="Strategy & composition">
+              <VaultStrategyList vault={vault} vaultConfig={vaultConfig} />
+              {vaultConfig?.composition && vaultConfig.composition.length > 0 && (
+                <VaultCompositionBars composition={vaultConfig.composition} />
+              )}
+            </DetailCard>
+          </div>
+
+          {/* RIGHT: Terms (enriched) → Activity (with filters) */}
+          <div style={{
+            display: 'flex',
+            flexDirection: 'column',
+            gap: shellGap,
+            minHeight: 0,
+            overflow: 'auto',
           }}>
             <DetailCard title="Terms">
               <TermsBody
@@ -396,7 +439,12 @@ export function VaultDetailPanel({
                 unlockDays={unlockDays}
               />
             </DetailCard>
-            <DetailCard title={`Activity (${vaultActivity.length})`}>
+            <DetailCard
+              title={`Activity (${vaultActivityRaw.length})`}
+              headerRight={
+                <ActivityFilterTabs value={activityFilter} onChange={setActivityFilter} />
+              }
+            >
               <VaultActivityTimeline activity={vaultActivity} />
             </DetailCard>
           </div>
@@ -974,19 +1022,74 @@ function TermsBody({
     : undefined
 
   return (
-    <div style={{
-      display: 'grid',
-      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
-      columnGap: TOKENS.spacing[6],
-      rowGap: TOKENS.spacing[3],
-    }}>
-      <MetaRow label="Lock period" value={lockPeriod} />
-      <MetaRow label="Maturity" value={formattedMaturity} />
-      <MetaRow label="Target unlock" value={vault.target} />
-      {minDeposit && <MetaRow label="Min deposit" value={minDeposit} />}
-      {vaultConfig?.fees && <MetaRow label="Fees" value={vaultConfig.fees} />}
-      {vaultConfig?.chain?.name && <MetaRow label="Chain" value={vaultConfig.chain.name} />}
-      {truncatedVault && <MetaRow label="Vault" value={truncatedVault} mono />}
+    <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[4] }}>
+      <div style={{
+        display: 'grid',
+        gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+        columnGap: TOKENS.spacing[6],
+        rowGap: TOKENS.spacing[3],
+      }}>
+        <MetaRow label="Lock period" value={lockPeriod} />
+        <MetaRow label="Maturity" value={formattedMaturity} />
+        <MetaRow label="Target unlock" value={vault.target} />
+        {minDeposit && <MetaRow label="Min deposit" value={minDeposit} />}
+        {vaultConfig?.fees && <MetaRow label="Fees" value={vaultConfig.fees} />}
+        {vaultConfig?.chain?.name && <MetaRow label="Chain" value={vaultConfig.chain.name} />}
+        {truncatedVault && <MetaRow label="Vault" value={truncatedVault} mono />}
+        {vaultConfig?.earlyWithdrawalPenalty && (
+          <MetaRow label="Early exit" value={vaultConfig.earlyWithdrawalPenalty} />
+        )}
+        {vaultConfig?.custodian && (
+          <MetaRow label="Custodian" value={vaultConfig.custodian} />
+        )}
+      </div>
+      {vaultConfig?.auditReports && vaultConfig.auditReports.length > 0 && (
+        <div style={{
+          paddingTop: TOKENS.spacing[3],
+          borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+        }}>
+          <div style={{
+            fontFamily: TOKENS.fonts.mono,
+            fontSize: TOKENS.fontSizes.micro,
+            fontWeight: TOKENS.fontWeights.bold,
+            letterSpacing: TOKENS.letterSpacing.display,
+            textTransform: 'uppercase',
+            color: TOKENS.colors.textGhost,
+            marginBottom: TOKENS.spacing[2],
+          }}>
+            Audit reports
+          </div>
+          <div style={{ display: 'flex', flexWrap: 'wrap', gap: TOKENS.spacing[2] }}>
+            {vaultConfig.auditReports.map((r) => (
+              <a
+                key={r.label}
+                href={r.url}
+                target="_blank"
+                rel="noopener noreferrer"
+                style={{
+                  display: 'inline-flex',
+                  alignItems: 'center',
+                  gap: TOKENS.spacing[1],
+                  padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
+                  background: TOKENS.colors.bgTertiary,
+                  border: `1px solid ${TOKENS.colors.borderSubtle}`,
+                  borderRadius: TOKENS.radius.full,
+                  fontFamily: TOKENS.fonts.mono,
+                  fontSize: TOKENS.fontSizes.nano,
+                  fontWeight: TOKENS.fontWeights.bold,
+                  letterSpacing: TOKENS.letterSpacing.display,
+                  textTransform: 'uppercase',
+                  color: TOKENS.colors.textSecondary,
+                  textDecoration: 'none',
+                }}
+              >
+                <span style={{ color: TOKENS.colors.accent, fontSize: TOKENS.fontSizes.nano, lineHeight: 1 }}>↗</span>
+                {r.label}
+              </a>
+            ))}
+          </div>
+        </div>
+      )}
     </div>
   )
 }
@@ -1070,10 +1173,12 @@ function ManageOption({
 function DetailCard({
   title,
   accent = false,
+  headerRight,
   children,
 }: {
   title: string
   accent?: boolean
+  headerRight?: React.ReactNode
   children: React.ReactNode
 }) {
   return (
@@ -1094,36 +1199,338 @@ function DetailCard({
         style={{
           display: 'flex',
           alignItems: 'center',
+          justifyContent: 'space-between',
           gap: TOKENS.spacing[2],
           marginBottom: TOKENS.spacing[3],
           flexShrink: 0,
         }}
       >
-        <span
-          style={{
-            width: 3,
-            height: 14,
-            background: accent ? TOKENS.colors.accent : TOKENS.colors.borderStrong,
-            borderRadius: TOKENS.radius.full,
-            display: 'inline-block',
-          }}
-        />
-        <span
-          style={{
-            fontFamily: TOKENS.fonts.mono,
-            fontSize: TOKENS.fontSizes.xs,
-            fontWeight: TOKENS.fontWeights.bold,
-            letterSpacing: TOKENS.letterSpacing.display,
-            textTransform: 'uppercase',
-            color: TOKENS.colors.textSecondary,
-          }}
-        >
-          {title}
-        </span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: TOKENS.spacing[2], minWidth: 0 }}>
+          <span
+            style={{
+              width: 3,
+              height: 14,
+              background: accent ? TOKENS.colors.accent : TOKENS.colors.borderStrong,
+              borderRadius: TOKENS.radius.full,
+              display: 'inline-block',
+              flexShrink: 0,
+            }}
+          />
+          <span
+            style={{
+              fontFamily: TOKENS.fonts.mono,
+              fontSize: TOKENS.fontSizes.xs,
+              fontWeight: TOKENS.fontWeights.bold,
+              letterSpacing: TOKENS.letterSpacing.display,
+              textTransform: 'uppercase',
+              color: TOKENS.colors.textSecondary,
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis',
+            }}
+          >
+            {title}
+          </span>
+        </div>
+        {headerRight && <div style={{ flexShrink: 0 }}>{headerRight}</div>}
       </div>
       <div style={{ minHeight: 0, overflow: 'auto', flex: 1 }} className="hide-scrollbar">
         {children}
       </div>
+    </div>
+  )
+}
+
+/** Compact label-over-value stat — used in About card footer (TVL / Investors / Inception). */
+function MicroStat({ label, value }: { label: string; value: string }) {
+  return (
+    <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing.half, minWidth: 0 }}>
+      <span style={{
+        fontFamily: TOKENS.fonts.mono,
+        fontSize: TOKENS.fontSizes.nano,
+        fontWeight: TOKENS.fontWeights.bold,
+        letterSpacing: TOKENS.letterSpacing.display,
+        textTransform: 'uppercase',
+        color: TOKENS.colors.textGhost,
+      }}>{label}</span>
+      <span style={{
+        fontSize: TOKENS.fontSizes.sm,
+        fontWeight: TOKENS.fontWeights.black,
+        color: TOKENS.colors.textPrimary,
+        fontFamily: TOKENS.fonts.sans,
+        fontVariantNumeric: 'tabular-nums',
+      }}>{value}</span>
+    </div>
+  )
+}
+
+/** VaultHistoryChart — 12-month yield curve sparkline, drawn inline as SVG so
+ * we don't pull Chart.js into the user-facing bundle. The dotted target line
+ * sets the visual baseline (vault APR) and the citrus area underlines wins. */
+function VaultHistoryChart({
+  returns,
+  targetApr,
+}: {
+  returns: Array<{ month: string; yieldPct: number }>
+  targetApr: number
+}) {
+  const W = 100
+  const H = 40
+  const min = Math.min(targetApr, ...returns.map((r) => r.yieldPct)) * 0.85
+  const max = Math.max(targetApr, ...returns.map((r) => r.yieldPct)) * 1.10
+  const span = Math.max(0.01, max - min)
+  const stepX = returns.length > 1 ? W / (returns.length - 1) : W
+  const ptY = (v: number) => H - ((v - min) / span) * H
+  const linePath = returns.map((r, i) => `${i === 0 ? 'M' : 'L'} ${(i * stepX).toFixed(2)} ${ptY(r.yieldPct).toFixed(2)}`).join(' ')
+  const areaPath = `${linePath} L ${(W).toFixed(2)} ${H} L 0 ${H} Z`
+  const targetY = ptY(targetApr)
+  const last = returns[returns.length - 1]
+  const first = returns[0]
+
+  return (
+    <div style={{ marginTop: TOKENS.spacing[4] }}>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        alignItems: 'baseline',
+        marginBottom: TOKENS.spacing[2],
+      }}>
+        <span style={{
+          fontFamily: TOKENS.fonts.mono,
+          fontSize: TOKENS.fontSizes.micro,
+          fontWeight: TOKENS.fontWeights.bold,
+          letterSpacing: TOKENS.letterSpacing.display,
+          textTransform: 'uppercase',
+          color: TOKENS.colors.textGhost,
+        }}>
+          Yield history · {returns.length}mo
+        </span>
+        <span style={{
+          fontFamily: TOKENS.fonts.mono,
+          fontSize: TOKENS.fontSizes.xs,
+          fontWeight: TOKENS.fontWeights.bold,
+          color: TOKENS.colors.accent,
+          fontVariantNumeric: 'tabular-nums',
+        }}>
+          {last?.yieldPct.toFixed(1)}% · target {targetApr.toFixed(1)}%
+        </span>
+      </div>
+      <svg
+        viewBox={`0 0 ${W} ${H}`}
+        preserveAspectRatio="none"
+        width="100%"
+        height={48}
+        aria-label="Vault historical yield"
+      >
+        <path d={areaPath} fill={TOKENS.colors.accentGlow} />
+        {/* Target baseline */}
+        <line
+          x1="0" y1={targetY} x2={W} y2={targetY}
+          stroke={TOKENS.colors.borderStrong}
+          strokeWidth={0.4}
+          strokeDasharray="1.6 1.6"
+        />
+        <path d={linePath} fill="none" stroke={TOKENS.colors.accent} strokeWidth={1.4} strokeLinejoin="round" strokeLinecap="round" />
+        <circle cx={(returns.length - 1) * stepX} cy={ptY(last?.yieldPct ?? targetApr)} r={1.6} fill={TOKENS.colors.accent} />
+      </svg>
+      <div style={{
+        display: 'flex',
+        justifyContent: 'space-between',
+        marginTop: TOKENS.spacing[1],
+        fontFamily: TOKENS.fonts.mono,
+        fontSize: TOKENS.fontSizes.nano,
+        color: TOKENS.colors.textGhost,
+      }}>
+        <span>{first?.month}</span>
+        <span>{last?.month}</span>
+      </div>
+    </div>
+  )
+}
+
+/** VaultStrategyList — Structured Strategy section: type / cadence / hedging /
+ * underlying / risk envelope. Reads from vault.strategy text plus optional
+ * envelope fields on VaultMeta (drawdown, vol, sharpe). */
+function VaultStrategyList({
+  vault,
+  vaultConfig,
+}: {
+  vault: ActiveVault | MaturedVault
+  vaultConfig: VaultConfig | null
+}) {
+  // Strategy text is delimited by " · " — split into tagged rows so the
+  // unstructured field still produces a structured display.
+  const parts = (vault.strategy || '').split('·').map((s) => s.trim()).filter(Boolean)
+  const cadence = parts[1] ?? '—'
+  const hedging = parts[2] ?? parts[0] ?? '—'
+  const underlying = parts[0] ?? '—'
+
+  const rows: Array<{ label: string; value: string; mono?: boolean }> = [
+    { label: 'Strategy', value: underlying },
+    { label: 'Distribution', value: cadence, mono: true },
+    { label: 'Hedging', value: hedging },
+  ]
+
+  return (
+    <div style={{
+      display: 'grid',
+      gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))',
+      columnGap: TOKENS.spacing[6],
+      rowGap: TOKENS.spacing[3],
+    }}>
+      {rows.map((r) => <MetaRow key={r.label} label={r.label} value={r.value} mono={r.mono} />)}
+      {vaultConfig?.maxDrawdown != null && (
+        <MetaRow label="Max drawdown" value={`${vaultConfig.maxDrawdown.toFixed(1)}%`} mono />
+      )}
+      {vaultConfig?.volatility != null && (
+        <MetaRow label="Volatility" value={`${vaultConfig.volatility.toFixed(1)}%`} mono />
+      )}
+      {vaultConfig?.sharpe != null && (
+        <MetaRow label="Sharpe" value={vaultConfig.sharpe.toFixed(2)} mono />
+      )}
+    </div>
+  )
+}
+
+/** VaultCompositionBars — Horizontal bars for sub-allocation breakdown.
+ * Color rotates through CHART_PALETTE so it visually rhymes with the donut. */
+function VaultCompositionBars({
+  composition,
+}: {
+  composition: Array<{ label: string; pct: number; color?: string }>
+}) {
+  const total = composition.reduce((s, c) => s + c.pct, 0) || 1
+  return (
+    <div style={{
+      marginTop: TOKENS.spacing[4],
+      paddingTop: TOKENS.spacing[3],
+      borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+    }}>
+      <div style={{
+        fontFamily: TOKENS.fonts.mono,
+        fontSize: TOKENS.fontSizes.micro,
+        fontWeight: TOKENS.fontWeights.bold,
+        letterSpacing: TOKENS.letterSpacing.display,
+        textTransform: 'uppercase',
+        color: TOKENS.colors.textGhost,
+        marginBottom: TOKENS.spacing[3],
+      }}>
+        Composition
+      </div>
+      {/* Stacked bar */}
+      <div style={{
+        display: 'flex',
+        height: 6,
+        borderRadius: TOKENS.radius.full,
+        overflow: 'hidden',
+        marginBottom: TOKENS.spacing[3],
+        background: TOKENS.colors.bgTertiary,
+      }}>
+        {composition.map((slice, i) => (
+          <div
+            key={slice.label}
+            style={{
+              flex: slice.pct / total,
+              background: slice.color ?? CHART_PALETTE[i % CHART_PALETTE.length],
+            }}
+          />
+        ))}
+      </div>
+      {/* Legend rows */}
+      <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2] }}>
+        {composition.map((slice, i) => (
+          <div
+            key={slice.label}
+            style={{
+              display: 'flex',
+              justifyContent: 'space-between',
+              alignItems: 'center',
+              gap: TOKENS.spacing[3],
+              fontSize: TOKENS.fontSizes.xs,
+            }}
+          >
+            <span style={{ display: 'flex', alignItems: 'center', gap: TOKENS.spacing[2], minWidth: 0 }}>
+              <span style={{
+                width: 8,
+                height: 8,
+                borderRadius: TOKENS.radius.full,
+                background: slice.color ?? CHART_PALETTE[i % CHART_PALETTE.length],
+                flexShrink: 0,
+              }} />
+              <span style={{
+                color: TOKENS.colors.textPrimary,
+                overflow: 'hidden',
+                textOverflow: 'ellipsis',
+                whiteSpace: 'nowrap',
+              }}>
+                {slice.label}
+              </span>
+            </span>
+            <span style={{
+              fontFamily: TOKENS.fonts.mono,
+              fontWeight: TOKENS.fontWeights.bold,
+              color: TOKENS.colors.textSecondary,
+              fontVariantNumeric: 'tabular-nums',
+              flexShrink: 0,
+            }}>
+              {slice.pct.toFixed(0)}%
+            </span>
+          </div>
+        ))}
+      </div>
+    </div>
+  )
+}
+
+/** ActivityFilterTabs — Tri-state pill (All / Claims / Deposits) above the
+ * VaultActivityTimeline so users can isolate cashflow events. */
+function ActivityFilterTabs({
+  value,
+  onChange,
+}: {
+  value: 'all' | 'claim' | 'deposit'
+  onChange: (v: 'all' | 'claim' | 'deposit') => void
+}) {
+  const opts: Array<{ id: typeof value; label: string }> = [
+    { id: 'all', label: 'All' },
+    { id: 'claim', label: 'Claims' },
+    { id: 'deposit', label: 'Deposits' },
+  ]
+  return (
+    <div style={{
+      display: 'inline-flex',
+      gap: TOKENS.spacing.half,
+      padding: TOKENS.spacing.half,
+      background: TOKENS.colors.bgTertiary,
+      borderRadius: TOKENS.radius.full,
+      border: `1px solid ${TOKENS.colors.borderSubtle}`,
+    }}>
+      {opts.map((opt) => {
+        const active = value === opt.id
+        return (
+          <button
+            key={opt.id}
+            type="button"
+            onClick={() => onChange(opt.id)}
+            style={{
+              padding: `${TOKENS.spacing.half} ${TOKENS.spacing[2]}`,
+              borderRadius: TOKENS.radius.full,
+              border: 'none',
+              background: active ? TOKENS.colors.accent : 'transparent',
+              color: active ? TOKENS.colors.bgApp : TOKENS.colors.textSecondary,
+              fontFamily: TOKENS.fonts.mono,
+              fontSize: TOKENS.fontSizes.nano,
+              fontWeight: TOKENS.fontWeights.bold,
+              letterSpacing: TOKENS.letterSpacing.display,
+              textTransform: 'uppercase',
+              cursor: 'pointer',
+              transition: TOKENS.transitions.fast,
+            }}
+          >
+            {opt.label}
+          </button>
+        )
+      })}
     </div>
   )
 }
