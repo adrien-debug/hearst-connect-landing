@@ -15,7 +15,6 @@ interface CockpitGaugeProps {
   active?: boolean
   align?: 'left' | 'center' | 'right'
   onClick?: () => void
-  sparkline?: number[]
 }
 
 export function CockpitGauge({
@@ -29,7 +28,6 @@ export function CockpitGauge({
   active = false,
   align = 'left',
   onClick,
-  sparkline,
 }: CockpitGaugeProps) {
   const displayValue = mode === 'limit' ? valueCompact : value
 
@@ -57,7 +55,7 @@ export function CockpitGauge({
         }),
         borderRadius: TOKENS.radius.md,
         background: active ? TOKENS.colors.accentSubtle : 'transparent',
-        border: active ? `1px solid ${TOKENS.colors.accent}` : '1px solid transparent',
+        border: active ? `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}` : `${TOKENS.borders.thin} solid transparent`,
         transition: TOKENS.transitions.fast,
       }}
       onMouseEnter={(e) => {
@@ -94,9 +92,6 @@ export function CockpitGauge({
       }}>
         {displayValue}
       </div>
-      {sparkline && sparkline.length > 1 && mode !== 'limit' && (
-        <GaugeSpark values={sparkline} accent={accent} />
-      )}
       <div style={{
         fontSize: TOKENS.fontSizes.xs,
         fontWeight: TOKENS.fontWeights.bold,
@@ -106,34 +101,5 @@ export function CockpitGauge({
         {subtext}
       </div>
     </div>
-  )
-}
-
-function GaugeSpark({ values, accent }: { values: number[]; accent: boolean }) {
-  const W = 100
-  const H = 22
-  const min = Math.min(...values)
-  const max = Math.max(...values)
-  const span = Math.max(0.0001, max - min)
-  const stepX = W / (values.length - 1)
-  const pctY = (v: number) => H * 0.9 - ((v - min) / span) * H * 0.8
-  const path = values
-    .map((v, i) => `${i === 0 ? 'M' : 'L'} ${(i * stepX).toFixed(1)} ${pctY(v).toFixed(1)}`)
-    .join(' ')
-  const lastX = (values.length - 1) * stepX
-  const lastY = pctY(values[values.length - 1])
-  const stroke = accent ? TOKENS.colors.accent : TOKENS.colors.textSecondary
-  return (
-    <svg
-      viewBox={`0 0 ${W} ${H}`}
-      preserveAspectRatio="none"
-      width="100%"
-      height={H}
-      aria-hidden
-      style={{ display: 'block', opacity: 0.75, marginTop: TOKENS.spacing[1] }}
-    >
-      <path d={path} fill="none" stroke={stroke} strokeWidth="1.6" strokeLinejoin="round" strokeLinecap="round" />
-      <circle cx={lastX.toFixed(1)} cy={lastY.toFixed(1)} r="2" fill={stroke} />
-    </svg>
   )
 }

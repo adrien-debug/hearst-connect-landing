@@ -10,15 +10,6 @@ import {
   projectScenario,
 } from '@/lib/projection-simulation'
 
-function formatCompactUsd(value: number) {
-  return new Intl.NumberFormat('en-US', {
-    style: 'currency',
-    currency: 'USD',
-    notation: 'compact',
-    maximumFractionDigits: 1,
-  }).format(value)
-}
-
 function formatPercent(value: number) {
   return `${value.toFixed(1)}%`
 }
@@ -102,7 +93,7 @@ export function SimulationPanel() {
             tight: `${pad * 0.75}px`,
             limit: `${pad * 0.5}px`,
           }),
-          borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
+          borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
           flexShrink: 0,
           background: TOKENS.colors.bgApp,
         }}
@@ -208,7 +199,7 @@ export function SimulationPanel() {
                 flexDirection: 'column',
                 minHeight: 0,
                 background: TOKENS.colors.black,
-                border: `1px solid ${TOKENS.colors.borderSubtle}`,
+                border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
                 borderRadius: TOKENS.radius.lg,
                 padding: fitValue(mode, {
                   normal: TOKENS.spacing[6],
@@ -261,23 +252,9 @@ export function SimulationPanel() {
                         strokeWidth="0.3"
                       />
                     ))}
-                    {([
-                      { key: 'bear', color: TOKENS.colors.danger },
-                      { key: 'base', color: TOKENS.colors.textSecondary },
-                      { key: 'bull', color: TOKENS.colors.accent },
-                    ] as const).map(({ key, color }) => {
-                      const active = scenario === key
-                      return (
-                        <polyline
-                          key={key}
-                          points={series[key]}
-                          fill="none"
-                          stroke={color}
-                          strokeWidth={active ? '1.2' : '0.4'}
-                          strokeOpacity={active ? 1 : 0.35}
-                        />
-                      )
-                    })}
+                    <polyline points={series.bear} fill="none" stroke={scenario === 'bear' ? TOKENS.colors.accent : TOKENS.colors.textGhost} strokeWidth={scenario === 'bear' ? "0.8" : "0.3"} />
+                    <polyline points={series.base} fill="none" stroke={scenario === 'base' ? TOKENS.colors.accent : TOKENS.colors.textGhost} strokeWidth={scenario === 'base' ? "0.8" : "0.3"} />
+                    <polyline points={series.bull} fill="none" stroke={scenario === 'bull' ? TOKENS.colors.accent : TOKENS.colors.textGhost} strokeWidth={scenario === 'bull' ? "0.8" : "0.3"} />
                   </svg>
                 </div>
               </div>
@@ -302,7 +279,7 @@ export function SimulationPanel() {
             <div
               style={{
                 background: TOKENS.colors.black,
-                border: `1px solid ${TOKENS.colors.borderSubtle}`,
+                border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
                 borderRadius: TOKENS.radius.lg,
                 padding: fitValue(mode, {
                   normal: TOKENS.spacing[6],
@@ -329,41 +306,33 @@ export function SimulationPanel() {
                 </span>
                 <div style={{ 
                   display: 'flex', 
-                  background: TOKENS.colors.bgTertiary, 
-                  borderRadius: TOKENS.radius.xl, 
+                  background: TOKENS.colors.bgTertiary,
+                  borderRadius: TOKENS.radius.xl,
                   padding: `${TOKENS.spacing[1]}`,
-                  border: `1px solid ${TOKENS.colors.borderSubtle}`
+                  border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`
                 }}>
-                  {([
-                    { key: 'bear', color: TOKENS.colors.danger },
-                    { key: 'base', color: TOKENS.colors.textSecondary },
-                    { key: 'bull', color: TOKENS.colors.accent },
-                  ] as const).map(({ key, color }) => {
-                    const active = scenario === key
-                    return (
-                      <button
-                        key={key}
-                        onClick={() => setScenario(key)}
-                        style={{
-                          padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[6]}`,
-                          borderRadius: TOKENS.radius.xl,
-                          background: active ? color : 'transparent',
-                          color: active ? TOKENS.colors.black : color,
-                          fontSize: TOKENS.fontSizes.xs,
-                          fontWeight: TOKENS.fontWeights.bold,
-                          textTransform: 'uppercase',
-                          letterSpacing: TOKENS.letterSpacing.display,
-                          border: 'none',
-                          cursor: 'pointer',
-                          transition: TOKENS.transitions.base,
-                          boxShadow: active ? `0 2px 8px ${color}40` : 'none',
-                          opacity: active ? 1 : 0.65,
-                        }}
-                      >
-                        {key}
-                      </button>
-                    )
-                  })}
+                  {(['bear', 'base', 'bull'] as const).map(s => (
+                    <button
+                      key={s}
+                      onClick={() => setScenario(s)}
+                      style={{
+                        padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[6]}`,
+                        borderRadius: TOKENS.radius.xl,
+                        background: scenario === s ? TOKENS.colors.accent : 'transparent',
+                        color: scenario === s ? TOKENS.colors.black : TOKENS.colors.textSecondary,
+                        fontSize: TOKENS.fontSizes.xs,
+                        fontWeight: TOKENS.fontWeights.bold,
+                        textTransform: 'uppercase',
+                        letterSpacing: TOKENS.letterSpacing.display,
+                        border: 'none',
+                        cursor: 'pointer',
+                        transition: TOKENS.transitions.base,
+                        boxShadow: scenario === s ? `0 2px 8px rgba(var(--brand-accent-rgb), 0.25)` : 'none',
+                      }}
+                    >
+                      {s}
+                    </button>
+                  ))}
                 </div>
               </div>
 
@@ -410,7 +379,7 @@ export function SimulationPanel() {
           {/* Right Column: Recap Panel */}
           <div style={{
             background: TOKENS.colors.black,
-            border: `1px solid ${TOKENS.colors.borderSubtle}`,
+            border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
             borderRadius: TOKENS.radius.lg,
             padding: fitValue(mode, {
               normal: TOKENS.spacing[6],
@@ -514,18 +483,17 @@ export function SimulationPanel() {
   )
 }
 
-function RecapRow({ label, value, accent, primary }: { label: string; value: string; accent?: boolean; primary?: boolean }) {
+function RecapRow({ label, value, accent }: { label: string; value: string; accent?: boolean }) {
   return (
     <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-      <span style={{ 
-        fontSize: TOKENS.fontSizes.xs, 
-        color: primary ? TOKENS.colors.textPrimary : TOKENS.colors.textSecondary,
-        fontWeight: primary ? TOKENS.fontWeights.bold : 'normal',
+      <span style={{
+        fontSize: TOKENS.fontSizes.xs,
+        color: TOKENS.colors.textSecondary,
       }}>
         {label}
       </span>
-      <span style={{ 
-        fontSize: primary ? TOKENS.fontSizes.md : TOKENS.fontSizes.sm, 
+      <span style={{
+        fontSize: TOKENS.fontSizes.sm,
         fontWeight: TOKENS.fontWeights.bold,
         color: accent ? TOKENS.colors.accent : TOKENS.colors.textPrimary,
         letterSpacing: VALUE_LETTER_SPACING,

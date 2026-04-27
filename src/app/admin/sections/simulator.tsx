@@ -151,7 +151,7 @@ function calcPocket(p: {
 const fmt = (n: number) => new Intl.NumberFormat('en-US', { maximumFractionDigits: 0 }).format(n)
 const fmtPct = (n: number) => `${n >= 0 ? '+' : ''}${n.toFixed(2)}%`
 const fmtU = (n: number) => '$' + fmt(n)
-const cc = (v: number) => (v >= 0 ? T.colors.success : T.colors.danger)
+const cc = (v: number) => (v >= 0 ? T.colors.accent : T.colors.danger)
 
 // ── Component ──────────────────────────────────────────────────────────
 
@@ -275,14 +275,14 @@ export function SimulatorSection() {
         </div>
         <LiveItem label="BTC/USD" value={fmtU(live.btcPrice)} />
         <LiveItem label="24h" value={fmtPct(live.btc24h)} color={cc(live.btc24h)} />
-        <LiveItem label="USDC (Aave)" value={`${live.usdcApy.toFixed(2)}%`} color={T.colors.success} />
-        <LiveItem label="USDT (Aave)" value={`${live.usdtApy.toFixed(2)}%`} color={T.colors.success} />
+        <LiveItem label="USDC (Aave)" value={`${live.usdcApy.toFixed(2)}%`} color={T.colors.accent} />
+        <LiveItem label="USDT (Aave)" value={`${live.usdtApy.toFixed(2)}%`} color={T.colors.accent} />
         <div>
           <span className="simulator-live-label">Fear & Greed</span>
-          <span className="simulator-live-value" style={{ color: live.fearGreed < 30 ? T.colors.danger : live.fearGreed > 70 ? T.colors.success : T.colors.warning }}>{live.fearGreed} — {live.fearLabel}</span>
+          <span className="simulator-live-value" style={{ color: live.fearGreed < 30 ? T.colors.danger : live.fearGreed > 70 ? T.colors.accent : T.colors.textGhost }}>{live.fearGreed} — {live.fearLabel}</span>
           <div className="simulator-fear-bar"><div style={{ height: '100%', width: `${live.fearGreed}%`, borderRadius: T.radius.full, background: `hsl(${fgHue},70%,50%)`, transition: `width ${T.transitions.slow}` }} /></div>
         </div>
-        <LiveItem label="Mining" value={`${effectiveMining.toFixed(1)}%/yr`} color={T.colors.success} />
+        <LiveItem label="Mining" value={`${effectiveMining.toFixed(1)}%/yr`} color={T.colors.accent} />
       </div>
 
       <div className="simulator-layout">

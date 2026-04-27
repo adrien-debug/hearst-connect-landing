@@ -188,7 +188,7 @@ const styles: Record<string, React.CSSProperties> = {
     height: '40px',
     border: `3px solid ${TOKENS.colors.bgTertiary}`,
     borderTopColor: TOKENS.colors.accent,
-    borderRadius: '50%',
+    borderRadius: TOKENS.radius.full,
     animation: 'spin 1s linear infinite',
   },
   loginScreen: {

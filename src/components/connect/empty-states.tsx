@@ -103,9 +103,9 @@ export function LoadingState() {
         style={{
           width: '32px',
           height: '32px',
-          border: `2px solid ${TOKENS.colors.borderSubtle}`,
+          border: `${TOKENS.borders.thick} solid ${TOKENS.colors.borderSubtle}`,
           borderTopColor: TOKENS.colors.accent,
-          borderRadius: '50%',
+          borderRadius: TOKENS.radius.full,
           animation: 'spin 1s linear infinite',
         }}
       />

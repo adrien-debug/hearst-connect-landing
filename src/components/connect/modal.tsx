@@ -96,7 +96,7 @@ export function Modal({
           ...sizeStyles[size],
           background: TOKENS.colors.black,
           borderRadius: TOKENS.radius.lg,
-          border: `1px solid ${TOKENS.colors.borderSubtle}`,
+          border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
           boxShadow: 'var(--hc-shadow-lg)',
           animation: 'scaleIn 200ms ease-out',
           display: 'flex',
@@ -115,7 +115,7 @@ export function Modal({
               tight: TOKENS.spacing[3],
               limit: TOKENS.spacing[3],
             }),
-            borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
+            borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
             flexShrink: 0,
           }}
         >
@@ -182,7 +182,7 @@ export function Modal({
                 tight: TOKENS.spacing[3],
                 limit: TOKENS.spacing[3],
               }),
-              borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+              borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
               flexShrink: 0,
             }}
           >
@@ -237,7 +237,7 @@ export function TransactionState({
               height: TOKENS.spacing[12],
               border: `${TOKENS.borders.heavy} solid ${TOKENS.colors.borderSubtle}`,
               borderTopColor: TOKENS.colors.accent,
-              borderRadius: '50%',
+              borderRadius: TOKENS.radius.full,
               animation: 'spin 1s linear infinite',
             }}
           />
@@ -251,7 +251,7 @@ export function TransactionState({
             style={{
               width: TOKENS.spacing[12],
               height: TOKENS.spacing[12],
-              borderRadius: '50%',
+              borderRadius: TOKENS.radius.full,
               background: TOKENS.colors.accent,
               display: 'flex',
               alignItems: 'center',
@@ -281,7 +281,7 @@ export function TransactionState({
             style={{
               width: TOKENS.spacing[12],
               height: TOKENS.spacing[12],
-              borderRadius: '50%',
+              borderRadius: TOKENS.radius.full,
               background: TOKENS.colors.danger,
               display: 'flex',
               alignItems: 'center',

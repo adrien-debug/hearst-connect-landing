@@ -11,7 +11,6 @@ import { CockpitGauge } from './cockpit-gauge'
 interface AvailableVaultsPanelProps {
   vaults: AvailableVault[]
   onVaultSelect: (vaultId: string) => void
-  onBack?: () => void
 }
 
 type RiskFilter = 'all' | 'very low' | 'low' | 'medium' | 'high'
@@ -29,7 +28,7 @@ function lockDays(lockPeriod: string): number {
 }
 
 export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsPanelProps) {
-  const { mode, isLimit } = useSmartFit({
+  const { mode } = useSmartFit({
     tightHeight: 880,
     limitHeight: 720,
     tightWidth: 1280,
@@ -185,7 +184,7 @@ export function AvailableVaultsPanel({ vaults, onVaultSelect }: AvailableVaultsP
               color: TOKENS.colors.textGhost,
               fontSize: TOKENS.fontSizes.sm,
               fontFamily: TOKENS.fonts.mono,
-              border: `1px dashed ${TOKENS.colors.borderSubtle}`,
+              border: `${TOKENS.borders.thin} dashed ${TOKENS.colors.borderSubtle}`,
               borderRadius: TOKENS.radius.lg,
             }}>
               No vaults match the current filter.
@@ -244,9 +243,9 @@ function FilterPills({
               gap: TOKENS.spacing[2],
               padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
               borderRadius: TOKENS.radius.full,
-              border: `1px solid ${active && opt.hue ? opt.hue : active ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
+              border: `${TOKENS.borders.thin} solid ${active && opt.hue ? opt.hue : active ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
               background: active
-                ? (opt.hue ? `${opt.hue}1a` : TOKENS.colors.accentSubtle)
+                ? (opt.hue ? 'rgba(var(--brand-accent-rgb), 0.08)' : TOKENS.colors.accentSubtle)
                 : TOKENS.colors.bgTertiary,
               color: active && opt.hue ? opt.hue : active ? TOKENS.colors.accent : TOKENS.colors.textSecondary,
               fontFamily: MONO,
@@ -259,7 +258,7 @@ function FilterPills({
             }}
           >
             {opt.hue && (
-              <span style={{ width: 6, height: 6, borderRadius: '50%', background: opt.hue }} />
+              <span style={{ width: 6, height: 6, borderRadius: TOKENS.radius.full, background: opt.hue }} />
             )}
             <span>{opt.label}</span>
             <span style={{
@@ -305,7 +304,7 @@ function SortMenu({ value, onChange }: { value: SortKey; onChange: (v: SortKey) 
         padding: TOKENS.spacing.half,
         background: TOKENS.colors.bgTertiary,
         borderRadius: TOKENS.radius.full,
-        border: `1px solid ${TOKENS.colors.borderSubtle}`,
+        border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
       }}>
         {opts.map((opt) => {
           const active = value === opt.id
@@ -348,7 +347,7 @@ interface AvailableVaultCardProps {
 /** Risk pill color drawn from CHART_PALETTE so the available-vaults grid
  * stays visually consistent with the donut and timeline palettes. Indexes
  * follow the palette spec in constants.ts: 0=accent, 1=sky, 3=amber, 2=fuchsia. */
-function riskColor(risk: string): string {
+export function riskColor(risk: string): string {
   const r = risk.toLowerCase()
   if (r.includes('very low')) return CHART_PALETTE[1]
   if (r === 'low') return CHART_PALETTE[0]
@@ -357,7 +356,7 @@ function riskColor(risk: string): string {
   return TOKENS.colors.textGhost
 }
 
-function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardProps) {
+export function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardProps) {
   const accentColor = CHART_PALETTE[index % CHART_PALETTE.length]
   const riskAccent = riskColor(vault.risk)
 
@@ -375,7 +374,7 @@ function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardP
           tight: TOKENS.spacing[4],
           limit: TOKENS.spacing[3],
         }),
-        border: `1px solid ${TOKENS.colors.borderSubtle}`,
+        border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
         cursor: 'pointer',
         transition: TOKENS.transitions.base,
         display: 'flex',
@@ -387,7 +386,7 @@ function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardP
       onMouseEnter={(e) => {
         e.currentTarget.style.borderColor = accentColor
         e.currentTarget.style.transform = 'translateY(-2px)'
-        e.currentTarget.style.boxShadow = `0 8px 24px ${accentColor}1a`
+        e.currentTarget.style.boxShadow = TOKENS.shadow.cardHover
       }}
       onMouseLeave={(e) => {
         e.currentTarget.style.borderColor = TOKENS.colors.borderSubtle
@@ -435,8 +434,8 @@ function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardP
               gap: TOKENS.spacing[1],
               padding: `${TOKENS.spacing.half} ${TOKENS.spacing[2]}`,
               borderRadius: TOKENS.radius.full,
-              background: `${riskAccent}1f`,
-              border: `1px solid ${riskAccent}66`,
+              background: 'rgba(var(--brand-accent-rgb), 0.08)',
+              border: `${TOKENS.borders.thin} solid rgba(var(--brand-accent-rgb), 0.25)`,
               fontFamily: MONO,
               fontSize: TOKENS.fontSizes.micro,
               fontWeight: TOKENS.fontWeights.bold,
@@ -444,7 +443,7 @@ function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardP
               textTransform: 'uppercase',
               color: riskAccent,
             }}>
-              <span style={{ width: 5, height: 5, borderRadius: '50%', background: riskAccent }} />
+              <span style={{ width: 5, height: 5, borderRadius: TOKENS.radius.full, background: riskAccent }} />
               {vault.risk} risk
             </span>
             <span style={{
@@ -490,7 +489,7 @@ function AvailableVaultCard({ vault, index, mode, onClick }: AvailableVaultCardP
             letterSpacing: TOKENS.letterSpacing.display,
             textTransform: 'uppercase',
             color: TOKENS.colors.textGhost,
-            marginTop: '2px',
+            marginTop: TOKENS.spacing.half,
           }}>
             APY · target {vault.target}
           </span>

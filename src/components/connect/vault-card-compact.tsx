@@ -7,6 +7,7 @@ import { ActionButton } from './action-button'
 import { getDaysToMaturity } from './utils/portfolio-chart-utils'
 import type { ActiveVault } from './data'
 import type { SmartFitMode } from './smart-fit'
+import { riskColor } from './available-vaults-panel'
 
 interface VaultCardCompactProps {
   vault: ActiveVault
@@ -20,17 +21,6 @@ interface VaultCardCompactProps {
   lastClaim?: { amount: number; timestamp: number } | null
 }
 
-/** Risk hue mirrors the AvailableVaultsPanel ladder so a position's badge
- * stays consistent across surfaces. Returns a CHART_PALETTE entry. */
-function riskHue(risk: string | undefined): string {
-  const r = (risk ?? '').toLowerCase()
-  if (r.includes('very low')) return CHART_PALETTE[1]
-  if (r === 'low') return CHART_PALETTE[0]
-  if (r === 'medium') return CHART_PALETTE[3]
-  if (r === 'high') return CHART_PALETTE[2]
-  return TOKENS.colors.textGhost
-}
-
 function relativeTime(ts: number): string {
   const delta = Math.max(0, Date.now() - ts)
   const m = Math.floor(delta / 60_000)
@@ -42,7 +32,7 @@ function relativeTime(ts: number): string {
   return new Date(ts).toLocaleDateString('en-GB', { day: '2-digit', month: 'short' })
 }
 
-export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, onExit, lastClaim }: VaultCardCompactProps) {
+export function VaultCardCompact({ vault, index, mode, onClick, onClaim, onExit, lastClaim }: VaultCardCompactProps) {
   const color = CHART_PALETTE[index % CHART_PALETTE.length]
   const daysToMaturity = getDaysToMaturity(vault.lockedUntil)
   const [isHovered, setIsHovered] = useState(false)
@@ -51,7 +41,7 @@ export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, 
   const canExit = vault.canWithdraw || daysToMaturity <= 0
   const showActions = isHovered && (canClaim || canExit)
   const risk = vault.risk
-  const riskColor = riskHue(risk)
+  const riskBadgeColor = risk ? riskColor(risk) : TOKENS.colors.textGhost
 
   return (
     <div
@@ -132,17 +122,17 @@ export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, 
                   gap: TOKENS.spacing[1],
                   padding: `${TOKENS.spacing.half} ${TOKENS.spacing[2]}`,
                   borderRadius: TOKENS.radius.full,
-                  background: `${riskColor}1f`,
-                  border: `1px solid ${riskColor}55`,
+                  background: 'rgba(var(--brand-accent-rgb), 0.08)',
+                  border: `${TOKENS.borders.thin} solid rgba(var(--brand-accent-rgb), 0.25)`,
                   fontFamily: TOKENS.fonts.mono,
                   fontSize: TOKENS.fontSizes.nano,
                   fontWeight: TOKENS.fontWeights.bold,
-                  color: riskColor,
+                  color: riskBadgeColor,
                   letterSpacing: TOKENS.letterSpacing.display,
                   flexShrink: 0,
                 }}
               >
-                <span style={{ width: 4, height: 4, borderRadius: '50%', background: riskColor }} />
+                <span style={{ width: 4, height: 4, borderRadius: TOKENS.radius.full, background: riskBadgeColor }} />
                 {risk}
               </span>
             )}
@@ -262,7 +252,6 @@ export function VaultCardCompact({ vault, index, total, mode, onClick, onClaim, 
             gap: TOKENS.spacing[2],
             padding: TOKENS.spacing[2],
             animation: 'fadeIn 150ms ease-out',
-            backdropFilter: `blur(${TOKENS.spacing[1]})`,
           }}
           onClick={(e) => e.stopPropagation()}
         >

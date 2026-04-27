@@ -406,7 +406,7 @@ export function VaultDetailPanel({
                   gap: TOKENS.spacing[3],
                   marginTop: TOKENS.spacing[4],
                   paddingTop: TOKENS.spacing[3],
-                  borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+                  borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
                 }}>
                   {vaultConfig?.tvl != null && <MicroStat label="TVL" value={fmtUsdCompact(vaultConfig.tvl)} />}
                   {vaultConfig?.investorCount != null && <MicroStat label="Investors" value={vaultConfig.investorCount.toLocaleString('en-US')} />}
@@ -585,7 +585,7 @@ export function VaultDetailPanel({
                 </span>
               </div>
               <div style={{
-                borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+                borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
                 marginTop: TOKENS.spacing[2],
                 paddingTop: TOKENS.spacing[2],
                 display: 'flex',
@@ -662,7 +662,7 @@ function PositionHeader({
         tight: `${shellPadding * 0.75}px`,
         limit: `${shellPadding * 0.5}px`,
       }),
-      borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
+      borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
       flexShrink: 0,
       background: `
         radial-gradient(ellipse 60% 100% at 100% 50%, ${TOKENS.colors.accentGlow} 0%, transparent 70%),
@@ -696,7 +696,7 @@ function PositionHeader({
                 alignItems: 'center',
                 gap: TOKENS.spacing[2],
                 background: 'transparent',
-                border: `1px solid ${TOKENS.colors.borderSubtle}`,
+                border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
                 borderRadius: TOKENS.radius.sm,
                 padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[2]}`,
                 color: TOKENS.colors.textSecondary,
@@ -780,7 +780,7 @@ function PositionHeader({
           gap: TOKENS.spacing[2],
           padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[4]}`,
           background: `linear-gradient(135deg, ${TOKENS.colors.accentGlow}, transparent)`,
-          border: `1px solid ${TOKENS.colors.accent}`,
+          border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`,
           borderRadius: TOKENS.radius.md,
         }}>
           <span style={{
@@ -851,7 +851,7 @@ function HeaderActionButton({
         padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[4]}`,
         background: palette.bg,
         color: palette.fg,
-        border: `1px solid ${palette.border}`,
+        border: `${TOKENS.borders.thin} solid ${palette.border}`,
         borderRadius: TOKENS.radius.md,
         fontFamily: TOKENS.fonts.sans,
         fontSize: TOKENS.fontSizes.xs,
@@ -1072,7 +1072,7 @@ function TermsBody({
                   gap: TOKENS.spacing[1],
                   padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
                   background: TOKENS.colors.bgTertiary,
-                  border: `1px solid ${TOKENS.colors.borderSubtle}`,
+                  border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
                   borderRadius: TOKENS.radius.full,
                   fontFamily: TOKENS.fonts.mono,
                   fontSize: TOKENS.fontSizes.nano,
@@ -1143,7 +1143,7 @@ function ManageOption({
         gap: TOKENS.spacing[2],
         padding: TOKENS.spacing[4],
         background: TOKENS.colors.bgTertiary,
-        border: `1px solid ${TOKENS.colors.borderSubtle}`,
+        border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
         borderRadius: TOKENS.radius.md,
         cursor: 'pointer',
         width: '100%',
@@ -1185,7 +1185,7 @@ function DetailCard({
     <div
       style={{
         background: TOKENS.colors.black,
-        border: `1px solid ${TOKENS.colors.borderSubtle}`,
+        border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
         borderRadius: TOKENS.radius.lg,
         padding: TOKENS.spacing[5],
         display: 'flex',
@@ -1503,7 +1503,7 @@ function ActivityFilterTabs({
       padding: TOKENS.spacing.half,
       background: TOKENS.colors.bgTertiary,
       borderRadius: TOKENS.radius.full,
-      border: `1px solid ${TOKENS.colors.borderSubtle}`,
+      border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
     }}>
       {opts.map((opt) => {
         const active = value === opt.id
@@ -1546,7 +1546,7 @@ function DetailPill({ label, icon }: { label: string; icon: 'risk' | 'chain' | '
         gap: TOKENS.spacing[2],
         padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
         background: TOKENS.colors.bgTertiary,
-        border: `1px solid ${TOKENS.colors.borderSubtle}`,
+        border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
         borderRadius: TOKENS.radius.full,
         fontFamily: TOKENS.fonts.mono,
         fontSize: TOKENS.fontSizes.micro,
@@ -1593,6 +1593,7 @@ function VaultActivityTimeline({
       {activity.map((event, i) => {
         const isWithdraw = event.type === 'withdraw'
         const accent = isWithdraw ? TOKENS.colors.danger : TOKENS.colors.accent
+        const accentBg = isWithdraw ? 'rgba(var(--color-error-rgb, 239,68,68), 0.12)' : 'rgba(var(--brand-accent-rgb), 0.12)'
         const label = event.type === 'claim' ? 'Yield claimed'
           : event.type === 'withdraw' ? 'Position withdrawn'
           : 'Capital deposited'
@@ -1605,16 +1606,16 @@ function VaultActivityTimeline({
               alignItems: 'center',
               gap: TOKENS.spacing[3],
               padding: `${TOKENS.spacing[3]} 0`,
-              borderBottom: i < activity.length - 1 ? `1px solid ${TOKENS.colors.borderSubtle}` : 'none',
+              borderBottom: i < activity.length - 1 ? `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}` : 'none',
             }}
           >
             <span
               style={{
                 width: 10,
                 height: 10,
-                borderRadius: '50%',
-                background: `${accent}30`,
-                border: `1.5px solid ${accent}`,
+                borderRadius: TOKENS.radius.full,
+                background: accentBg,
+                border: `${TOKENS.borders.thin} solid ${accent}`,
                 justifySelf: 'center',
               }}
             />

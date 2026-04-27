@@ -183,7 +183,7 @@ function MainPanel({
     return <VaultDetailPanel vault={selected} onBack={onBack} />
   }
   if (isAvailableVaultsList) {
-    return <AvailableVaultsPanel vaults={availableVaults} onVaultSelect={onVaultSelect} onBack={onBack} />
+    return <AvailableVaultsPanel vaults={availableVaults} onVaultSelect={onVaultSelect} />
   }
   return (
     <PortfolioSummary
@@ -234,7 +234,7 @@ function WalletButton() {
           style={{
             width: 6,
             height: 6,
-            borderRadius: '50%',
+            borderRadius: TOKENS.radius.full,
             background: TOKENS.colors.accent,
             boxShadow: `0 0 6px ${TOKENS.colors.accent}`,
             flexShrink: 0,

@@ -259,14 +259,14 @@ export const LINE_HEIGHT = {
 
 export const VALUE_LETTER_SPACING = 'var(--dashboard-letter-spacing-value)'
 
-/** Donut / timeline / position charts — distinct hues on dark background.
- * Keep accent first (brand consistency) then four high-contrast secondary hues. */
+/** Donut / timeline / position charts — green + grey spectrum on dark background.
+ * Keep accent first (brand consistency) then four grey-spectrum secondary hues. */
 export const CHART_PALETTE = [
-  TOKENS.colors.accent,         // brand citrus green
-  '#7DD3FC',                    // sky-300 (cyan)
-  '#F0ABFC',                    // fuchsia-300 (pink)
-  '#FBBF24',                    // amber-400 (yellow)
-  '#A78BFA',                    // violet-400 (purple)
+  TOKENS.colors.accent,  // #a7fb90 brand green
+  '#52c97a',             // mid green
+  '#d4d4d8',             // zinc-300 light grey
+  '#71717a',             // zinc-500 medium grey
+  '#3f3f46',             // zinc-700 dark grey
 ] as const
 
 export function fmtUsd(n: number): string {

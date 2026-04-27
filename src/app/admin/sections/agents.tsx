@@ -48,19 +48,19 @@ const AGENT_META: Record<AgentName, { label: string; desc: string; icon: string;
     label: 'Market Watcher',
     desc: 'Surveille BTC, yields DeFi, Fear & Greed, hashprice en continu.',
     icon: '👁',
-    color: T.colors.info,
+    color: T.colors.accent,
   },
   strategy: {
     label: 'Strategy Optimizer',
     desc: 'Analyse les conditions et génère des signaux de rebalance si justifiés.',
     icon: '⚡',
-    color: T.colors.warning,
+    color: '#52c97a',
   },
   audit: {
     label: 'Audit & Risk',
     desc: 'Audite les signaux pending, vérifie les risques, peut bloquer.',
     icon: '🛡',
-    color: T.colors.success,
+    color: '#d4d4d8',
   },
 }
 
@@ -209,14 +209,14 @@ export default function AgentsSection() {
               key={key}
               style={{
                 background: T.colors.bgSurface,
-                border: `1px solid ${isRunning ? meta.color : T.colors.borderSubtle}`,
+                border: `${T.borders.thin} solid ${isRunning ? meta.color : T.colors.borderSubtle}`,
                 borderRadius: T.radius.lg,
                 padding: T.spacing[5],
                 display: 'flex',
                 flexDirection: 'column',
                 gap: T.spacing[3],
                 transition: T.transitions.base,
-                boxShadow: isRunning ? `0 0 0 1px ${meta.color}40` : 'none',
+                boxShadow: isRunning ? `0 0 0 1px rgba(var(--brand-accent-rgb), 0.25)` : 'none',
               }}
             >
               {/* Card header */}
@@ -237,7 +237,7 @@ export default function AgentsSection() {
                   {isRunning ? (
                     <PulsingDot color={meta.color} />
                   ) : (
-                    <span style={{ width: 8, height: 8, borderRadius: '50%', background: T.colors.borderDefault, display: 'inline-block' }} />
+                    <span style={{ width: 8, height: 8, borderRadius: T.radius.full, background: T.colors.borderDefault, display: 'inline-block' }} />
                   )}
                   <span style={{ fontSize: T.fontSizes.xs, color: isRunning ? meta.color : T.colors.textGhost }}>
                     {isRunning ? 'En cours' : 'Idle'}
@@ -252,8 +252,8 @@ export default function AgentsSection() {
                 style={{
                   padding: `${T.spacing[3]} ${T.spacing[4]}`,
                   borderRadius: T.radius.md,
-                  border: `1px solid ${isRunning ? T.colors.logError : meta.color}`,
-                  background: isRunning ? `color-mix(in srgb, ${T.colors.danger} 10%, transparent)` : `${meta.color}18`,
+                  border: `${T.borders.thin} solid ${isRunning ? T.colors.logError : meta.color}`,
+                  background: isRunning ? `color-mix(in srgb, ${T.colors.danger} 10%, transparent)` : 'rgba(var(--brand-accent-rgb), 0.06)',
                   color: isRunning ? T.colors.logError : meta.color,
                   fontSize: T.fontSizes.sm,
                   fontWeight: T.fontWeights.semibold,
@@ -274,7 +274,7 @@ export default function AgentsSection() {
       {/* Log terminal */}
       <div style={{
         background: T.colors.bgApp,
-        border: `1px solid ${T.colors.borderSubtle}`,
+        border: `${T.borders.thin} solid ${T.colors.borderSubtle}`,
         borderRadius: T.radius.lg,
         overflow: 'hidden',
       }}>
@@ -284,14 +284,14 @@ export default function AgentsSection() {
           alignItems: 'center',
           justifyContent: 'space-between',
           padding: `${T.spacing[3]} ${T.spacing[4]}`,
-          borderBottom: `1px solid ${T.colors.borderSubtle}`,
+          borderBottom: `${T.borders.thin} solid ${T.colors.borderSubtle}`,
           background: T.colors.bgSurface,
         }}>
           <div style={{ display: 'flex', alignItems: 'center', gap: T.spacing[3] }}>
             {/* macOS dots */}
             <div style={{ display: 'flex', gap: T.spacing[2] }}>
               {[T.colors.terminalRed, T.colors.terminalYellow, T.colors.terminalGreen].map(c => (
-                <div key={c} style={{ width: 10, height: 10, borderRadius: '50%', background: c }} />
+                <div key={c} style={{ width: 10, height: 10, borderRadius: T.radius.full, background: c }} />
               ))}
             </div>
             <span style={{ fontSize: T.fontSizes.xs, color: T.colors.textGhost, fontFamily: MONO }}>
@@ -413,7 +413,7 @@ export default function AgentsSection() {
                 key={run.id}
                 style={{
                   background: T.colors.bgSurface,
-                  border: `1px solid ${T.colors.borderSubtle}`,
+                  border: `${T.borders.thin} solid ${T.colors.borderSubtle}`,
                   borderRadius: T.radius.md,
                   padding: `${T.spacing[3]} ${T.spacing[4]}`,
                   display: 'flex',
@@ -491,9 +491,9 @@ function PulsingDot({ color }: { color: string }) {
         .ping-dot { animation: ping 1s cubic-bezier(0,0,0.2,1) infinite; }
       `}</style>
       <span className="ping-dot" style={{
-        position: 'absolute', inset: 0, borderRadius: '50%', background: color, opacity: 0.75,
+        position: 'absolute', inset: 0, borderRadius: T.radius.full, background: color, opacity: 0.75,
       }} />
-      <span style={{ borderRadius: '50%', background: color, width: 8, height: 8, display: 'inline-block' }} />
+      <span style={{ borderRadius: T.radius.full, background: color, width: 8, height: 8, display: 'inline-block' }} />
     </span>
   )
 }

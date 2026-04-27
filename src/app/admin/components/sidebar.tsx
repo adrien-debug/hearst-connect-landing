@@ -174,7 +174,7 @@ const styles: Record<string, React.CSSProperties> = {
   sidebar: {
     width: 'var(--dashboard-sidebar-width, 240px)',
     background: TOKENS.colors.bgSidebar,
-    borderRight: `1px solid ${TOKENS.colors.borderSubtle}`,
+    borderRight: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
     display: 'flex',
     flexDirection: 'column',
     flexShrink: 0,
@@ -184,7 +184,7 @@ const styles: Record<string, React.CSSProperties> = {
     alignItems: 'center',
     gap: TOKENS.spacing[3],
     padding: `${TOKENS.spacing[6]} ${TOKENS.spacing[4]}`,
-    borderBottom: `1px solid ${TOKENS.colors.borderSubtle}`,
+    borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
   },
   logo: {
     height: TOKENS.spacing[8],
@@ -196,7 +196,7 @@ const styles: Record<string, React.CSSProperties> = {
     letterSpacing: TOKENS.letterSpacing.display,
     color: TOKENS.colors.accent,
     padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[2]}`,
-    border: `1px solid ${TOKENS.colors.accent}`,
+    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`,
     borderRadius: TOKENS.radius.sm,
   },
   nav: {
@@ -212,7 +212,7 @@ const styles: Record<string, React.CSSProperties> = {
     gap: TOKENS.spacing[3],
     padding: `${TOKENS.spacing[3]} ${TOKENS.spacing[4]}`,
     background: 'transparent',
-    border: `1px solid transparent`,
+    border: `${TOKENS.borders.thin} solid transparent`,
     borderRadius: TOKENS.radius.md,
     color: TOKENS.colors.textSecondary,
     fontSize: TOKENS.fontSizes.sm,
@@ -228,12 +228,12 @@ const styles: Record<string, React.CSSProperties> = {
   activeIndicator: {
     width: TOKENS.spacing[1],
     height: TOKENS.spacing[1],
-    borderRadius: '50%',
+    borderRadius: TOKENS.radius.full,
     background: TOKENS.colors.accent,
   },
   footer: {
     padding: TOKENS.spacing[4],
-    borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+    borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
   },
   logoutButton: {
     display: 'flex',
@@ -242,7 +242,7 @@ const styles: Record<string, React.CSSProperties> = {
     width: '100%',
     padding: `${TOKENS.spacing[3]} ${TOKENS.spacing[4]}`,
     background: 'transparent',
-    border: `1px solid ${TOKENS.colors.borderSubtle}`,
+    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
     borderRadius: TOKENS.radius.md,
     color: TOKENS.colors.textSecondary,
     fontSize: TOKENS.fontSizes.sm,

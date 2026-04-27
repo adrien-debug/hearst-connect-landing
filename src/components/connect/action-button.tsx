@@ -20,17 +20,17 @@ const variantStyles: Record<ActionButtonVariant, React.CSSProperties> = {
   primary: {
     background: TOKENS.colors.accentSubtle,
     color: TOKENS.colors.accent,
-    border: `1px solid ${TOKENS.colors.accent}`,
+    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.accent}`,
   },
   secondary: {
     background: TOKENS.colors.bgTertiary,
     color: TOKENS.colors.textPrimary,
-    border: `1px solid ${TOKENS.colors.borderSubtle}`,
+    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
   },
   danger: {
-    background: `${TOKENS.colors.danger}15`,
+    background: 'rgba(var(--color-error-rgb, 239,68,68), 0.08)',
     color: TOKENS.colors.danger,
-    border: `1px solid ${TOKENS.colors.danger}`,
+    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.danger}`,
   },
 }
 

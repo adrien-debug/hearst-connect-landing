@@ -55,7 +55,6 @@ export function DemoBanner() {
         fontWeight: 'var(--weight-bold)',
         letterSpacing: 'var(--dashboard-letter-spacing-caption)',
         textTransform: 'uppercase',
-        backdropFilter: 'blur(6px)',
         pointerEvents: 'auto',
       }}
     >
@@ -70,7 +69,7 @@ export function DemoBanner() {
           style={{
             width: 6,
             height: 6,
-            borderRadius: '50%',
+            borderRadius: 'var(--dashboard-radius-badge)',
             background: 'var(--demo-accent)',
             boxShadow: '0 0 8px var(--demo-accent)',
             animation: 'demoPulse 2s ease-in-out infinite',

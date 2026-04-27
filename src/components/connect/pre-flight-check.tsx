@@ -67,7 +67,7 @@ export function PreFlightCheck({
   return (
     <div style={{
       paddingTop: TOKENS.spacing[3],
-      borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+      borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
     }}>
       {/* Header */}
       <div style={{
@@ -200,7 +200,7 @@ export function PreFlightCheck({
         <div style={{
           marginTop: TOKENS.spacing[4],
           paddingTop: TOKENS.spacing[4],
-          borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+          borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
           fontSize: TOKENS.fontSizes.sm,
           color: TOKENS.colors.accent,
           fontFamily: MONO,
@@ -228,7 +228,7 @@ function CheckItem({
 }) {
   const statusColors = {
     success: TOKENS.colors.accent,
-    warning: TOKENS.colors.warning,
+    warning: TOKENS.colors.textGhost,
     error: TOKENS.colors.danger,
     pending: TOKENS.colors.textGhost,
     action: TOKENS.colors.accent,
@@ -245,7 +245,7 @@ function CheckItem({
         <div style={{
           width: TOKENS.spacing[2],
           height: TOKENS.spacing[2],
-          borderRadius: '50%',
+          borderRadius: TOKENS.radius.full,
           background: statusColors[status],
         }} />
         <div>

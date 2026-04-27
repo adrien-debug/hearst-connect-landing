@@ -1,6 +1,5 @@
 import {
   type Aggregate as VaultAggregate,
-  computeMonthlyYield as computeMonthlyYieldCore,
 } from '@/lib/vault-math'
 import type { VaultMeta } from '@/types/vault'
 
@@ -48,12 +47,3 @@ export interface AvailableVault extends BaseVault {
 export type VaultLine = ActiveVault | MaturedVault | AvailableVault
 
 export type Aggregate = VaultAggregate
-
-export function computeMonthlyYield(
-  deposited: number,
-  apr: number,
-  dayOfMonth: number,
-  daysInMonth: number,
-) {
-  return computeMonthlyYieldCore(deposited, apr, dayOfMonth, daysInMonth)
-}

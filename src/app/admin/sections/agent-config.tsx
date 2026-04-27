@@ -163,7 +163,7 @@ export function AgentConfigSection() {
       {activeTab === 'strategy' && (
         <div style={st.card}>
           <SliderField label="Prix d'entrée BTC" value={btcEntry} min={10000} max={200000} step={1000} unit="$" onChange={v => set('btc_entry_price', String(v))} mono />
-          <SliderField label="Max vente BTC par signal" value={parseFloat(draft.max_btc_sell_pct || '20')} min={5} max={50} step={1} unit="%" onChange={v => set('max_btc_sell_pct', String(v))} color={T.colors.warning} />
+          <SliderField label="Max vente BTC par signal" value={parseFloat(draft.max_btc_sell_pct || '20')} min={5} max={50} step={1} unit="%" onChange={v => set('max_btc_sell_pct', String(v))} color={T.colors.textGhost} />
 
           <div style={{ marginTop: T.spacing[4] }}>
             <div style={st.sectionHead}>
@@ -182,7 +182,7 @@ export function AgentConfigSection() {
                     <span style={{ ...st.profitValue, fontFamily: MONO }}>${Math.round(btcEntry * lv.mult).toLocaleString()}</span>
                   </div>
                   <SliderField label={`+${((lv.mult - 1) * 100).toFixed(0)}% vs entrée`} value={lv.mult} min={1.05} max={3.0} step={0.05} unit="x" onChange={v => setProfitLevel(i, 'mult', v)} compact />
-                  <SliderField label="% de la poche BTC" value={lv.pct} min={5} max={50} step={5} unit="%" onChange={v => setProfitLevel(i, 'pct', v)} compact color={T.colors.success} />
+                  <SliderField label="% de la poche BTC" value={lv.pct} min={5} max={50} step={5} unit="%" onChange={v => setProfitLevel(i, 'pct', v)} compact color={T.colors.accent} />
                 </div>
               ))}
             </div>
@@ -196,19 +196,19 @@ export function AgentConfigSection() {
           <div style={st.fgContainer}>
             <h4 style={st.sectionTitle}>Fear & Greed Index</h4>
             <div style={st.fgBar}>
-              <div style={{ ...st.fgZone, background: `${T.colors.danger}30`, width: `${parseFloat(draft.fear_greed_low || '20')}%` }}>
+              <div style={{ ...st.fgZone, background: 'rgba(var(--color-error-rgb, 239,68,68), 0.18)', width: `${parseFloat(draft.fear_greed_low || '20')}%` }}>
                 <span style={st.fgZoneLabel}>FEAR</span>
               </div>
-              <div style={{ ...st.fgZone, background: `${T.colors.success}15`, flex: 1 }}>
+              <div style={{ ...st.fgZone, background: 'rgba(var(--brand-accent-rgb), 0.06)', flex: 1 }}>
                 <span style={st.fgZoneLabel}>NEUTRAL</span>
               </div>
-              <div style={{ ...st.fgZone, background: `${T.colors.success}30`, width: `${100 - parseFloat(draft.fear_greed_high || '80')}%` }}>
+              <div style={{ ...st.fgZone, background: 'rgba(var(--brand-accent-rgb), 0.18)', width: `${100 - parseFloat(draft.fear_greed_high || '80')}%` }}>
                 <span style={st.fgZoneLabel}>GREED</span>
               </div>
             </div>
             <div style={st.fgSliders}>
               <SliderField label="Seuil Fear (INCREASE_BTC)" value={parseFloat(draft.fear_greed_low || '20')} min={5} max={40} step={1} onChange={v => set('fear_greed_low', String(v))} color={T.colors.danger} />
-              <SliderField label="Seuil Greed (REDUCE_RISK)" value={parseFloat(draft.fear_greed_high || '80')} min={60} max={95} step={1} onChange={v => set('fear_greed_high', String(v))} color={T.colors.success} />
+              <SliderField label="Seuil Greed (REDUCE_RISK)" value={parseFloat(draft.fear_greed_high || '80')} min={60} max={95} step={1} onChange={v => set('fear_greed_high', String(v))} color={T.colors.accent} />
             </div>
           </div>
 
@@ -320,7 +320,7 @@ export function AgentConfigSection() {
       {/* Save bar */}
       <div style={{ ...st.saveBar, opacity: hasChanges ? 1 : 0 }}>
         <div style={st.saveBarInner}>
-          <span style={{ color: T.colors.warning, fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold }}>
+          <span style={{ color: T.colors.textSecondary, fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold }}>
             Modifications non sauvegardées
           </span>
           <div style={{ display: 'flex', gap: T.spacing[2] }}>
@@ -357,14 +357,14 @@ function SliderField({ label, value, min, max, step, unit, onChange, color, comp
 // ── Styles ──────────────────────────────────────────────────────────────
 
 const st: Record<string, React.CSSProperties> = {
-  error: { background: `${T.colors.danger}20`, border: `1px solid ${T.colors.danger}40`, borderRadius: T.radius.md, padding: T.spacing[3], color: T.colors.danger, fontSize: T.fontSizes.sm, marginBottom: T.spacing[3] },
-  presetBar: { display: 'flex', alignItems: 'center', gap: T.spacing[2], marginBottom: T.spacing[3], padding: `${T.spacing[2]} ${T.spacing[3]}`, background: T.colors.bgSurface, border: `1px solid ${T.colors.borderSubtle}`, borderRadius: T.radius.lg, flexWrap: 'wrap' },
+  error: { background: 'rgba(var(--color-error-rgb, 239,68,68), 0.08)', border: `${T.borders.thin} solid rgba(var(--color-error-rgb, 239,68,68), 0.25)`, borderRadius: T.radius.md, padding: T.spacing[3], color: T.colors.danger, fontSize: T.fontSizes.sm, marginBottom: T.spacing[3] },
+  presetBar: { display: 'flex', alignItems: 'center', gap: T.spacing[2], marginBottom: T.spacing[3], padding: `${T.spacing[2]} ${T.spacing[3]}`, background: T.colors.bgSurface, border: `${T.borders.thin} solid ${T.colors.borderSubtle}`, borderRadius: T.radius.lg, flexWrap: 'wrap' },
   presetLabel: { fontSize: T.fontSizes.sm, color: T.colors.textSecondary, fontWeight: T.fontWeights.bold, marginRight: T.spacing[1] },
-  presetBtn: { padding: `${T.spacing[2]} ${T.spacing[3]}`, borderRadius: T.radius.md, fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold, cursor: 'pointer', border: `1px solid ${T.colors.borderSubtle}`, background: T.colors.bgTertiary, color: T.colors.textPrimary, display: 'flex', alignItems: 'center', gap: T.spacing[2], transition: T.transitions.all },
-  tabs: { display: 'flex', gap: T.spacing[1], marginBottom: T.spacing[3], background: T.colors.bgSurface, borderRadius: T.radius.lg, padding: T.spacing[1], border: `1px solid ${T.colors.borderSubtle}` },
+  presetBtn: { padding: `${T.spacing[2]} ${T.spacing[3]}`, borderRadius: T.radius.md, fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold, cursor: 'pointer', border: `${T.borders.thin} solid ${T.colors.borderSubtle}`, background: T.colors.bgTertiary, color: T.colors.textPrimary, display: 'flex', alignItems: 'center', gap: T.spacing[2], transition: T.transitions.all },
+  tabs: { display: 'flex', gap: T.spacing[1], marginBottom: T.spacing[3], background: T.colors.bgSurface, borderRadius: T.radius.lg, padding: T.spacing[1], border: `${T.borders.thin} solid ${T.colors.borderSubtle}` },
   tab: { flex: 1, padding: `${T.spacing[2]} ${T.spacing[3]}`, borderRadius: T.radius.md, fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold, cursor: 'pointer', border: 'none', background: 'transparent', color: T.colors.textSecondary, transition: T.transitions.all, textAlign: 'center' as const },
   tabActive: { background: T.colors.bgTertiary, color: T.colors.accent, boxShadow: `0 0 0 1px ${T.colors.borderSubtle}` },
-  card: { background: T.colors.bgSurface, border: `1px solid ${T.colors.borderSubtle}`, borderRadius: T.radius.lg, padding: T.spacing[4], marginBottom: T.spacing[3] },
+  card: { background: T.colors.bgSurface, border: `${T.borders.thin} solid ${T.colors.borderSubtle}`, borderRadius: T.radius.lg, padding: T.spacing[4], marginBottom: T.spacing[3] },
   sectionHead: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: T.spacing[3] },
   sectionTitle: { fontSize: T.fontSizes.md, fontWeight: T.fontWeights.bold, color: T.colors.textPrimary, margin: `0 0 ${T.spacing[2]}` },
   help: { fontSize: T.fontSizes.micro, color: T.colors.textSecondary, marginBottom: T.spacing[2] },
@@ -372,17 +372,17 @@ const st: Record<string, React.CSSProperties> = {
   sliderLabels: { display: 'flex', justifyContent: 'space-between', fontSize: T.fontSizes.micro, color: T.colors.textGhost, marginTop: T.spacing.half },
   // Profit levels
   profitGrid: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(200px, 1fr))', gap: T.spacing[2] },
-  profitCard: { background: T.colors.bgTertiary, borderRadius: T.radius.md, padding: T.spacing[3], border: `1px solid ${T.colors.borderSubtle}` },
+  profitCard: { background: T.colors.bgTertiary, borderRadius: T.radius.md, padding: T.spacing[3], border: `${T.borders.thin} solid ${T.colors.borderSubtle}` },
   profitHeader: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: T.spacing[2] },
   profitBadge: { fontSize: T.fontSizes.micro, color: T.colors.accent, background: T.colors.accentSubtle, padding: `${T.spacing.half} ${T.spacing[2]}`, borderRadius: T.radius.sm, fontWeight: T.fontWeights.bold },
   profitRow: { display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: T.spacing[2] },
   profitLabel: { fontSize: T.fontSizes.micro, color: T.colors.textSecondary },
   profitValue: { fontSize: T.fontSizes.md, fontWeight: T.fontWeights.bold, color: T.colors.textPrimary },
-  removeBtn: { width: 20, height: 20, borderRadius: T.radius.sm, border: `1px solid ${T.colors.borderSubtle}`, background: 'transparent', color: T.colors.textGhost, cursor: 'pointer', fontSize: T.fontSizes.micro, display: 'flex', alignItems: 'center', justifyContent: 'center' },
-  addBtn: { padding: `${T.spacing[1]} ${T.spacing[3]}`, borderRadius: T.radius.sm, fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold, cursor: 'pointer', border: `1px dashed ${T.colors.borderSubtle}`, background: 'transparent', color: T.colors.accent },
+  removeBtn: { width: 20, height: 20, borderRadius: T.radius.sm, border: `${T.borders.thin} solid ${T.colors.borderSubtle}`, background: 'transparent', color: T.colors.textGhost, cursor: 'pointer', fontSize: T.fontSizes.micro, display: 'flex', alignItems: 'center', justifyContent: 'center' },
+  addBtn: { padding: `${T.spacing[1]} ${T.spacing[3]}`, borderRadius: T.radius.sm, fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold, cursor: 'pointer', border: `${T.borders.thin} dashed ${T.colors.borderSubtle}`, background: 'transparent', color: T.colors.accent },
   // F&G
   fgContainer: { marginBottom: T.spacing[3] },
-  fgBar: { display: 'flex', height: 32, borderRadius: T.radius.md, overflow: 'hidden', marginBottom: T.spacing[3], border: `1px solid ${T.colors.borderSubtle}` },
+  fgBar: { display: 'flex', height: 32, borderRadius: T.radius.md, overflow: 'hidden', marginBottom: T.spacing[3], border: `${T.borders.thin} solid ${T.colors.borderSubtle}` },
   fgZone: { display: 'flex', alignItems: 'center', justifyContent: 'center', minWidth: 40 },
   fgZoneLabel: { fontSize: T.fontSizes.micro, fontWeight: T.fontWeights.bold, letterSpacing: T.letterSpacing.micro, opacity: 0.7 },
   fgSliders: { display: 'grid', gridTemplateColumns: '1fr 1fr', gap: T.spacing[3] },
@@ -400,13 +400,13 @@ const st: Record<string, React.CSSProperties> = {
   cooldownValue: { fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold, color: T.colors.accent, minWidth: 32, textAlign: 'right' as const },
   // Prompts
   promptPresetRow: { display: 'grid', gridTemplateColumns: 'repeat(auto-fill, minmax(160px, 1fr))', gap: T.spacing[2], marginBottom: T.spacing[3] },
-  promptPresetBtn: { padding: T.spacing[2], borderRadius: T.radius.md, cursor: 'pointer', border: `1px solid ${T.colors.borderSubtle}`, background: T.colors.bgTertiary, color: T.colors.textPrimary, textAlign: 'left' as const, display: 'flex', flexDirection: 'column' as const, gap: T.spacing.half, transition: T.transitions.all, fontSize: T.fontSizes.sm },
+  promptPresetBtn: { padding: T.spacing[2], borderRadius: T.radius.md, cursor: 'pointer', border: `${T.borders.thin} solid ${T.colors.borderSubtle}`, background: T.colors.bgTertiary, color: T.colors.textPrimary, textAlign: 'left' as const, display: 'flex', flexDirection: 'column' as const, gap: T.spacing.half, transition: T.transitions.all, fontSize: T.fontSizes.sm },
   promptPresetDesc: { fontSize: T.fontSizes.micro, color: T.colors.textSecondary, fontWeight: T.fontWeights.regular },
-  presetActiveBadge: { fontSize: T.fontSizes.micro, padding: `1px ${T.spacing[2]}`, borderRadius: T.radius.full, border: '1px solid', fontWeight: T.fontWeights.bold },
-  textarea: { width: '100%', background: T.colors.bgTertiary, border: `1px solid ${T.colors.borderSubtle}`, borderRadius: T.radius.md, padding: `${T.spacing[3]} ${T.spacing[4]}`, color: T.colors.textPrimary, fontSize: T.fontSizes.sm, resize: 'vertical' as const, minHeight: 80, fontFamily: 'inherit', lineHeight: T.lineHeights.relaxed },
+  presetActiveBadge: { fontSize: T.fontSizes.micro, padding: `${T.spacing.half} ${T.spacing[2]}`, borderRadius: T.radius.full, border: `${T.borders.thin} solid`, fontWeight: T.fontWeights.bold },
+  textarea: { width: '100%', background: T.colors.bgTertiary, border: `${T.borders.thin} solid ${T.colors.borderSubtle}`, borderRadius: T.radius.md, padding: `${T.spacing[3]} ${T.spacing[4]}`, color: T.colors.textPrimary, fontSize: T.fontSizes.sm, resize: 'vertical' as const, minHeight: 80, fontFamily: 'inherit', lineHeight: T.lineHeights.relaxed },
   // Save bar
   saveBar: { position: 'fixed' as const, bottom: 0, left: 0, right: 0, zIndex: T.zIndex.dock, transition: `opacity ${T.transitions.base}`, pointerEvents: 'auto' as const },
-  saveBarInner: { maxWidth: 900, margin: '0 auto', padding: `${T.spacing[3]} ${T.spacing[4]}`, background: T.colors.bgSurface, borderTop: `1px solid ${T.colors.borderSubtle}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center', backdropFilter: 'blur(12px)' },
+  saveBarInner: { maxWidth: 900, margin: '0 auto', padding: `${T.spacing[3]} ${T.spacing[4]}`, background: T.colors.bgSurface, borderTop: `${T.borders.thin} solid ${T.colors.borderSubtle}`, display: 'flex', justifyContent: 'space-between', alignItems: 'center' },
   saveBtn: { padding: `${T.spacing[2]} ${T.spacing[4]}`, borderRadius: T.radius.md, fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold, cursor: 'pointer', border: 'none', background: T.colors.accent, color: 'var(--color-on-accent)' },
-  cancelBtn: { padding: `${T.spacing[2]} ${T.spacing[4]}`, borderRadius: T.radius.md, fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold, cursor: 'pointer', border: `1px solid ${T.colors.borderSubtle}`, background: 'transparent', color: T.colors.textSecondary },
+  cancelBtn: { padding: `${T.spacing[2]} ${T.spacing[4]}`, borderRadius: T.radius.md, fontSize: T.fontSizes.sm, fontWeight: T.fontWeights.bold, cursor: 'pointer', border: `${T.borders.thin} solid ${T.colors.borderSubtle}`, background: 'transparent', color: T.colors.textSecondary },
 }
