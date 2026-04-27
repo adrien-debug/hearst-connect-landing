@@ -165,7 +165,7 @@
   --dashboard-chart-series-2: var(--dashboard-info);
   --dashboard-chart-series-3: var(--dashboard-warning);
   --dashboard-chart-area-fill: var(--dashboard-accent-soft);
-  --font-sans: 'Satoshi Variable', Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  /* --font-sans intentionally NOT redeclared: owned by next/font/local in layout.tsx */
   --ds-ease-out: cubic-bezier(0.16, 1, 0.3, 1);
   --ds-ease-standard: cubic-bezier(0.4, 0, 0.2, 1);
   --ds-duration-fast: 0.15s;
@@ -290,9 +290,14 @@
   --dashboard-icon-size-xl: 32px;
 
   /* ─── INDICATOR / DOT TOKENS ──────────────────────────────────────────── */
+  --dashboard-dot-size-xs: 6px;
   --dashboard-dot-size-sm: 8px;
   --dashboard-dot-size-md: 12px;
   --dashboard-dot-size-lg: 16px;
+
+  /* ─── BAR THICKNESS TOKENS ────────────────────────────────────────────── */
+  --dashboard-bar-thin: 6px;
+  --dashboard-bar-thick: 12px;
 
   /* ─── ANIMATION TOKENS ────────────────────────────────────────────────── */
   --dashboard-ease-spring: cubic-bezier(0.16, 1, 0.3, 1);

@@ -157,9 +157,14 @@ export const TOKENS = {
     xl: 'var(--dashboard-icon-size-xl)',
   },
   dot: {
+    xs: 'var(--dashboard-dot-size-xs)',
     sm: 'var(--dashboard-dot-size-sm)',
     md: 'var(--dashboard-dot-size-md)',
     lg: 'var(--dashboard-dot-size-lg)',
+  },
+  bar: {
+    thin: 'var(--dashboard-bar-thin)',
+    thick: 'var(--dashboard-bar-thick)',
   },
   animation: {
     durationFast: 'var(--dashboard-duration-fast)',

@@ -15,8 +15,14 @@
   }
 }
 
+/* Bind Tailwind's --font-sans to the Satoshi variable exposed by next/font/local
+ * (see src/app/layout.tsx). This overrides Tailwind v4 preflight's default
+ * (ui-sans-serif, system-ui, …) so EVERY element falls back to Satoshi by default.
+ */
 @theme {
-  --font-sans: 'Satoshi Variable', Inter, -apple-system, sans-serif;
+  --font-sans: var(--font-satoshi), Inter, -apple-system, BlinkMacSystemFont, sans-serif;
+  /* Mono is aliased to sans (Satoshi). Tabular figures via font-variant-numeric. */
+  --font-mono: var(--font-satoshi), Inter, -apple-system, BlinkMacSystemFont, sans-serif;
 }
 
 /* Click ripple animation */

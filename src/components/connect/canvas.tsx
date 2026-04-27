@@ -249,11 +249,10 @@ function WalletButton() {
       >
         <span
           style={{
-            width: 6,
-            height: 6,
+            width: TOKENS.dot.xs,
+            height: TOKENS.dot.xs,
             borderRadius: TOKENS.radius.full,
             background: TOKENS.colors.accent,
-            boxShadow: `0 0 6px ${TOKENS.colors.accent}`,
             flexShrink: 0,
           }}
         />

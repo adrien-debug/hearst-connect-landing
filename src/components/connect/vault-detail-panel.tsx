@@ -688,11 +688,10 @@ function PositionHeader({
             color: TOKENS.colors.accent,
           }}>
             <span style={{
-              width: 6,
-              height: 6,
+              width: TOKENS.dot.xs,
+              height: TOKENS.dot.xs,
               borderRadius: TOKENS.radius.full,
               background: TOKENS.colors.accent,
-              boxShadow: `0 0 6px ${TOKENS.colors.accentGlow}`,
             }} />
             {isReadyForExit ? statusLabel : 'Live'}
           </span>
@@ -700,7 +699,7 @@ function PositionHeader({
             <span style={{ color: TOKENS.colors.textGhost }}>· {chainName}</span>
           )}
         </div>
-        <h2 style={{
+        <h1 style={{
           margin: 0,
           fontSize: fitValue(mode, {
             normal: TOKENS.fontSizes.xl,
@@ -713,7 +712,7 @@ function PositionHeader({
           lineHeight: LINE_HEIGHT.tight,
         }}>
           {formatVaultName(vault.name)}
-        </h2>
+        </h1>
         {subtitle && (
           <div style={{
             fontSize: TOKENS.fontSizes.sm,
@@ -938,7 +937,7 @@ function CumulativeTargetProgress({
       </div>
 
       <div style={{
-        height: 6,
+        height: TOKENS.bar.thin,
         background: TOKENS.colors.bgTertiary,
         borderRadius: TOKENS.radius.full,
         overflow: 'hidden',
@@ -948,7 +947,7 @@ function CumulativeTargetProgress({
           width: `${fillPct}%`,
           background: TOKENS.colors.accent,
           borderRadius: TOKENS.radius.full,
-          transition: 'width 1s ease',
+          transition: `width ${TOKENS.transitions.durSlow} ease`,
         }} />
       </div>
 
@@ -1283,7 +1282,7 @@ function VaultCompositionBars({
     <div style={{
       marginTop: TOKENS.spacing[4],
       paddingTop: TOKENS.spacing[3],
-      borderTop: `1px solid ${TOKENS.colors.borderSubtle}`,
+      borderTop: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
     }}>
       <div style={{
         fontFamily: TOKENS.fonts.mono,
@@ -1299,7 +1298,7 @@ function VaultCompositionBars({
       {/* Stacked bar */}
       <div style={{
         display: 'flex',
-        height: 6,
+        height: TOKENS.bar.thin,
         borderRadius: TOKENS.radius.full,
         overflow: 'hidden',
         marginBottom: TOKENS.spacing[3],
@@ -1330,8 +1329,8 @@ function VaultCompositionBars({
           >
             <span style={{ display: 'flex', alignItems: 'center', gap: TOKENS.spacing[2], minWidth: 0 }}>
               <span style={{
-                width: 8,
-                height: 8,
+                width: TOKENS.dot.sm,
+                height: TOKENS.dot.sm,
                 borderRadius: TOKENS.radius.full,
                 background: slice.color ?? CHART_PALETTE[i % CHART_PALETTE.length],
                 flexShrink: 0,
@@ -1453,7 +1452,7 @@ function VaultActivityTimeline({
             key={event.id}
             style={{
               display: 'grid',
-              gridTemplateColumns: '20px 1fr auto',
+              gridTemplateColumns: `${TOKENS.spacing[5]} 1fr auto`,
               alignItems: 'center',
               gap: TOKENS.spacing[3],
               padding: `${TOKENS.spacing[3]} 0`,
@@ -1462,8 +1461,8 @@ function VaultActivityTimeline({
           >
             <span
               style={{
-                width: 10,
-                height: 10,
+                width: TOKENS.dot.sm,
+                height: TOKENS.dot.sm,
                 borderRadius: TOKENS.radius.full,
                 background: accentBg,
                 border: `${TOKENS.borders.thin} solid ${accent}`,
