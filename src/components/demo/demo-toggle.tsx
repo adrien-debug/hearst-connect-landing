@@ -1,19 +1,21 @@
 'use client'
 
 import { useDemoMode, setDemoMode } from '@/lib/demo/use-demo-mode'
+import { useSiweAuth } from '@/hooks/useSiweAuth'
 
 /** DemoToggle — Small chip that flips the app between live and demo data.
  * Bidirectional (the existing DemoBanner only handles "exit"); meant to live
  * in a chrome surface (canvas header, admin header) so a real user can drop
  * into demo for a screenshare without restarting the session.
  *
+ * Visibility: only renders for wallets in the DEMO/ADMIN whitelist. Unauthorized
+ * users don't see it at all — no "you can't" feedback, just a missing chip.
+ * Authorization comes from the SIWE session (`isDemoAuthorized` claim).
+ *
  * Visual states:
  *   - LIVE  (default): outline chip, accent dot, label "Switch to demo"
  *   - DEMO  (active):  filled accent chip, label "Demo · switch to live"
- *
- * Inline-styled like the rest of the connect chrome. The variant prop lets
- * the caller pick between the dense MONO chip used in the canvas header and
- * a slightly larger admin-header version. */
+ */
 export function DemoToggle({
   variant = 'compact',
   className,
@@ -22,6 +24,11 @@ export function DemoToggle({
   className?: string
 }) {
   const isDemo = useDemoMode()
+  const { isDemoAuthorized, sessionChecked } = useSiweAuth()
+
+  // Hide entirely for unauthorized wallets (and during the brief pre-session
+  // check window so the chip doesn't flash before we know).
+  if (!sessionChecked || !isDemoAuthorized) return null
 
   const handleClick = () => {
     setDemoMode(!isDemo)

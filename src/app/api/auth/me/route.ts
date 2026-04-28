@@ -15,5 +15,6 @@ export async function GET(request: NextRequest) {
   return NextResponse.json({
     address: session.address,
     isAdmin: session.isAdmin,
+    isDemoAuthorized: session.isDemoAuthorized,
   })
 }

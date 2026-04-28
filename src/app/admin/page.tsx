@@ -56,14 +56,15 @@ function AdminContent() {
   const isDemo = useDemoMode()
   const [activeSection, setActiveSection] = useState('dashboard')
 
-  // Demo bypass: skip every auth gate so screen-shares / pitches always reach
-  // the admin shell. Real-mode access requires a SIWE-signed cookie issued
-  // server-side (the same one used by /app), with the connected address
-  // present in process.env.ADMIN_ADDRESSES.
+  // Always wait for the session check first — prevents a flash of NoSessionScreen
+  // when demo is authorized but useDemoMode resolves slightly after sessionChecked.
+  if (!sessionChecked) {
+    return <LoadingScreen />
+  }
+
+  // Demo bypass: authorized demo wallets reach the admin shell without needing
+  // ADMIN_ADDRESSES. Real-mode still requires the full SIWE + admin whitelist.
   if (!isDemo) {
-    if (!sessionChecked) {
-      return <LoadingScreen />
-    }
     if (!isAuthenticated) {
       return <NoSessionScreen />
     }
@@ -205,12 +206,12 @@ const styles: Record<string, React.CSSProperties> = {
     background: TOKENS.colors.bgApp,
   },
   spinner: {
-    width: '40px',
-    height: '40px',
-    border: `3px solid ${TOKENS.colors.bgTertiary}`,
+    width: TOKENS.spacing[10],
+    height: TOKENS.spacing[10],
+    border: `${TOKENS.borders.thin} solid ${TOKENS.colors.bgTertiary}`,
     borderTopColor: TOKENS.colors.accent,
     borderRadius: TOKENS.radius.full,
-    animation: 'spin 1s linear infinite',
+    animation: 'spin var(--dashboard-duration-loader, 1s) linear infinite',
   },
   loginScreen: {
     display: 'flex',

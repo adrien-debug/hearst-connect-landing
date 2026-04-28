@@ -23,6 +23,9 @@ interface SiweAuthState {
   error: string | null
   address: string | null
   isAdmin: boolean
+  /** Backend says this wallet may flip the app into demo mode. Drives the
+   * DemoToggle visibility and the demo bypass on the AccessGate. */
+  isDemoAuthorized: boolean
   hasRejected: boolean
 }
 
@@ -60,6 +63,7 @@ export function useSiweAuth() {
     error: null,
     address: null,
     isAdmin: false,
+    isDemoAuthorized: false,
     hasRejected: false,
   })
 
@@ -78,6 +82,7 @@ export function useSiweAuth() {
             error: null,
             address: data.address,
             isAdmin: data.isAdmin,
+            isDemoAuthorized: data.isDemoAuthorized ?? false,
             hasRejected: false,
           })
           setApiAuthenticated(true)
@@ -170,6 +175,7 @@ export function useSiweAuth() {
         error: null,
         address: result.address,
         isAdmin: result.isAdmin,
+        isDemoAuthorized: result.isDemoAuthorized ?? false,
         hasRejected: false,
       })
 
@@ -194,6 +200,7 @@ export function useSiweAuth() {
         error: msg,
         address: null,
         isAdmin: false,
+        isDemoAuthorized: false,
         hasRejected: isRejection,
       })
       setApiAuthenticated(false)
@@ -222,6 +229,7 @@ export function useSiweAuth() {
         error: null,
         address: null,
         isAdmin: false,
+        isDemoAuthorized: false,
         hasRejected: false,
       })
       setApiAuthenticated(false)

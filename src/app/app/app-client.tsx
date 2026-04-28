@@ -435,13 +435,9 @@ function AccessGate({ children }: { children: React.ReactNode }) {
     }
   }, [connectors, connect, reset])
 
-  // Demo mode bypass — no wallet, no signature, straight to the canvas.
-  if (isDemo) {
-    return <>{children}</>
-  }
-
-  // Hold the loader during the first paint if ?demo=true is in the URL but
-  // useDemoMode hasn't synced yet — prevents the AccessGate from flashing.
+  // Hold the loader until session has resolved (and demo flag has settled).
+  // demoPending: flag is set in storage/URL but useDemoMode hasn't confirmed
+  // authorization yet — keep the spinner so the gate doesn't flash.
   const demoPending = mounted && !isDemo && isDemoModeSync()
 
   if (!mounted || isRedirecting || !sessionChecked || demoPending) {
@@ -451,6 +447,12 @@ function AccessGate({ children }: { children: React.ReactNode }) {
         <div className="access-gate__loader-spinner" />
       </div>
     )
+  }
+
+  // Demo bypass — only reachable after sessionChecked; isDemo is already gated
+  // on authorization so unauthorized wallets never reach this branch.
+  if (isDemo) {
+    return <>{children}</>
   }
 
   const hasAccess = isConnected && isAuthenticated

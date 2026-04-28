@@ -110,14 +110,13 @@ export async function POST(request: NextRequest) {
     const token = await createSession(parsed.address)
     const session = await verifySession(token)
     const isAdmin = session?.isAdmin ?? false
-
-    console.log('[Auth] Session created for:', parsed.address, isAdmin ? '(admin)' : '')
+    const isDemoAuthorized = session?.isDemoAuthorized ?? false
 
     const isSecure = process.env.NODE_ENV === 'production'
     const cookieValue = `hearst-session=${token}; HttpOnly; SameSite=Strict; Path=/; Max-Age=86400${isSecure ? '; Secure' : ''}`
 
     return NextResponse.json(
-      { success: true, address: parsed.address, isAdmin },
+      { success: true, address: parsed.address, isAdmin, isDemoAuthorized },
       { headers: { 'Set-Cookie': cookieValue } }
     )
   } catch (error) {

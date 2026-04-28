@@ -10,6 +10,10 @@ import type { Address } from 'viem'
 export interface Session {
   address: Address
   isAdmin: boolean
+  /** Wallet is allowed to flip the app into demo mode. Demos expose mocked
+   * portfolio data that we don't want any random visitor to see — gating it
+   * to a small whitelist (DEMO_ADDRESSES env var) keeps the surface internal. */
+  isDemoAuthorized: boolean
   iat: number
   exp: number
 }
@@ -32,33 +36,49 @@ const SECRET_KEY = new TextEncoder().encode(
   JWT_SECRET || 'hearst-dev-secret-do-not-use-in-production-32bytes'
 )
 
-// Admin addresses - validate format and normalize
-const ADMIN_ADDRESSES = new Set(
-  (process.env.ADMIN_ADDRESSES || '')
-    .toLowerCase()
-    .split(',')
-    .map(addr => addr.trim())
-    .filter(addr => {
-      if (!addr) return false
-      if (!/^0x[a-f0-9]{40}$/.test(addr)) {
-        console.warn(`[Auth] Invalid admin address format ignored: ${addr}`)
-        return false
-      }
-      return true
-    })
-)
+function parseAddressWhitelist(raw: string | undefined, label: string): Set<string> {
+  return new Set(
+    (raw || '')
+      .toLowerCase()
+      .split(',')
+      .map((addr) => addr.trim())
+      .filter((addr) => {
+        if (!addr) return false
+        if (!/^0x[a-f0-9]{40}$/.test(addr)) {
+          console.warn(`[Auth] Invalid ${label} address format ignored: ${addr}`)
+          return false
+        }
+        return true
+      }),
+  )
+}
+
+// Admin whitelist drives the `isAdmin` JWT claim — gates /admin and any
+// API route guarded by requireAdmin().
+const ADMIN_ADDRESSES = parseAddressWhitelist(process.env.ADMIN_ADDRESSES, 'admin')
+
+// Demo whitelist drives the `isDemoAuthorized` JWT claim. Anyone in the admin
+// whitelist gets demo access for free (admins always can preview), plus any
+// extra addresses listed in DEMO_ADDRESSES (testers, sales reps, etc.).
+const DEMO_ADDRESSES = new Set([
+  ...ADMIN_ADDRESSES,
+  ...parseAddressWhitelist(process.env.DEMO_ADDRESSES, 'demo'),
+])
 
 /**
  * Create a new JWT session after SIWE verification
  */
 export async function createSession(address: Address): Promise<string> {
   validateJWTSecret()
-  
-  const isAdmin = ADMIN_ADDRESSES.has(address.toLowerCase())
+
+  const lowered = address.toLowerCase()
+  const isAdmin = ADMIN_ADDRESSES.has(lowered)
+  const isDemoAuthorized = DEMO_ADDRESSES.has(lowered)
 
   const token = await new SignJWT({
     address,
     isAdmin,
+    isDemoAuthorized,
   })
     .setProtectedHeader({ alg: 'HS256' })
     .setIssuedAt()
@@ -66,7 +86,8 @@ export async function createSession(address: Address): Promise<string> {
     .sign(SECRET_KEY)
 
   if (!IS_PRODUCTION) {
-    console.log('[Auth] Session created for:', address, isAdmin ? '(admin)' : '')
+    const tags = [isAdmin ? 'admin' : null, isDemoAuthorized ? 'demo' : null].filter(Boolean)
+    console.log('[Auth] Session created for:', address, tags.length ? `(${tags.join(', ')})` : '')
   }
   return token
 }
@@ -82,6 +103,10 @@ export async function verifySession(token: string): Promise<Session | null> {
     return {
       address: payload.address as Address,
       isAdmin: payload.isAdmin as boolean,
+      // Older tokens (pre-DEMO_ADDRESSES) don't carry the flag; default to
+      // false so the new gate is respected as soon as it ships, even before
+      // every active session is renewed.
+      isDemoAuthorized: (payload.isDemoAuthorized as boolean | undefined) ?? false,
       iat: payload.iat as number,
       exp: payload.exp as number,
     }
