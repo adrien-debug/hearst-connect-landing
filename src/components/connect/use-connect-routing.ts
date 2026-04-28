@@ -10,11 +10,13 @@ import {
   useState,
   type ReactNode,
 } from 'react'
-import { SIMULATION_VIEW_ID } from './view-ids'
+import { SIMULATION_VIEW_ID, AVAILABLE_VAULTS_VIEW_ID } from './view-ids'
 import { type VaultLine, type Aggregate } from './data'
 import { useVaultLines } from '@/hooks/useVaultLines'
 
-function readInitialSelection(): string | null {
+const VIEW_IDS: ReadonlySet<string> = new Set([SIMULATION_VIEW_ID, AVAILABLE_VAULTS_VIEW_ID])
+
+function readSelectionFromUrl(): string | null {
   if (typeof window === 'undefined') return null
   try {
     const params = new URLSearchParams(window.location.search)
@@ -22,6 +24,22 @@ function readInitialSelection(): string | null {
   } catch {
     return null
   }
+}
+
+/** selectionToSearch — Maps a selected id to the right query param. Special
+ * view ids (simulation, available-vaults) live under `?view=`; everything
+ * else (concrete vault / cohort ids) lives under `?vault=`. Empty selection
+ * yields an empty search so the home URL stays clean. Exported for tests. */
+export function selectionToSearch(id: string | null): string {
+  if (!id) return ''
+  const param = VIEW_IDS.has(id) ? 'view' : 'vault'
+  return `?${param}=${encodeURIComponent(id)}`
+}
+
+/** currentSearch — Reads the live `?…` from window for diff comparison. */
+function currentSearch(): string {
+  if (typeof window === 'undefined') return ''
+  return window.location.search
 }
 
 interface ConnectRoutingContextValue {
@@ -38,14 +56,17 @@ interface ConnectRoutingContextValue {
 const ConnectRoutingContext = createContext<ConnectRoutingContextValue | null>(null)
 
 export function NavigationProvider({ children }: { children: ReactNode }) {
-  const [selectedId, setSelectedId] = useState<string | null>(null)
+  const [selectedId, setSelectedIdState] = useState<string | null>(null)
   const { vaults, agg, hasVaults, isLoading } = useVaultLines()
 
-  // Hydrate initial selection from URL (?vault=<id> or ?view=<id>) once mounted
-  // so demo screenshots can deep-link straight into a vault detail page.
+  // Hydrate from URL on mount and react to browser back/forward. Both paths
+  // funnel through the same sync function so deep-links AND popstate produce
+  // identical state.
   useEffect(() => {
-    const initial = readInitialSelection()
-    if (initial) setSelectedId(initial)
+    const sync = () => setSelectedIdState(readSelectionFromUrl())
+    sync()
+    window.addEventListener('popstate', sync)
+    return () => window.removeEventListener('popstate', sync)
   }, [])
 
   const isSimulation = selectedId === SIMULATION_VIEW_ID
@@ -57,8 +78,16 @@ export function NavigationProvider({ children }: { children: ReactNode }) {
     [isSimulation, selectedId, vaults],
   )
 
+  // setSelectedId — updates state and pushes a history entry so browser
+  // back/forward can navigate. Skips pushState when the URL already matches
+  // (e.g. initial hydration from popstate) to avoid duplicate stack entries.
   const select = useCallback((id: string | null) => {
-    setSelectedId(id)
+    setSelectedIdState(id)
+    if (typeof window === 'undefined') return
+    const nextSearch = selectionToSearch(id)
+    if (nextSearch === currentSearch()) return
+    const url = `${window.location.pathname}${nextSearch}${window.location.hash}`
+    window.history.pushState({}, '', url)
   }, [])
 
   const value = useMemo<ConnectRoutingContextValue>(

@@ -89,7 +89,7 @@ export function Canvas() {
             flexShrink: 0,
           }}
         />
-        <DockRadial onSelect={setSelectedId} />
+        <DockRadial onSelect={setSelectedId} activeId={selectedId} />
       </div>
     )
   }
@@ -175,7 +175,7 @@ export function Canvas() {
       />
 
       {/* Dock Radial Navigation */}
-      <DockRadial onSelect={handleSelect} />
+      <DockRadial onSelect={handleSelect} activeId={selectedId} />
     </div>
   )
 }
