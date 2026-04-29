@@ -479,16 +479,17 @@
 }
 
 /* Cards - Multi-layer shadows for "High-End" depth */
-[data-theme="light"] .card,
-[data-theme="light"] [class*="card"] {
+/* NOTE: Intentionally NOT using [class*="card"] — that wildcard leaks into
+   connect-scope and admin elements that have "card" in their class name.
+   Only explicit .card utility class gets light-mode styling. */
+[data-theme="light"] .card {
   background: var(--color-bg-secondary);
   border: 1px solid var(--color-border-default);
   box-shadow: var(--shadow-card);
   transition: all 0.3s cubic-bezier(0.2, 1, 0.2, 1);
 }
 
-[data-theme="light"] .card:hover,
-[data-theme="light"] [class*="card"]:hover {
+[data-theme="light"] .card:hover {
   transform: translateY(-4px);
   border-color: var(--color-accent);
   box-shadow: var(--shadow-card-hover);
@@ -496,8 +497,7 @@
 
 /* Buttons - Primary: Black bg, Citrus text */
 [data-theme="light"] .btn-primary,
-[data-theme="light"] button[data-variant="primary"],
-[data-theme="light"] [class*="btn-primary"] {
+[data-theme="light"] button[data-variant="primary"] {
   background: #000000;
   color: var(--color-accent);
   border: 2px solid #000000;
@@ -505,8 +505,7 @@
 }
 
 [data-theme="light"] .btn-primary:hover,
-[data-theme="light"] button[data-variant="primary"]:hover,
-[data-theme="light"] [class*="btn-primary"]:hover {
+[data-theme="light"] button[data-variant="primary"]:hover {
   background: var(--color-accent);
   color: #000000;
   border-color: #000000;
@@ -528,27 +527,26 @@
   border-color: var(--color-border-strong);
 }
 
-/* Inputs */
-[data-theme="light"] input,
-[data-theme="light"] textarea,
-[data-theme="light"] select {
+/* Inputs — scoped to marketing/non-connect surfaces */
+[data-theme="light"] input:not(.connect-scope input),
+[data-theme="light"] textarea:not(.connect-scope textarea),
+[data-theme="light"] select:not(.connect-scope select) {
   background: var(--color-bg-input);
   border: 1px solid var(--color-border-default);
   color: var(--color-text-primary);
 }
 
-[data-theme="light"] input:focus,
-[data-theme="light"] textarea:focus,
-[data-theme="light"] select:focus {
+[data-theme="light"] input:not(.connect-scope input):focus,
+[data-theme="light"] textarea:not(.connect-scope textarea):focus,
+[data-theme="light"] select:not(.connect-scope select):focus {
   outline: none;
   background: var(--color-bg-secondary);
   border-color: #000000;
   box-shadow: 4px 4px 0px var(--color-accent);
 }
 
-/* Badges with accent */
-[data-theme="light"] .badge,
-[data-theme="light"] [class*="badge"] {
+/* Badges with accent — explicit .badge class only, not wildcard */
+[data-theme="light"] .badge {
   background: var(--color-accent);
   color: #000000;
   border: 1px solid #000000;
@@ -566,4 +564,58 @@
 [data-theme="light"] .welcome-logo,
 [data-theme="light"] img[src*="hearst"] {
   filter: brightness(0);
+}
+
+/* ============================================
+   CONNECT-SCOPE LIGHT-MODE INTERFERENCE RESET
+   The connect surface is always dark regardless
+   of the user's system / [data-theme] setting.
+   These rules appear AFTER all [data-theme="light"]
+   rules so they win on equal specificity (0,2,0).
+   ============================================ */
+
+/* Reset any light-mode card overrides inside connect */
+.connect-scope .card,
+.connect-scope [class*="card"] {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+  transform: none;
+  transition: none;
+}
+
+/* Restore explicit dark surfaces where connect components set them via inline style */
+.connect-scope input,
+.connect-scope textarea,
+.connect-scope select {
+  background: var(--hc-bg-secondary);
+  border: 1px solid var(--hc-border-subtle);
+  color: var(--hc-text-primary);
+  color-scheme: dark;
+}
+
+.connect-scope input:focus,
+.connect-scope textarea:focus,
+.connect-scope select:focus {
+  border-color: var(--hc-accent);
+  box-shadow: none;
+  outline: none;
+}
+
+/* Reset badge overrides */
+.connect-scope .badge,
+.connect-scope [class*="badge"] {
+  background: var(--hc-accent-dim);
+  color: var(--hc-accent);
+  border: 1px solid var(--hc-border-subtle);
+}
+
+/* Reset button overrides */
+.connect-scope .btn-primary,
+.connect-scope button[data-variant="primary"] {
+  background: var(--hc-accent);
+  color: var(--hc-bg-app);
+  border: none;
+  transform: none;
+  box-shadow: none;
 }

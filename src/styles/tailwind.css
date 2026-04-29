@@ -164,12 +164,19 @@ input[type="range"]:focus-visible::-webkit-slider-thumb {
   box-shadow: 0 0 0 3px rgba(var(--brand-accent-rgb), 0.30);
 }
 
-/* ─── Admin inputs / selects — browser default reset ──────────────────────── */
-input[type="number"],
-input[type="text"],
-input[type="email"],
-input[type="password"],
-select {
+/* ─── Connect/Admin inputs — browser chrome forced dark inside dark scopes ── */
+/* Scoped to connect-scope and [data-theme="dark"] to avoid breaking light-mode
+   marketing inputs (which should render with the system's light native chrome). */
+.connect-scope input[type="number"],
+.connect-scope input[type="text"],
+.connect-scope input[type="email"],
+.connect-scope input[type="password"],
+.connect-scope select,
+[data-theme="dark"] input[type="number"],
+[data-theme="dark"] input[type="text"],
+[data-theme="dark"] input[type="email"],
+[data-theme="dark"] input[type="password"],
+[data-theme="dark"] select {
   color-scheme: dark;
 }
 
