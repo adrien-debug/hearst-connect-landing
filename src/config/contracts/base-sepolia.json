@@ -1,12 +1,12 @@
 {
   "chainId": 84532,
   "chainName": "base-sepolia",
-  "deployedAt": null,
-  "txHash": null,
+  "deployedAt": "2026-04-29T00:42:44.105Z",
+  "txHash": "0xe4859442d5803e5ec124b148de61ad5df0e38cd5f1fe115677d84741bdba3542",
   "contracts": {
-    "HearstVault": null,
-    "HearstVaultImpl": null,
-    "HearstPosition": null,
-    "HearstPositionImpl": null
+    "HearstVault": "0x25b0022ee53d210ad960dae81df884f66f473a73",
+    "HearstVaultImpl": "0xeb72591f691796155b93ed129cd00cf5ea0882bf",
+    "HearstPosition": "0x66e5d784cbb2ce8df213fa9deea9a962a8a67676",
+    "HearstPositionImpl": "0x2c53c9aa5d377f1116a9350c20a151cb7ad7d4fb"
   }
 }
