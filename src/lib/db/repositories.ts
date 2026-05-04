@@ -24,6 +24,8 @@ import type {
   DbAgentConfig,
   SignalStatus,
   AgentName,
+  DbEarlyAccessSignup,
+  DbEarlyAccessSignupInput,
 } from './schema'
 import type { Address } from 'viem'
 
@@ -722,5 +724,58 @@ export class AgentConfigRepository {
 
   static getDefaults(): Record<string, string> {
     return { ...DEFAULT_CONFIG }
+  }
+}
+
+// Early Access Signups Repository
+export const EarlyAccessRepository = {
+  create(input: DbEarlyAccessSignupInput): DbEarlyAccessSignup {
+    const db = getDb()
+    const now = Date.now()
+    const row: DbEarlyAccessSignup = {
+      id: generateId('eas'),
+      email: input.email.toLowerCase().trim(),
+      source: input.source ?? null,
+      userAgent: input.userAgent ?? null,
+      ip: input.ip ?? null,
+      createdAt: now,
+    }
+    db.prepare(
+      'INSERT INTO early_access_signups (id, email, source, user_agent, ip, created_at) VALUES (?, ?, ?, ?, ?, ?)'
+    ).run(row.id, row.email, row.source, row.userAgent, row.ip, row.createdAt)
+    return row
+  },
+
+  findByEmail(email: string): DbEarlyAccessSignup | null {
+    const db = getDb()
+    const row = db
+      .prepare('SELECT * FROM early_access_signups WHERE email = ?')
+      .get(email.toLowerCase().trim()) as Record<string, unknown> | undefined
+    return row ? mapEarlyAccessRow(row) : null
+  },
+
+  findAll(limit = 1000): DbEarlyAccessSignup[] {
+    const db = getDb()
+    const rows = db
+      .prepare('SELECT * FROM early_access_signups ORDER BY created_at DESC LIMIT ?')
+      .all(limit) as Record<string, unknown>[]
+    return rows.map(mapEarlyAccessRow)
+  },
+
+  count(): number {
+    const db = getDb()
+    const row = db.prepare('SELECT COUNT(*) AS c FROM early_access_signups').get() as { c: number }
+    return row.c
+  },
+}
+
+function mapEarlyAccessRow(row: Record<string, unknown>): DbEarlyAccessSignup {
+  return {
+    id: row.id as string,
+    email: row.email as string,
+    source: (row.source as string | null) ?? null,
+    userAgent: (row.user_agent as string | null) ?? null,
+    ip: (row.ip as string | null) ?? null,
+    createdAt: row.created_at as number,
   }
 }

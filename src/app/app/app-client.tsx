@@ -128,9 +128,9 @@ function AccessGate({ children }: { children: React.ReactNode }) {
           {/* Logo - Solo */}
           <div style={{ marginBottom: TOKENS.spacing[10] }}>
             <img 
-              src="/logos/hearst-connect.svg" 
-              alt="Hearst Connect" 
-              style={{ width: '72px', height: '72px', filter: 'drop-shadow(0 0 30px rgba(167, 251, 144, 0.15))' }} 
+              src="/logos/hearst-ai-black.svg" 
+              alt="Hearst AI" 
+              style={{ width: '72px', height: '72px', filter: 'drop-shadow(0 0 30px rgba(46, 207, 206, 0.15))' }} 
             />
           </div>
 

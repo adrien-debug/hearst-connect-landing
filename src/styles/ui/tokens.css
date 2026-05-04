@@ -38,10 +38,10 @@
   --color-text-tertiary: rgba(255, 255, 255, 0.40);
   --color-text-disabled: rgba(255, 255, 255, 0.25);
 
-  /* Accent (green for financial/positive) */
-  --color-accent: #a7fb90;
-  --color-accent-dim: rgba(167, 251, 144, 0.15);
-  --color-accent-subtle: rgba(167, 251, 144, 0.08);
+  /* Accent (cyan for financial/positive) */
+  --color-accent: #2ECFCE;
+  --color-accent-dim: rgba(46, 207, 206, 0.15);
+  --color-accent-subtle: rgba(46, 207, 206, 0.08);
 
   /* Borders */
   --color-border-subtle: rgba(255, 255, 255, 0.08);
@@ -51,7 +51,7 @@
   /* States */
   --color-state-hover: rgba(255, 255, 255, 0.04);
   --color-state-active: rgba(255, 255, 255, 0.08);
-  --color-state-selected: rgba(167, 251, 144, 0.10);
+  --color-state-selected: rgba(46, 207, 206, 0.10);
 
   /* ───────────────────────────────────────────────────────────────
      SPACING SYSTEM (4px base unit)

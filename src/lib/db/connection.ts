@@ -193,6 +193,19 @@ export function initDb(): void {
     );
   `)
 
+  // Early access signups - landing page email captures
+  database.exec(`
+    CREATE TABLE IF NOT EXISTS early_access_signups (
+      id TEXT PRIMARY KEY,
+      email TEXT NOT NULL UNIQUE,
+      source TEXT,
+      user_agent TEXT,
+      ip TEXT,
+      created_at INTEGER NOT NULL
+    );
+    CREATE INDEX IF NOT EXISTS idx_early_access_created ON early_access_signups(created_at DESC);
+  `)
+
   // Apply performance indexes
   database.exec(`
     CREATE INDEX IF NOT EXISTS idx_vaults_address ON vaults(vault_address);

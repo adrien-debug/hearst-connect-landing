@@ -1,5 +1,5 @@
-/* Design tokens — accent synced to Hearst Connect logo (public/logos/hearst-connect.svg .st1).
- * sRGB écran: #A7FB90. Impression: proche Pantone 902 C (#8DE971) — valider sur charte papier / Pantone Bridge.
+/* Design tokens — accent synced to Hearst AI logo (public/logos/hearst-ai-black.svg).
+ * sRGB écran: #2ECFCE. Cyan accent pour Hearst AI.
  */
 
 :root {
@@ -16,25 +16,25 @@
   --dashboard-glass: rgba(17, 17, 23, 0.8);
   --dashboard-glass-border: rgba(255, 255, 255, 0.04);
   --dashboard-blur: 0px;
-  --dashboard-accent: #A7FB90;
-  --dashboard-accent-hover: #C4FFA8;
-  --dashboard-accent-dim: rgba(167, 251, 144, 0.12);
-  --dashboard-accent-muted: rgba(167, 251, 144, 0.20);
-  --dashboard-accent-soft: rgba(167, 251, 144, 0.06);
+  --dashboard-accent: #2ECFCE;
+  --dashboard-accent-hover: #5FD9D8;
+  --dashboard-accent-dim: rgba(46, 207, 206, 0.12);
+  --dashboard-accent-muted: rgba(46, 207, 206, 0.20);
+  --dashboard-accent-soft: rgba(46, 207, 206, 0.06);
   --dashboard-accent-faint: transparent;
-  --dashboard-accent-strong: rgba(167, 251, 144, 0.10);
-  --dashboard-accent-ring: rgba(167, 251, 144, 0.16);
-  --dashboard-accent-shadow: rgba(167, 251, 144, 0.12);
-  --dashboard-accent-glow: rgba(167, 251, 144, 0.04);
-  --dashboard-accent-deep: #4A8F3A;
-  --dashboard-glow-accent: 0 0 24px rgba(167, 251, 144, 0.06);
-  --dashboard-glow-accent-medium: 0 0 8px rgba(167, 251, 144, 0.5);
-  --dashboard-glow-accent-strong: 0 0 15px rgba(167, 251, 144, 0.4);
+  --dashboard-accent-strong: rgba(46, 207, 206, 0.10);
+  --dashboard-accent-ring: rgba(46, 207, 206, 0.16);
+  --dashboard-accent-shadow: rgba(46, 207, 206, 0.12);
+  --dashboard-accent-glow: rgba(46, 207, 206, 0.04);
+  --dashboard-accent-deep: #1F7F7E;
+  --dashboard-glow-accent: 0 0 24px rgba(46, 207, 206, 0.06);
+  --dashboard-glow-accent-medium: 0 0 8px rgba(46, 207, 206, 0.5);
+  --dashboard-glow-accent-strong: 0 0 15px rgba(46, 207, 206, 0.4);
   --dashboard-glow-accent-soft: 0 0 6px color-mix(in srgb, var(--dashboard-accent) 45%, transparent);
   --dashboard-glow-error: 0 0 24px rgba(239, 68, 68, 0.06);
-  --dashboard-shadow-rail-mark: 0 0 24px rgba(167, 251, 144, 0.24);
-  --dashboard-shadow-rail-nav-icon: 0 0 12px rgba(167, 251, 144, 0.6);
-  --dashboard-shadow-rail-status-dot: 0 0 10px rgba(167, 251, 144, 0.8);
+  --dashboard-shadow-rail-mark: 0 0 24px rgba(46, 207, 206, 0.24);
+  --dashboard-shadow-rail-nav-icon: 0 0 12px rgba(46, 207, 206, 0.6);
+  --dashboard-shadow-rail-status-dot: 0 0 10px rgba(46, 207, 206, 0.8);
   --dashboard-shadow-rail-user-chip: 0 4px 20px rgba(0, 0, 0, 0.45);
   --dashboard-shadow-error-confirm: 0 0 15px var(--dashboard-error-border);
   --dashboard-rail-nav-item-max-width: 168px;
@@ -43,7 +43,7 @@
   --dashboard-text-secondary: #A0A6B0;
   --dashboard-text-muted: #7A808A;
   --dashboard-text-ghost: #5A5F68;
-  --dashboard-text-accent: #C8F5B8;
+  --dashboard-text-accent: #C8F5F4;
   --dashboard-border: rgba(255, 255, 255, 0.06);
   --dashboard-border-mid: rgba(255, 255, 255, 0.10);
   --dashboard-border-strong: rgba(255, 255, 255, 0.14);
@@ -69,12 +69,12 @@
   --dashboard-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.20);
   --dashboard-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.30);
   --dashboard-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.40);
-  --dashboard-shadow-accent: 0 0 16px rgba(167, 251, 144, 0.10);
+  --dashboard-shadow-accent: 0 0 16px rgba(46, 207, 206, 0.10);
   --dashboard-gauge: var(--dashboard-accent);
   --dashboard-dot: var(--dashboard-accent);
-  --dashboard-gauge-glow: rgba(167, 251, 144, 0.14);
-  --dashboard-gauge-glow-strong: rgba(167, 251, 144, 0.24);
-  --dashboard-gauge-glow-soft: rgba(167, 251, 144, 0.06);
+  --dashboard-gauge-glow: rgba(46, 207, 206, 0.14);
+  --dashboard-gauge-glow-strong: rgba(46, 207, 206, 0.24);
+  --dashboard-gauge-glow-soft: rgba(46, 207, 206, 0.06);
   --dashboard-terminal-red: #ff5f57;
   --dashboard-terminal-yellow: #ffbd2e;
   --dashboard-terminal-accent: var(--dashboard-accent);

@@ -1,11 +1,11 @@
 {
-  "name": "hearst-connect",
+  "name": "hearst-ai-new",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "lsof -ti:8100 | xargs kill -9 2>/dev/null; sleep 1; next dev --port 8100 --webpack",
+    "dev": "lsof -ti:5555 | xargs kill -9 2>/dev/null; sleep 1; next dev --port 5555 --webpack",
     "build": "next build --webpack",
-    "start": "next start --port 8100",
+    "start": "next start --port 5555",
     "lint": "tsc -p . --noEmit",
     "test": "vitest run"
   },

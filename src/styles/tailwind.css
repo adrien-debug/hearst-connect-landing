@@ -25,7 +25,7 @@
   width: 20px;
   height: 20px;
   border-radius: 50%;
-  background: var(--dashboard-accent, #A7FB90);
+  background: var(--dashboard-accent, #2ECFCE);
   opacity: 0.5;
   transform: translate(-50%, -50%) scale(0);
   pointer-events: none;
@@ -125,7 +125,7 @@ input[type="range"]::-webkit-slider-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--color-accent, #a7fb90);
+  background: var(--color-accent, #2ECFCE);
   margin-top: -5px;
   cursor: pointer;
   transition: transform 0.1s ease, box-shadow 0.1s ease;
@@ -133,7 +133,7 @@ input[type="range"]::-webkit-slider-thumb {
 
 input[type="range"]::-webkit-slider-thumb:hover {
   transform: scale(1.2);
-  box-shadow: 0 0 0 4px rgba(167, 251, 144, 0.20);
+  box-shadow: 0 0 0 4px rgba(46, 207, 206, 0.20);
 }
 
 input[type="range"]::-moz-range-track {
@@ -146,7 +146,7 @@ input[type="range"]::-moz-range-thumb {
   width: 14px;
   height: 14px;
   border-radius: 50%;
-  background: var(--color-accent, #a7fb90);
+  background: var(--color-accent, #2ECFCE);
   border: none;
   cursor: pointer;
 }

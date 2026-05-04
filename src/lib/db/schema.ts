@@ -200,6 +200,23 @@ export interface DbAgentConfig {
   updatedAt: number
 }
 
+// Early access signup - landing page email capture
+export interface DbEarlyAccessSignup {
+  id: string
+  email: string
+  source: string | null
+  userAgent: string | null
+  ip: string | null
+  createdAt: number
+}
+
+export interface DbEarlyAccessSignupInput {
+  email: string
+  source?: string
+  userAgent?: string
+  ip?: string
+}
+
 export interface AgentConfigMap {
   btc_entry_price: string
   profit_levels: string // JSON array [{mult, pct}]

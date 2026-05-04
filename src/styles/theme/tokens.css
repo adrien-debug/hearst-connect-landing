@@ -143,17 +143,17 @@
   --color-border-strong: rgba(255, 255, 255, 0.20);
   --color-border-focus: rgba(255, 255, 255, 0.40);
 
-  /* Accent (neon green - excellent on dark) */
-  --color-accent: #a7fb90;
-  --color-accent-dim: rgba(167, 251, 144, 0.10);
-  --color-accent-subtle: rgba(167, 251, 144, 0.15);
-  --color-accent-glow: rgba(167, 251, 144, 0.25);
+  /* Accent (cyan accent - excellent on dark) */
+  --color-accent: #2ECFCE;
+  --color-accent-dim: rgba(46, 207, 206, 0.10);
+  --color-accent-subtle: rgba(46, 207, 206, 0.15);
+  --color-accent-glow: rgba(46, 207, 206, 0.25);
   --color-accent-text: #000000;
 
   /* Status colors */
-  --color-success: #a7fb90;
-  --color-success-bg: rgba(167, 251, 144, 0.15);
-  --color-success-border: rgba(167, 251, 144, 0.30);
+  --color-success: #2ECFCE;
+  --color-success-bg: rgba(46, 207, 206, 0.15);
+  --color-success-border: rgba(46, 207, 206, 0.30);
   
   --color-error: #ef4444;
   --color-error-bg: rgba(239, 68, 68, 0.15);
@@ -172,12 +172,12 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.40);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.50);
   --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.60);
-  --shadow-glow: 0 0 20px rgba(167, 251, 144, 0.30);
+  --shadow-glow: 0 0 20px rgba(46, 207, 206, 0.30);
 
   /* Interactive states */
   --color-hover: rgba(255, 255, 255, 0.06);
   --color-active: rgba(255, 255, 255, 0.10);
-  --color-selected: rgba(167, 251, 144, 0.15);
+  --color-selected: rgba(46, 207, 206, 0.15);
 
   /* Scrollbar */
   --scrollbar-thumb: rgba(255, 255, 255, 0.20);
@@ -212,12 +212,12 @@
   --color-border-strong: rgba(0, 0, 0, 0.20);
   --color-border-focus: rgba(0, 0, 0, 0.40);
 
-  /* Accent (Citrus Neon - Identique au Dark) */
-  --color-accent: #a7fb90;              /* Citrus Neon exact */
+  /* Accent (Cyan Accent - New Hearst AI brand) */
+  --color-accent: #2ECFCE;              /* Cyan accent */
   --color-accent-fg: #000000;           /* Black text on accent */
-  --color-accent-dim: rgba(167, 251, 144, 0.10);
-  --color-accent-subtle: rgba(167, 251, 144, 0.15);
-  --color-accent-glow: rgba(167, 251, 144, 0.25);
+  --color-accent-dim: rgba(46, 207, 206, 0.10);
+  --color-accent-subtle: rgba(46, 207, 206, 0.15);
+  --color-accent-glow: rgba(46, 207, 206, 0.25);
   --color-accent-text: #000000;
 
   /* Status colors (adapted for light theme) */
@@ -242,23 +242,23 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.03);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.04);
   --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.06);
-  --shadow-glow: 0 0 20px rgba(167, 251, 144, 0.20);
+  --shadow-glow: 0 0 20px rgba(46, 207, 206, 0.20);
 
   /* Card-specific multi-layer shadows (Light Stylé signature) */
   --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.02),
                  0 12px 24px rgba(0, 0, 0, 0.03),
                  0 20px 40px -10px rgba(0, 0, 0, 0.04);
   --shadow-card-hover: 0 4px 8px rgba(0, 0, 0, 0.04),
-                       0 20px 40px rgba(167, 251, 144, 0.15),
+                       0 20px 40px rgba(46, 207, 206, 0.15),
                        0 30px 60px -12px rgba(0, 0, 0, 0.06);
 
   /* Button shadows */
-  --shadow-button-primary-hover: 0 4px 16px rgba(167, 251, 144, 0.25);
+  --shadow-button-primary-hover: 0 4px 16px rgba(46, 207, 206, 0.25);
 
   /* Interactive states */
   --color-hover: rgba(0, 0, 0, 0.04);
   --color-active: rgba(0, 0, 0, 0.08);
-  --color-selected: rgba(167, 251, 144, 0.15);
+  --color-selected: rgba(46, 207, 206, 0.15);
 
   /* Scrollbar */
   --scrollbar-thumb: rgba(0, 0, 0, 0.15);
@@ -266,7 +266,7 @@
   --scrollbar-track: transparent;
 
   /* Cinematic Gradients (adaptés au blanc) */
-  --gradient-stage-shoulder: radial-gradient(ellipse 160% 100% at 50% -30%, rgba(167, 251, 144, 0.08) 0%, transparent 55%);
+  --gradient-stage-shoulder: radial-gradient(ellipse 160% 100% at 50% -30%, rgba(46, 207, 206, 0.08) 0%, transparent 55%);
   --gradient-stage-carbon: radial-gradient(ellipse at 25% 15%, rgba(0, 0, 0, 0.01) 0%, transparent 45%),
                            radial-gradient(ellipse at 75% 85%, rgba(0, 0, 0, 0.01) 0%, transparent 40%),
                            radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.02) 0%, transparent 70%);
@@ -292,9 +292,9 @@
   --hc-border-default: rgba(255, 255, 255, 0.12);
   --hc-border-strong: rgba(255, 255, 255, 0.14);
 
-  --hc-accent: #a7fb90;
-  --hc-accent-dim: rgba(167, 251, 144, 0.05);
-  --hc-accent-glow: rgba(167, 251, 144, 0.12);
+  --hc-accent: #2ECFCE;
+  --hc-accent-dim: rgba(46, 207, 206, 0.05);
+  --hc-accent-glow: rgba(46, 207, 206, 0.12);
 
   --hc-overlay: rgba(0, 0, 0, 0.8);
 
@@ -325,10 +325,10 @@
   --hc-border-default: rgba(0, 0, 0, 0.10);
   --hc-border-strong: rgba(0, 0, 0, 0.20);
 
-  /* Citrus accent - identical to Dark theme */
-  --hc-accent: #a7fb90;
-  --hc-accent-dim: rgba(167, 251, 144, 0.10);
-  --hc-accent-glow: rgba(167, 251, 144, 0.15);
+  /* Cyan accent - identical to Dark theme */
+  --hc-accent: #2ECFCE;
+  --hc-accent-dim: rgba(46, 207, 206, 0.10);
+  --hc-accent-glow: rgba(46, 207, 206, 0.15);
 
   --hc-overlay: rgba(0, 0, 0, 0.4);
 
@@ -519,7 +519,6 @@
 /* ou garder le logo original blanc/vert */
 
 /* Option 1: Logos en noir complet (filter simple) */
-[data-theme="light"] .welcome-logo,
 [data-theme="light"] img[src*="hearst"] {
   filter: brightness(0);
 }

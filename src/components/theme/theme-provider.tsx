@@ -60,10 +60,17 @@ export function ThemeProvider({
   const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
+    if (window.location.pathname === '/') {
+      setThemeState('dark')
+      setResolvedTheme('dark')
+      setMounted(true)
+      return
+    }
+
     const stored = getStoredTheme()
     const initialTheme = stored || defaultTheme
     setThemeState(initialTheme)
-    
+
     if (forcedTheme) {
       setResolvedTheme(forcedTheme)
     } else if (initialTheme === 'system' && enableSystem) {
@@ -71,7 +78,7 @@ export function ThemeProvider({
     } else {
       setResolvedTheme(initialTheme as ResolvedTheme)
     }
-    
+
     setMounted(true)
   }, [defaultTheme, forcedTheme, enableSystem])
 

@@ -25,25 +25,39 @@ function CloseIcon() {
   );
 }
 
-/** Crossfade premier plan → seconde capture dans la tablette. */
+/** Crossfade entre 3 captures dans la tablette, piloté par la progression de
+ * scroll à travers la section #features-section.
+ *
+ * Plus la fenêtre est grande (`fadeWindow`), plus la transition est lente. */
 function updateTabletScrollBlend(layers: HTMLElement): void {
-  const section2 = document.getElementById('feature-agents');
-  if (!section2) return;
+  const wrapper = document.getElementById('features-section');
+  if (!wrapper) return;
 
-  const r = section2.getBoundingClientRect();
+  const r = wrapper.getBoundingClientRect();
   const vh = window.innerHeight;
-  
-  // Le fondu commence quand l'article "Transparent reporting" entre dans le bas de l'écran (85% vh)
-  // Et se termine quand il arrive vers le milieu (45% vh)
-  const startFade = vh * 0.85;
-  const endFade = vh * 0.45;
-  
-  let t = (startFade - r.top) / Math.max(startFade - endFade, 1);
-  t = Math.max(0, Math.min(1, t));
-  
-  // Ease-in-out
-  const s = t * t * (3 - 2 * t);
-  layers.style.setProperty('--tablet-front-opacity', (1 - s).toFixed(4));
+
+  // progression 0 → 1 sur tout le scroll utile à travers la section
+  const total = r.height + vh;
+  const raw = (vh - r.top) / total;
+  const p = Math.max(0, Math.min(1, raw));
+
+  const easeInOut = (t: number) => t * t * (3 - 2 * t);
+
+  // Centres des deux transitions (espacés également) et largeur de fondu très
+  // étalée pour ralentir au maximum le passage d'une image à l'autre.
+  const fadeWindow = 0.001; // switch instantané, pas de fondu
+  const center12 = 0.36;
+  const center23 = 0.54;
+  const center34 = 0.72;
+
+  const lerp = (a: number, b: number, t: number) => Math.max(0, Math.min(1, (t - a) / Math.max(b - a, 1e-6)));
+  const t12 = lerp(center12 - fadeWindow / 2, center12 + fadeWindow / 2, p);
+  const t23 = lerp(center23 - fadeWindow / 2, center23 + fadeWindow / 2, p);
+  const t34 = lerp(center34 - fadeWindow / 2, center34 + fadeWindow / 2, p);
+
+  layers.style.setProperty('--tablet-front-opacity', easeInOut(t12).toFixed(4));
+  layers.style.setProperty('--tablet-third-opacity', easeInOut(t23).toFixed(4));
+  layers.style.setProperty('--tablet-fourth-opacity', easeInOut(t34).toFixed(4));
 }
 
 /** Scroll-driven fade + parallax for `.hub-chapter` nodes (reliable vs CSS view timelines). */
@@ -79,19 +93,36 @@ function updateHubChapterStyles(scope: HTMLElement): void {
 
 const FEATURE_PILLARS = [
   {
-    id: 'feature-unified',
-    title: 'Real infrastructure',
-    desc: 'USDC exposure to industrial Bitcoin mining: real hashrate, real operations, institutional controls.',
+    id: 'feature-smart-input',
+    title: 'Smart Input',
+    subtitle: 'From Idea to Workflow',
+    desc: 'Describe your needs in natural language and instantly generate structured workflows, connecting tools, data, and logic without writing a single line of code.',
+    image: '/marketing/captures/1-v4.png',
+    imageAlt: 'Smart input prompt interface',
   },
   {
-    id: 'feature-agents',
-    title: 'Transparent reporting',
-    desc: 'Monthly distributions, on-chain proof of reserves, and third-party audits. No black boxes.',
+    id: 'feature-live-orchestration',
+    title: 'Live Orchestration',
+    subtitle: 'Agents in Motion',
+    desc: 'Watch your system activate in real time as agents connect services, deploy workflows, and coordinate tasks seamlessly across your entire digital infrastructure.',
+    image: '/marketing/captures/2-v3.png',
+    imageAlt: 'Live orchestration view',
   },
   {
-    id: 'feature-orchestration',
-    title: 'Institutional controls',
-    desc: 'Multi-signature governance, audited contracts, and custody built for serious allocators.',
+    id: 'feature-instant-deployment',
+    title: 'Instant Deployment',
+    subtitle: 'Live From Day One',
+    desc: 'Your custom application is generated, configured, and ready to use, with integrations, automations, and insights fully operational from the moment it launches.',
+    image: '/marketing/captures/3-v4.png',
+    imageAlt: 'Instant deployment configuration',
+  },
+  {
+    id: 'feature-unified-control',
+    title: 'Unified Control',
+    subtitle: 'One Command Center',
+    desc: 'Monitor performance, manage agents, track workflows, and gain real-time insights through a centralized dashboard designed for clarity, speed, and intelligent decision-making.',
+    image: '/marketing/captures/4-v3.png',
+    imageAlt: 'Unified control dashboard',
   },
 ] as const;
 
@@ -107,50 +138,55 @@ function HearstMonogram({ className }: { className?: string }) {
 
 const VAULT_PRODUCT_SLIDES = [
   {
-    id: 'hashvault-prime',
-    brandLine: 'Hearst Premier',
+    id: 'hospitality-travel',
     variant: 'prime' as const,
-    productName: 'HashVault Prime',
-    bgVideo: '/videos/bg-prime.mp4',
-    apy: '12% APY',
-    tagline: 'Stable yield, engineered for consistency.',
+    productName: 'Hospitality & Travel',
+    screenshot: '/marketing/verticals/mamo.png',
+    screenshotAlt: 'Mamo Michelangelo — Hospitality AI workspace',
+    apy: 'More Yield',
+    tagline: 'AI Guest Operations',
     description:
-      'Mining-backed cashflow, stablecoin income, and hedged BTC exposure combine to smooth volatility and deliver daily yield until 36% target or maturity.',
-    lock: '3 years',
-    minDeposit: '$500,000',
-    risk: 'Moderate',
+      'Automate guest communication and personalize every interaction in real time.\nSynchronize bookings across all channels while optimizing pricing and revenue.\nCoordinate front desk, housekeeping, and operations within one unified platform.',
   },
   {
-    id: 'hashvault-growth',
-    brandLine: 'Hearst Growth',
+    id: 'real-estate-property',
     variant: 'growth' as const,
-    productName: 'HashVault Growth',
-    bgVideo: '/videos/bg-growth.mp4',
-    apy: '15% APY',
-    tagline: 'Bitcoin upside, supported by mining yield.',
+    productName: 'Premium Real Estate',
+    screenshot: '/marketing/verticals/mind.png',
+    screenshotAlt: 'MIND — Real Estate AI workspace',
+    apy: 'More imput',
+    tagline: 'AI Portfolio Management',
     description:
-      'Spot BTC captures upside while mining cashflow cushions drawdowns, with dynamic allocation and daily yield until 45% target or maturity.',
-    lock: '3 years',
-    minDeposit: '$250,000',
-    risk: 'Growth',
+      'Streamline listings, tenant workflows, and CRM pipelines in one place.\nAutomate operations and gain real-time insights across your portfolio.\nMake faster decisions with AI agents managing assets end-to-end.\nScale your portfolio with clarity, control, and confidence.',
   },
 ] as const;
 
 const ICONS = [
-  { name: 'Bitcoin', src: '/icons/crypto/btc.png' },
-  { name: 'Ethereum', src: '/icons/crypto/eth.png' },
-  { name: 'Tether', src: '/icons/crypto/usdt.png' },
-  { name: 'BNB', src: '/icons/crypto/bnb.png' },
-  { name: 'Solana', src: '/icons/crypto/sol.png' },
-  { name: 'XRP', src: '/icons/crypto/xrp.png' },
-  { name: 'USDC', src: '/icons/crypto/usdc.png' },
-  { name: 'Cardano', src: '/icons/crypto/ada.png' },
-  { name: 'Avalanche', src: '/icons/crypto/avax.png' },
-  { name: 'Dogecoin', src: '/icons/crypto/doge.png' },
-  { name: 'TRON', src: '/icons/crypto/trx.png' },
-  { name: 'Chainlink', src: '/icons/crypto/link.png' },
-  { name: 'Polygon', src: '/icons/crypto/matic.png' },
-  { name: 'Polkadot', src: '/icons/crypto/dot.png' },
+  { name: 'Gmail', src: 'https://cdn.simpleicons.org/gmail' },
+  { name: 'Google Drive', src: 'https://cdn.simpleicons.org/googledrive' },
+  { name: 'Notion', src: 'https://cdn.simpleicons.org/notion' },
+  { name: 'HubSpot', src: 'https://cdn.simpleicons.org/hubspot' },
+  { name: 'Jira', src: 'https://cdn.simpleicons.org/jira' },
+  { name: 'GitHub', src: 'https://cdn.simpleicons.org/github' },
+  { name: 'Slack', src: '/logos/services/slack.svg' },
+  { name: 'Zapier', src: 'https://cdn.simpleicons.org/zapier' },
+  { name: 'Stripe', src: 'https://cdn.simpleicons.org/stripe' },
+  { name: 'Figma', src: 'https://cdn.simpleicons.org/figma' },
+  { name: 'Linear', src: 'https://cdn.simpleicons.org/linear' },
+  { name: 'Airtable', src: 'https://cdn.simpleicons.org/airtable' },
+  { name: 'Asana', src: 'https://cdn.simpleicons.org/asana' },
+  { name: 'Dropbox', src: 'https://cdn.simpleicons.org/dropbox' },
+  { name: 'Zoom', src: 'https://cdn.simpleicons.org/zoom' },
+  { name: 'Discord', src: 'https://cdn.simpleicons.org/discord' },
+  { name: 'Telegram', src: 'https://cdn.simpleicons.org/telegram' },
+  { name: 'WhatsApp', src: 'https://cdn.simpleicons.org/whatsapp' },
+  { name: 'Shopify', src: 'https://cdn.simpleicons.org/shopify' },
+  { name: 'Intercom', src: 'https://cdn.simpleicons.org/intercom' },
+  { name: 'Webflow', src: 'https://cdn.simpleicons.org/webflow' },
+  { name: 'Zendesk', src: 'https://cdn.simpleicons.org/zendesk' },
+  { name: 'Trello', src: 'https://cdn.simpleicons.org/trello' },
+  { name: 'Vercel', src: 'https://cdn.simpleicons.org/vercel' },
+  { name: 'Supabase', src: 'https://cdn.simpleicons.org/supabase' },
 ] as const;
 
 function useAutoCarousel(itemCount: number, intervalMs = 5000) {
@@ -176,7 +212,6 @@ function useAutoCarousel(itemCount: number, intervalMs = 5000) {
 
 export default function HubPageClient() {
   const { activeIndex, setActiveIndex, isPaused, setIsPaused, scrollNext, scrollPrev } = useAutoCarousel(VAULT_PRODUCT_SLIDES.length);
-
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
 
   useEffect(() => {
@@ -189,19 +224,7 @@ export default function HubPageClient() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-  // Force dark mode on landing — toggle désactivé sur cette page uniquement
-  useEffect(() => {
-    const root = document.documentElement
-    const previous = root.getAttribute('data-theme')
-    root.setAttribute('data-theme', 'dark')
-    root.classList.add('dark')
-    return () => {
-      if (previous) root.setAttribute('data-theme', previous)
-      else root.removeAttribute('data-theme')
-    }
-  }, [])
-
-  useEffect(() => {
+useEffect(() => {
     const nav = document.getElementById('hub-site-nav');
     const menuToggle = document.getElementById('menu-checkbox') as HTMLInputElement | null;
     if (!nav || !menuToggle) return;
@@ -223,7 +246,10 @@ export default function HubPageClient() {
         el.style.setProperty('--hub-ch-opacity', '1');
         el.style.setProperty('--hub-ch-ty', '0px');
       });
-      scope.querySelector<HTMLElement>('.tablet-mockup-layers')?.style.setProperty('--tablet-front-opacity', '1');
+      const reducedLayers = scope.querySelector<HTMLElement>('.tablet-mockup-layers');
+      reducedLayers?.style.setProperty('--tablet-front-opacity', '1');
+      reducedLayers?.style.setProperty('--tablet-third-opacity', '1');
+      reducedLayers?.style.setProperty('--tablet-fourth-opacity', '1');
     } else {
       let rafId = 0;
       const schedule = (): void => {
@@ -256,26 +282,9 @@ export default function HubPageClient() {
     const $welcome = document.querySelector('#welcome') as HTMLElement | null;
     if (!$welcome) return;
 
-    let isInteractive = false;
-    let listenersBound = false;
-
-    const onPointerMove = (e: PointerEvent): void => {
-      if (!isInteractive) {
-        $welcome.classList.add('interactive');
-        isInteractive = true;
-      }
-      $welcome.style.setProperty('--ring-x', String((e.clientX / window.innerWidth) * 100));
-      $welcome.style.setProperty('--ring-y', String((e.clientY / window.innerHeight) * 100));
-      $welcome.style.setProperty('--ring-interactive', '1');
-    };
-
-    const onPointerLeave = (): void => {
-      $welcome.classList.remove('interactive');
-      isInteractive = false;
-      $welcome.style.setProperty('--ring-x', '50');
-      $welcome.style.setProperty('--ring-y', '50');
-      $welcome.style.setProperty('--ring-interactive', '0');
-    };
+    $welcome.style.setProperty('--ring-x', '50');
+    $welcome.style.setProperty('--ring-y', '50');
+    $welcome.style.setProperty('--ring-interactive', '0');
 
     let cancelled = false;
 
@@ -286,20 +295,11 @@ export default function HubPageClient() {
         await CSS.paintWorklet.addModule('/ringparticles.js');
       } catch (err) {
         console.warn('[hub] ring-particles paint worklet failed to load', err);
-        return;
       }
-      if (cancelled) return;
-      $welcome.addEventListener('pointermove', onPointerMove);
-      $welcome.addEventListener('pointerleave', onPointerLeave);
-      listenersBound = true;
     })();
 
     return () => {
       cancelled = true;
-      if (listenersBound) {
-        $welcome.removeEventListener('pointermove', onPointerMove);
-        $welcome.removeEventListener('pointerleave', onPointerLeave);
-      }
     };
   }, []);
 
@@ -308,8 +308,8 @@ export default function HubPageClient() {
       {/* Header */}
       <div className={`header-wrapper ${isHeaderVisible ? 'is-visible' : ''}`}>
         <header>
-          <a href="#" className="header-logo-link" aria-label="Hearst Connect">
-            <Image src="/logos/hearst-connect.svg" alt="Hearst Connect" className="header-logo" width={160} height={42} style={{ height: 'auto' }} priority />
+          <a href="#" className="header-logo-link" aria-label="Hearst AI">
+            <Image src="/logos/hearst-ai-black.svg" alt="Hearst AI" width={160} height={54} style={{ height: '54px', width: 'auto', display: 'block' }} priority />
           </a>
           <input
             className="menu-checkbox"
@@ -345,11 +345,11 @@ export default function HubPageClient() {
 
       {/* Welcome */}
       <section id="welcome" className="center" lang="en">
-        <Image src="/logos/hearst-connect.svg" alt="Hearst Connect" className="welcome-logo" width={416} height={110} style={{ height: 'auto' }} priority />
+        <Image src="/logos/hearst-ai-black.svg" alt="Hearst AI" className="welcome-logo" width={400} height={135} style={{ height: '135px', width: 'auto' }} priority />
         <h1 className="welcome-title hub-chapter">
-          Turning bitcoin mining
+          One platform. 1000+ services.
           <br />
-          into structured yield.
+          <span style={{ color: '#2ECFCE' }}>Seamless execution.</span>
         </h1>
         <Link href={CTA_LINKS.launchApp.href} className="welcome-btn hub-chapter" prefetch>
           <span>{CTA_LINKS.launchApp.label}</span>
@@ -362,13 +362,9 @@ export default function HubPageClient() {
       {/* Intro */}
       <section id="intro" className="theme-light" lang="en">
         <div className="hub-section-lead">
-          <h2 className="typewriter">
-            <span className="hub-lead-accent">Hearst</span> — Institutional Mining Yield
+          <h2>
+            <span className="typewriter"><span className="hub-lead-accent">Hearst AI</span> orchestrates your entire stack through intelligent agents that automate workflows, streamline operations, and scale execution effortlessly across every sector.</span>
           </h2>
-          <p className="hub-lead-subtitle">
-            Qualified investors gain direct exposure to industrial mining cash flows.
-            USDC vaults backed by regulated infrastructure and clear reporting.
-          </p>
         </div>
 
         <div className="icons">
@@ -382,8 +378,9 @@ export default function HubPageClient() {
                       src={icon.src}
                       alt={copy === 0 ? icon.name : ''}
                       className="icon-img"
-                      width={56}
-                      height={56}
+                      width={480}
+                      height={200}
+                      quality={100}
                       loading="lazy"
                     />
                   </div>
@@ -404,23 +401,52 @@ export default function HubPageClient() {
                 id={feature.id}
                 className="feature-block feature-pillar"
               >
+                <span className="feature-pillar-subtitle">{feature.subtitle}</span>
                 <h3>{feature.title}</h3>
                 <p>{feature.desc}</p>
+                <div className="feature-pillar-image" aria-hidden>
+                  <Image
+                    src={feature.image}
+                    alt={feature.imageAlt}
+                    width={1600}
+                    height={1100}
+                  />
+                </div>
               </article>
             ))}
           </div>
-          <div className="features-tablet">
+          <div className="features-tablet" id="features-tablet">
             <div className="tablet-mockup">
               <div className="tablet-mockup-layers">
                 <div className="tablet-mockup-stack-inner">
-                  <video
-                    src="/marketing/area.mp4"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="tablet-layer tablet-layer--video"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
+                  <Image
+                    src="/marketing/captures/1-v4.png"
+                    alt="Smart input prompt interface"
+                    width={1600}
+                    height={1100}
+                    className="tablet-layer tablet-layer--back"
+                    priority
+                  />
+                  <Image
+                    src="/marketing/captures/2-v3.png"
+                    alt="Live orchestration view"
+                    width={1600}
+                    height={1100}
+                    className="tablet-layer tablet-layer--front"
+                  />
+                  <Image
+                    src="/marketing/captures/3-v4.png"
+                    alt="Instant deployment configuration"
+                    width={1600}
+                    height={1100}
+                    className="tablet-layer tablet-layer--third"
+                  />
+                  <Image
+                    src="/marketing/captures/4-v3.png"
+                    alt="Unified control dashboard"
+                    width={1600}
+                    height={1100}
+                    className="tablet-layer tablet-layer--fourth"
                   />
                 </div>
               </div>
@@ -432,9 +458,9 @@ export default function HubPageClient() {
       {/* Solutions */}
       <section id="developers" className="theme-light">
         <div className="hub-section-head" lang="en">
-          <h2>Investment strategies</h2>
+          <h2>Execution-focused verticals</h2>
           <p className="intro">
-            Two vault profiles. Pick the risk and return fit.
+            Pre-configured agent packs, workflows, and integrations tailored for hospitality, real estate, and more — all fully customizable to match your brand identity, including your logo and color palette.
           </p>
         </div>
 
@@ -458,46 +484,32 @@ export default function HubPageClient() {
                 <div className="hub-slide-card">
                   <div className={`hub-vault-product-card hub-vault-product-card--${slide.variant}`}>
                     <div className="hub-vault-product-inner">
-                      <div className="hub-vault-product-emblem" aria-hidden>
-                        <span className="hub-vault-product-monogram">
-                          <HearstMonogram />
-                        </span>
-                        <span className="hub-vault-product-line">{slide.brandLine}</span>
-                      </div>
                       <h3 className="hub-vault-product-name">{slide.productName}</h3>
-                      <p className="hub-vault-product-apy">{slide.apy}</p>
+                      <p className="hub-vault-product-apy" style={{ color: '#2ECFCE' }}>{slide.apy}</p>
                       <p className="hub-vault-product-tagline">{slide.tagline}</p>
-                      <p className="hub-vault-product-desc">{slide.description}</p>
-                      <dl className="hub-vault-product-specs">
-                        <div>
-                          <dt>Lock</dt>
-                          <dd>{slide.lock}</dd>
-                        </div>
-                        <div>
-                          <dt>Min deposit</dt>
-                          <dd>{slide.minDeposit}</dd>
-                        </div>
-                        <div>
-                          <dt>Risk</dt>
-                          <dd>{slide.risk}</dd>
-                        </div>
-                      </dl>
-                      <a href={CTA_LINKS.viewOffering.href} className="hub-slide-cta hub-vault-product-cta">
-                        <span>{CTA_LINKS.viewOffering.label}</span>
-                        <svg className="hub-slide-arrow" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-                          <path d="M5 12h14M12 5l7 7-7 7" />
-                        </svg>
-                      </a>
+                      <p className="hub-vault-product-desc" style={{ whiteSpace: 'pre-line' }}>{slide.description}</p>
+                      <div className="hub-vault-product-cta">
+                        <a href={CTA_LINKS.launchApp.href} className="login-btn">
+                          Launch App
+                        </a>
+                      </div>
                     </div>
-                    <div className="hub-vault-product-video-wrapper">
-                      <video
-                        src={slide.bgVideo}
-                        autoPlay
-                        loop
-                        muted
-                        playsInline
-                        className="hub-vault-product-bg-video"
-                      />
+                    <div className="hub-vault-product-imac-wrapper">
+                      <div className="hub-vault-product-imac" aria-hidden>
+                        <div className="hub-vault-product-imac-bezel">
+                          <div className="hub-vault-product-imac-screen">
+                            <Image
+                              src={slide.screenshot}
+                              alt={slide.screenshotAlt}
+                              fill
+                              sizes="(max-width: 929px) 90vw, 60vw"
+                              className="hub-vault-product-imac-image"
+                            />
+                          </div>
+                        </div>
+                        <div className="hub-vault-product-imac-stand" />
+                        <div className="hub-vault-product-imac-foot" />
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -526,17 +538,6 @@ export default function HubPageClient() {
             </svg>
           </button>
 
-          <div className="hub-carousel-auto-indicators">
-            {VAULT_PRODUCT_SLIDES.map((slide, i) => (
-              <button
-                key={slide.id}
-                type="button"
-                className={`hub-carousel-auto-indicator ${i === activeIndex ? 'is-active' : ''}`}
-                onClick={() => setActiveIndex(i)}
-                aria-label={`${slide.productName}, slide ${i + 1}`}
-              />
-            ))}
-          </div>
         </div>
       </section>
 
@@ -545,71 +546,104 @@ export default function HubPageClient() {
         <div className="card dark hub-final-cta-card">
           <div className="hub-chapter hub-final-cta-content">
             <p>
-              <span className="typewriter">Ready to allocate?</span>
+              <span className="typewriter">Stop switching. Start scaling.</span>
             </p>
             <div className="buttons">
               <Link href={CTA_LINKS.launchApp.href} className="hub-cta-primary">
                 {CTA_LINKS.launchApp.label}
               </Link>
-              <a href={CTA_LINKS.contactSales.href} className="hub-cta-secondary">
-                {CTA_LINKS.contactSales.label}
-              </a>
             </div>
           </div>
         </div>
       </section>
 
-      <footer className="hub-footer" id="hub-footer" lang="fr">
-        <div className="hub-footer-accent" aria-hidden />
-        <div className="hub-footer-inner">
-          <div className="hub-footer-brand">
-            <Image
-              src="/logos/hearst-connect.svg"
-              alt="Hearst Connect"
-              className="hub-footer-logo"
-              width={120}
-              height={32}
-              style={{ height: 'auto' }}
-              loading="lazy"
-            />
-            <p className="hub-footer-tagline" lang="en">
-              Onchain access to industrial Bitcoin mining cash flows. Institutional controls,
-              transparent reporting.
-            </p>
-          </div>
-          <div className="hub-footer-grid">
-            <div className="hub-footer-col">
-              <p className="hub-footer-heading">Produit</p>
-              <ul className="hub-footer-links">
-                {NAV_LINKS.map(link => (
-                  <li key={link.href}>
-                    <a href={link.href}>{link.label}</a>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="hub-footer-col">
-              <p className="hub-footer-heading">Accès</p>
-              <ul className="hub-footer-links">
-                <li>
-                  <Link href={CTA_LINKS.launchApp.href} prefetch>
-                    {CTA_LINKS.launchApp.label}
-                  </Link>
-                </li>
-                <li>
-                  <a href={CTA_LINKS.viewOffering.href}>Offre</a>
-                </li>
-              </ul>
-            </div>
+      <footer className="hub-footer-slim" id="hub-footer">
+        <div className="hub-footer-slim-inner">
+          <Image
+            src="/logos/hearst-ai-black.svg"
+            alt="Hearst AI"
+            className="hub-footer-slim-logo"
+            width={160}
+            height={54}
+            style={{ height: '54px', width: 'auto', display: 'block' }}
+            loading="lazy"
+          />
+          <div className="hub-footer-slim-cta">
+            <p className="hub-footer-slim-headline">Join the next wave of intelligent operations.</p>
+            <EarlyAccessForm />
           </div>
         </div>
-        <div className="hub-footer-bottom">
-          <span className="hub-footer-copy">© {new Date().getFullYear()} Hearst</span>
-          <a href={`mailto:${HEARST_EMAIL}`} className="hub-footer-mail">
-            {HEARST_EMAIL}
-          </a>
+        <div className="hub-footer-slim-bottom">
+          <span>© {new Date().getFullYear()} Hearst Corporation. All rights reserved.</span>
+          <div className="hub-footer-slim-links">
+            <a href="/terms">Terms of Service</a>
+            <span aria-hidden>·</span>
+            <a href="/privacy">Privacy Policy</a>
+          </div>
         </div>
       </footer>
     </div>
+  );
+}
+
+function EarlyAccessForm() {
+  const [email, setEmail] = useState('');
+  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+  const [message, setMessage] = useState<string | null>(null);
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!email.trim()) return;
+    setStatus('loading');
+    setMessage(null);
+    try {
+      const res = await fetch('/api/early-access', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: email.trim(), source: 'landing-footer' }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if (!res.ok) {
+        setStatus('error');
+        setMessage(data?.error === 'Invalid email' ? 'Please enter a valid email.' : 'Something went wrong. Try again.');
+        return;
+      }
+      setStatus('success');
+      setMessage(data?.duplicate ? "You're already on the list — we'll be in touch." : "You're on the list. We'll be in touch shortly.");
+      setEmail('');
+    } catch {
+      setStatus('error');
+      setMessage('Network error. Try again.');
+    }
+  };
+
+  return (
+    <form className="hub-footer-slim-form" onSubmit={handleSubmit} noValidate>
+      <input
+        type="email"
+        placeholder="your@email.com"
+        className="hub-footer-slim-input"
+        aria-label="Email address"
+        value={email}
+        onChange={(e) => setEmail(e.target.value)}
+        required
+        disabled={status === 'loading'}
+      />
+      <button
+        type="submit"
+        className="hub-footer-slim-btn"
+        disabled={status === 'loading'}
+      >
+        {status === 'loading' ? 'Submitting…' : 'Get Early Access'}
+      </button>
+      {message && (
+        <p
+          role="status"
+          className={`hub-footer-slim-form-msg ${status === 'error' ? 'is-error' : 'is-success'}`}
+        >
+          {message}
+        </p>
+      )}
+    </form>
   );
 }
