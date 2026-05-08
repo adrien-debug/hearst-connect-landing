@@ -104,10 +104,6 @@ export function HubFooter() {
           <span>© {new Date().getFullYear()} Hearst Corporation. All rights reserved.</span>
           <div className="hub-footer-slim-links">
             <a href={`mailto:${HEARST_EMAIL}`}>{HEARST_EMAIL}</a>
-            <span aria-hidden>·</span>
-            <a href="/terms">Terms</a>
-            <span aria-hidden>·</span>
-            <a href="/privacy">Privacy</a>
           </div>
         </div>
       </footer>

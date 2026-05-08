@@ -12,23 +12,6 @@
 	@layer layout {
 
 		/* Ring particles for #welcome live in unlayered `hub.css` (Tailwind cascade). */
-
-		/* Draw some dynamic noise behind some of the screens */
-		/* I am using Houdini PaintWorklets for this */
-		@layer speckled-backgrounds {
-			@supports (background: paint(something)) {
-				#beforeyougo .card {
-			    --extra-confettiNumber: 250;
-  			  --extra-confettiLengthVariance: 1;
-			    --extra-confettiWeightVariance: 1;
-    			background-image: paint(extra-confetti);
-				}
-			}
-		}
-
-		@layer product {
-			/* @TODO: Move `container-type: inline-size` for centered sticky using cqi to here, as that is modern CSS */
-		}
 	}
 
 	@layer components {
@@ -48,16 +31,6 @@
 					}
 				}
 
-				button.secondary,
-				a.hub-cta-secondary {
-					color: var(--dashboard-page);
-					background: var(--dashboard-overlay-10);
-
-					&:hover,
-					&:focus-visible {
-						background: var(--dashboard-overlay-12);
-					}
-				}
 			}
 		}
 
@@ -360,9 +333,7 @@
 @layer components {
 	@layer button {
 		button,
-		a.hub-cta-primary,
-		button.secondary,
-		a.hub-cta-secondary {
+		a.hub-cta-primary {
 			border-radius: 999px;
 			padding: 0.6em 1.5em;
 
@@ -387,8 +358,7 @@
 			}
 		}
 
-		a.hub-cta-primary,
-		a.hub-cta-secondary {
+		a.hub-cta-primary {
 			text-decoration: none;
 			box-sizing: border-box;
 		}
@@ -399,18 +369,6 @@
 			color: var(--dashboard-page);
 			border: 0px;
 			font-weight: 700;
-
-			&:hover,
-			&:focus-visible {
-				background: var(--dashboard-accent-hover);
-			}
-		}
-
-		button.secondary,
-		a.hub-cta-secondary {
-			color: var(--dashboard-text-primary);
-			background: var(--dashboard-overlay-06);
-			border: 1px solid var(--dashboard-border);
 
 			&:hover,
 			&:focus-visible {
@@ -1655,17 +1613,6 @@ a.welcome-btn:focus-visible {
   color: var(--dashboard-page);
 }
 
-.hub-font-scope .dark a.hub-cta-secondary {
-  color: var(--dashboard-page);
-  background: var(--dashboard-overlay-10);
-  border: 0;
-}
-
-.hub-font-scope .dark a.hub-cta-secondary:hover,
-.hub-font-scope .dark a.hub-cta-secondary:focus-visible {
-  background: var(--dashboard-overlay-12);
-}
-
 /* #beforeyougo — bigger button + clearly visible hover */
 .hub-font-scope #beforeyougo a.hub-cta-primary {
   font-size: var(--dashboard-text-base);
@@ -2584,31 +2531,6 @@ box-sizing: border-box;
 	}
 }
 
-
-.hub-vault-product-emblem {
-	display: flex;
-	align-items: center;
-	gap: 0.75rem;
-	margin-bottom: 0.15rem;
-}
-
-.hub-vault-product-monogram {
-	display: flex;
-	color: #059669;
-	line-height: 0;
-}
-
-.hub-vault-product-line {
-	font-size: 0.7rem;
-	font-weight: 700;
-	letter-spacing: 0.14em;
-	text-transform: uppercase;
-	color: #71717A;
-}
-
-.hub-vault-product-card--growth .hub-vault-product-monogram {
-	color: #0284C7;
-}
 
 .hub-vault-product-name {
 	margin: 0;

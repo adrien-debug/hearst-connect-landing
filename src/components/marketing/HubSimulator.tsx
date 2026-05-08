@@ -52,7 +52,7 @@ export function HubSimulator() {
     20;
 
   return (
-    <section id="simulator" className="hub-simulator-section theme-light">
+    <section id="simulator" className="hub-simulator-section">
       <div className="hub-simulator-container">
         <div className="hub-simulator-header">
           <h2>Project your yield</h2>

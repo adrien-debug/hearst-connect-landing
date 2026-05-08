@@ -2,7 +2,6 @@
 
 import '@/styles/marketing/hub-font.css';
 import '@/styles/marketing/hub.css';
-import '@/styles/marketing/intro.css';
 
 import { useEffect, useState, useCallback } from 'react';
 
