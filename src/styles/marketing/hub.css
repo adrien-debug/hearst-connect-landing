@@ -899,7 +899,7 @@
 				flex: 1 1 auto;
 				min-height: 0;
 				border-radius: var(--dashboard-radius-box, 16px);
-				border: 1px solid var(--dashboard-border-mid);
+				border: 1px solid #a7fb90;
 				box-sizing: border-box;
 
 				display: flex;
@@ -907,10 +907,12 @@
 				justify-content: center;
 				padding: clamp(2.5rem, 7vh, 5rem) clamp(1.5rem, 5vw, 3.5rem);
 
+				background-color: #a7fb90;
 				background-image: url('/patterns/hearst-dotted-h.svg');
 				background-repeat: no-repeat;
 				background-position: right 3rem center;
 				background-size: auto 58%;
+				color: #000;
 			}
 
 			.hub-final-cta-content {
@@ -2359,7 +2361,8 @@ box-sizing: border-box;
 
 @media (min-width: 930px) {
 	.hub-vault-product-card {
-		flex-direction: row;
+		display: grid;
+		grid-template-columns: 1fr 2fr;
 	}
 }
 
@@ -2391,7 +2394,7 @@ box-sizing: border-box;
 
 @media (min-width: 930px) {
 	.hub-vault-product-inner {
-		width: 33%;
+		width: auto;
 		height: 100%;
 		justify-content: flex-start;
 		border-right: 1px solid rgba(255, 255, 255, 0.05);
@@ -2444,7 +2447,7 @@ box-sizing: border-box;
 	position: relative;
 	z-index: 2;
 	width: 100%;
-	max-width: 720px;
+	max-width: 920px;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
@@ -3034,4 +3037,68 @@ box-sizing: border-box;
 .hub-footer-slim-logo {
   opacity: 1;
   visibility: visible;
+}
+
+/* ─── Vault carousel media (replaces iMac mockup) ───────────────────────────
+ * Video fills its grid column edge-to-edge — no bezel, stand, or chrome.
+ * The text panel keeps its left border, the video panel becomes pure motion. */
+.hub-vault-product-media {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  min-height: 24rem;
+  overflow: hidden;
+  background: #080A0C;
+}
+.hub-vault-product-media video {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+/* ─── Final CTA card on accent bg ───────────────────────────────────────────
+ * Green accent box: white text/typewriter color is overridden to black for
+ * legibility on the lime bg, and the primary CTA flips to dark-on-white style. */
+#beforeyougo .hub-final-cta-card,
+#beforeyougo .hub-final-cta-card .hub-final-cta-content {
+  color: #000;
+}
+#beforeyougo .hub-final-cta-card .typewriter,
+#beforeyougo .hub-final-cta-card p {
+  color: #000;
+  --typewriter-text-color: #000;
+}
+#beforeyougo .hub-final-cta-card .hub-cta-primary {
+  background: #000;
+  color: #a7fb90;
+  border: 1px solid #000;
+}
+#beforeyougo .hub-final-cta-card .hub-cta-primary:hover {
+  background: #fff;
+  color: #000;
+  border-color: #fff;
+}
+
+/* ─── Welcome logo: minimum visibility guarantees ──────────────────────────
+ * SVG paths are colored via embedded <style> in the asset (#fff and #a7fb90).
+ * On hostile cascades or @starting-style stuck states, force visibility and
+ * give the img a known display/dimensions so nothing collapses to 0×0. */
+#welcome .welcome-logo {
+  opacity: 1 !important;
+  visibility: visible !important;
+  display: block !important;
+  height: 135px !important;
+  width: 400px !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+  filter: none !important;
+}
+@media (max-width: 929px) {
+  #welcome .welcome-logo {
+    height: 72px !important;
+    width: 213px !important;
+  }
 }

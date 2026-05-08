@@ -535,14 +535,10 @@
    ============================================ */
 
 /* Pour les logos images: on ne peut pas séparer le H du texte avec filter CSS */
-/* Solution: passer tout en noir (texte) et accepter que le H soit aussi noir, */
-/* ou garder le logo original blanc/vert */
-
-/* Option 1: Logos en noir complet (filter simple) */
-[data-theme="light"] .welcome-logo,
-[data-theme="light"] img[src*="hearst"] {
-  filter: brightness(0);
-}
+/* The welcome section keeps a dark background (--dashboard-page = #0A0A0A) in
+ * both themes, so the logo there must stay light/green and NOT be filtered to
+ * black. Other Hearst marks outside the marketing hero may still need theme
+ * adaptation — handle those locally where they live. */
 
 /* ============================================
    CONNECT-SCOPE LIGHT-MODE INTERFERENCE RESET
