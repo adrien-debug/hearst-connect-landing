@@ -6,7 +6,7 @@ Onchain access to institutional Bitcoin mining cash flows.
 
 | Route | Description |
 |-------|-------------|
-| `/` | Landing — hero *Turning bitcoin mining into structured yield.*, full-width features + sticky tablet (`public/marketing/hearst-dashboard-tablet.png`), two-strategy carousel (HashVault Prime / Growth), CTA |
+| `/` | Landing — Lenis smooth scroll, hero, market ticker, features + tablet video, illustrative yield simulator, two-strategy carousel (APY odometer, scrub text), CTA, optional custom cursor (pointer devices) |
 | `/app` | **Dashboard** — portfolio, vault subscription. Requires SIWE authentication. |
 | `/admin` | Admin panel — vault registry management, activity logs, settings |
 
@@ -33,6 +33,7 @@ Streamlined DeFi flow: landing → wallet connect → SIWE auth → platform.
 - **better-sqlite3** — SQLite database for users, vaults, positions, activity, market snapshots, signals
 - **@anthropic-ai/sdk** — Claude intelligence for agent analysis and insights
 - **Vitest** — unit tests for vault math, projection, and database repositories (`npm test`)
+- **Lenis** — smooth scrolling on the marketing landing (`HubSmoothScroll`)
 - **Satoshi Variable** (brand font) + **IBM Plex Mono** (data) + **Inter** (fallback)
 
 ## Getting Started
@@ -41,7 +42,7 @@ Streamlined DeFi flow: landing → wallet connect → SIWE auth → platform.
 cp .env.example .env  # optional — analytics / wallet / vault addresses
 npm install
 npm test              # vault math + projection
-npm run dev           # http://localhost:8100
+npm run dev           # http://localhost:5555
 ```
 
 ## Environment Variables

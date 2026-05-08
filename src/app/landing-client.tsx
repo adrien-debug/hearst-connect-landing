@@ -4,61 +4,18 @@ import '@/styles/marketing/hub-font.css';
 import '@/styles/marketing/hub.css';
 import '@/styles/marketing/intro.css';
 
-import Link from 'next/link';
-import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
-import { NAV_LINKS, CTA_LINKS, HUB_MAILTO_SALES, HEARST_EMAIL } from '@/config/navigation';
 
-function MenuIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="4" y1="6" x2="20" y2="6" /><line x1="4" y1="12" x2="20" y2="12" /><line x1="4" y1="18" x2="20" y2="18" />
-    </svg>
-  );
-}
-
-function CloseIcon() {
-  return (
-    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
-      <line x1="18" y1="6" x2="6" y2="18" /><line x1="6" y1="6" x2="18" y2="18" />
-    </svg>
-  );
-}
-
-/** Crossfade entre 3 captures dans la tablette, piloté par la progression de
- * scroll à travers la section #features-section.
- *
- * Plus la fenêtre est grande (`fadeWindow`), plus la transition est lente. */
-function updateTabletScrollBlend(layers: HTMLElement): void {
-  const wrapper = document.getElementById('features-section');
-  if (!wrapper) return;
-
-  const r = wrapper.getBoundingClientRect();
-  const vh = window.innerHeight;
-
-  // progression 0 → 1 sur tout le scroll utile à travers la section
-  const total = r.height + vh;
-  const raw = (vh - r.top) / total;
-  const p = Math.max(0, Math.min(1, raw));
-
-  const easeInOut = (t: number) => t * t * (3 - 2 * t);
-
-  // Centres des deux transitions (espacés également) et largeur de fondu très
-  // étalée pour ralentir au maximum le passage d'une image à l'autre.
-  const fadeWindow = 0.001; // switch instantané, pas de fondu
-  const center12 = 0.36;
-  const center23 = 0.54;
-  const center34 = 0.72;
-
-  const lerp = (a: number, b: number, t: number) => Math.max(0, Math.min(1, (t - a) / Math.max(b - a, 1e-6)));
-  const t12 = lerp(center12 - fadeWindow / 2, center12 + fadeWindow / 2, p);
-  const t23 = lerp(center23 - fadeWindow / 2, center23 + fadeWindow / 2, p);
-  const t34 = lerp(center34 - fadeWindow / 2, center34 + fadeWindow / 2, p);
-
-  layers.style.setProperty('--tablet-front-opacity', easeInOut(t12).toFixed(4));
-  layers.style.setProperty('--tablet-third-opacity', easeInOut(t23).toFixed(4));
-  layers.style.setProperty('--tablet-fourth-opacity', easeInOut(t34).toFixed(4));
-}
+import { HubHeader } from '@/components/marketing/HubHeader';
+import { HubHero } from '@/components/marketing/HubHero';
+import { HubTicker } from '@/components/marketing/HubTicker';
+import { HubMarquee } from '@/components/marketing/HubMarquee';
+import { HubFeatures } from '@/components/marketing/HubFeatures';
+import { HubCarousel } from '@/components/marketing/HubCarousel';
+import { HubSimulator } from '@/components/marketing/HubSimulator';
+import { HubFooter } from '@/components/marketing/HubFooter';
+import { PremiumEffects } from '@/components/marketing/PremiumEffects';
+import { HubSmoothScroll } from '@/components/marketing/HubSmoothScroll';
 
 /** Scroll-driven fade + parallax for `.hub-chapter` nodes (reliable vs CSS view timelines). */
 function updateHubChapterStyles(scope: HTMLElement): void {
@@ -90,94 +47,6 @@ function updateHubChapterStyles(scope: HTMLElement): void {
   });
 }
 
-
-const FEATURE_PILLARS = [
-  {
-    id: 'feature-real-infrastructure',
-    title: 'Real infrastructure',
-    subtitle: 'Industrial Bitcoin Mining',
-    desc: 'USDC exposure to industrial Bitcoin mining cash flows. Real hashrate, real operations, institutional-grade infrastructure — not synthetic exposure or paper claims.',
-    image: '/platform-screenshot.png',
-    imageAlt: 'Hearst Connect — vault portfolio overview',
-  },
-  {
-    id: 'feature-transparent-reporting',
-    title: 'Transparent reporting',
-    subtitle: 'Onchain Proof of Reserves',
-    desc: 'Monthly USDC distributions, on-chain proof of reserves, and third-party audits at every step. Every position, every payout — verifiable on Base.',
-    image: '/platform-screenshot.png',
-    imageAlt: 'Hearst Connect — reporting and analytics',
-  },
-  {
-    id: 'feature-institutional-controls',
-    title: 'Institutional controls',
-    subtitle: 'Built for Allocators',
-    desc: 'Multi-signature governance, audited contracts, KYC/AML compliance, and custody integrations built for serious allocators — Fireblocks, Safe, Ledger Enterprise.',
-    image: '/platform-screenshot.png',
-    imageAlt: 'Hearst Connect — governance and custody',
-  },
-  {
-    id: 'feature-stable-yield',
-    title: 'Stable USDC yield',
-    subtitle: 'Daily Distributions',
-    desc: 'Mining-backed cashflow streams smooth Bitcoin volatility into predictable daily USDC yield. Track every accrual, claim on demand, redeem at maturity.',
-    image: '/platform-screenshot.png',
-    imageAlt: 'Hearst Connect — daily yield distributions',
-  },
-] as const;
-
-/** HB monogram (matches brand mark in `public/logos/hearst-logo.svg`). */
-function HearstMonogram({ className }: { className?: string }) {
-  return (
-    <svg className={className} viewBox="572 466 130 144" width={36} height={40} aria-hidden focusable="false">
-      <polygon fill="currentColor" points="601.7 466.9 572.6 466.9 572.6 609.7 601.7 609.7 601.7 549.1 633.1 579.4 665.8 579.4 601.7 517.5 601.7 466.9" />
-      <polygon fill="currentColor" points="672.7 466.9 672.7 528.1 644.6 500.9 612 500.9 672.7 559.7 672.7 609.7 701.9 609.7 701.9 466.9 672.7 466.9" />
-    </svg>
-  );
-}
-
-const VAULT_PRODUCT_SLIDES = [
-  {
-    id: 'hashvault-prime',
-    variant: 'prime' as const,
-    productName: 'HashVault Prime',
-    video: '/videos/bg-prime.mp4',
-    videoAlt: 'HashVault Prime — animated background',
-    apy: '12% APY',
-    tagline: 'Stable yield, engineered for consistency.',
-    description:
-      'Mining-backed cashflow combined with stablecoin income and hedged BTC exposure.\nDaily USDC distributions until 36% target or maturity.\nMin allocation $500,000 · 3-year lock · moderate risk profile.\nBuilt for capital preservation with institutional-grade reporting.',
-  },
-  {
-    id: 'hashvault-growth',
-    variant: 'growth' as const,
-    productName: 'HashVault Growth',
-    video: '/videos/bg-growth.mp4',
-    videoAlt: 'HashVault Growth — animated background',
-    apy: '15% APY',
-    tagline: 'Bitcoin upside, supported by mining yield.',
-    description:
-      'Spot BTC captures upside while mining cashflow cushions drawdowns.\nDynamic allocation, daily USDC yield until 45% target or maturity.\nMin allocation $250,000 · 3-year lock · growth risk profile.\nFor allocators seeking BTC exposure with a yield floor.',
-  },
-] as const;
-
-const ICONS = [
-  { name: 'Bitcoin', src: '/icons/crypto/btc.png' },
-  { name: 'Ethereum', src: '/icons/crypto/eth.png' },
-  { name: 'USDC', src: '/icons/crypto/usdc.png' },
-  { name: 'Tether', src: '/icons/crypto/usdt.png' },
-  { name: 'BNB', src: '/icons/crypto/bnb.png' },
-  { name: 'Solana', src: '/icons/crypto/sol.png' },
-  { name: 'XRP', src: '/icons/crypto/xrp.png' },
-  { name: 'Cardano', src: '/icons/crypto/ada.png' },
-  { name: 'Avalanche', src: '/icons/crypto/avax.png' },
-  { name: 'Dogecoin', src: '/icons/crypto/doge.png' },
-  { name: 'Polkadot', src: '/icons/crypto/dot.png' },
-  { name: 'Chainlink', src: '/icons/crypto/link.png' },
-  { name: 'Polygon', src: '/icons/crypto/matic.png' },
-  { name: 'TRON', src: '/icons/crypto/trx.png' },
-] as const;
-
 function useAutoCarousel(itemCount: number, intervalMs = 5000) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [isPaused, setIsPaused] = useState(false);
@@ -200,7 +69,7 @@ function useAutoCarousel(itemCount: number, intervalMs = 5000) {
 }
 
 export default function HubPageClient() {
-  const { activeIndex, setActiveIndex, isPaused, setIsPaused, scrollNext, scrollPrev } = useAutoCarousel(VAULT_PRODUCT_SLIDES.length);
+  const carouselState = useAutoCarousel(2); // 2 slides
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
 
   useEffect(() => {
@@ -213,7 +82,7 @@ export default function HubPageClient() {
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
-useEffect(() => {
+  useEffect(() => {
     const nav = document.getElementById('hub-site-nav');
     const menuToggle = document.getElementById('menu-checkbox') as HTMLInputElement | null;
     if (!nav || !menuToggle) return;
@@ -235,10 +104,6 @@ useEffect(() => {
         el.style.setProperty('--hub-ch-opacity', '1');
         el.style.setProperty('--hub-ch-ty', '0px');
       });
-      const reducedLayers = scope.querySelector<HTMLElement>('.tablet-mockup-layers');
-      reducedLayers?.style.setProperty('--tablet-front-opacity', '1');
-      reducedLayers?.style.setProperty('--tablet-third-opacity', '1');
-      reducedLayers?.style.setProperty('--tablet-fourth-opacity', '1');
     } else {
       let rafId = 0;
       const schedule = (): void => {
@@ -246,13 +111,9 @@ useEffect(() => {
         rafId = window.requestAnimationFrame(() => {
           rafId = 0;
           updateHubChapterStyles(scope);
-          const layers = scope.querySelector<HTMLElement>('.tablet-mockup-layers');
-          if (layers) updateTabletScrollBlend(layers);
         });
       };
       updateHubChapterStyles(scope);
-      const layers0 = scope.querySelector<HTMLElement>('.tablet-mockup-layers');
-      if (layers0) updateTabletScrollBlend(layers0);
       window.addEventListener('scroll', schedule, { passive: true });
       window.addEventListener('resize', schedule);
       return () => {
@@ -277,6 +138,26 @@ useEffect(() => {
 
     let cancelled = false;
 
+    const handleMouseMove = (e: MouseEvent): void => {
+      if (cancelled) return;
+      const rect = $welcome.getBoundingClientRect();
+      const x = ((e.clientX - rect.left) / rect.width) * 100;
+      const y = ((e.clientY - rect.top) / rect.height) * 100;
+      $welcome.style.setProperty('--ring-x', x.toString());
+      $welcome.style.setProperty('--ring-y', y.toString());
+      $welcome.style.setProperty('--ring-interactive', '1');
+    };
+
+    const handleMouseLeave = (): void => {
+      if (cancelled) return;
+      $welcome.style.setProperty('--ring-x', '50');
+      $welcome.style.setProperty('--ring-y', '50');
+      $welcome.style.setProperty('--ring-interactive', '0');
+    };
+
+    $welcome.addEventListener('mousemove', handleMouseMove);
+    $welcome.addEventListener('mouseleave', handleMouseLeave);
+
     void (async (): Promise<void> => {
       try {
         // Houdini paint worklet (see public/ringparticles.js)
@@ -289,366 +170,23 @@ useEffect(() => {
 
     return () => {
       cancelled = true;
+      $welcome.removeEventListener('mousemove', handleMouseMove);
+      $welcome.removeEventListener('mouseleave', handleMouseLeave);
     };
   }, []);
 
   return (
     <div className="hub-font-scope">
-      {/* Header */}
-      <div className={`header-wrapper ${isHeaderVisible ? 'is-visible' : ''}`}>
-        <header>
-          <a href="#" className="header-logo-link" aria-label="Hearst Connect">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img src="/logos/hearst-connect.svg" alt="Hearst Connect" width={160} height={54} style={{ height: '54px', width: 'auto', display: 'block' }} />
-          </a>
-          <input
-            className="menu-checkbox"
-            type="checkbox"
-            id="menu-checkbox"
-            aria-controls="hub-site-nav"
-          />
-          <label className="menu-button" htmlFor="menu-checkbox" lang="fr">
-            <span className="not-sr-only" data-show-when="closed">
-              <MenuIcon />
-            </span>
-            <span className="not-sr-only" data-show-when="open">
-              <CloseIcon />
-            </span>
-            <span className="sr-only">Ouvrir ou fermer le menu de navigation</span>
-          </label>
-
-          <nav id="hub-site-nav" aria-label="Navigation principale" lang="fr">
-            <ul>
-              {NAV_LINKS.map(link => (
-                <li key={link.href}>
-                  <a href={link.href}>{link.label}</a>
-                </li>
-              ))}
-            </ul>
-          </nav>
-
-          <Link href={CTA_LINKS.launchApp.href} className="login-btn" prefetch>
-            <span>{CTA_LINKS.launchApp.label}</span>
-          </Link>
-        </header>
-      </div>
-
-      {/* Welcome */}
-      <section id="welcome" className="center" lang="en">
-        <HearstConnectWordmark className="welcome-logo" />
-
-        <h1 className="welcome-title hub-chapter">
-          Turning bitcoin mining
-          <br />
-          <span style={{ color: '#a7fb90' }}>into structured yield.</span>
-        </h1>
-        <Link href={CTA_LINKS.launchApp.href} className="welcome-btn hub-chapter" prefetch>
-          <span>{CTA_LINKS.launchApp.label}</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18" style={{ marginLeft: '4px' }}>
-            <path d="M5 12h14M12 5l7 7-7 7" />
-          </svg>
-        </Link>
-      </section>
-
-      {/* Intro */}
-      <section id="intro" className="theme-light" lang="en">
-        <div className="hub-section-lead">
-          <h2>
-            <span className="typewriter"><span className="hub-lead-accent">Hearst Connect</span> brings industrial Bitcoin mining cash flows on-chain. USDC vaults backed by real hashrate, institutional controls, and transparent reporting — built for qualified allocators.</span>
-          </h2>
-        </div>
-
-        <div className="icons">
-          {/* icons-marquee-strip : conteneur animé, 3 copies pour boucle seamless */}
-          <div className="icons-marquee-strip">
-            {[0, 1, 2].map((copy) => (
-              <div key={copy} className="icons-track" aria-hidden={copy > 0}>
-                {ICONS.map((icon, i) => (
-                  <div key={`${icon.name}-${copy}-${i}`} className="icon">
-                    <Image
-                      src={icon.src}
-                      alt={copy === 0 ? icon.name : ''}
-                      className="icon-img"
-                      width={480}
-                      height={200}
-                      quality={100}
-                      loading="lazy"
-                    />
-                  </div>
-                ))}
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Features */}
-      <section id="features-section" aria-label="Why Hearst Connect, four pillars" lang="en">
-        <div id="features">
-          <div className="features-text">
-            {FEATURE_PILLARS.map(feature => (
-              <article
-                key={feature.id}
-                id={feature.id}
-                className="feature-block feature-pillar"
-              >
-                <span className="feature-pillar-subtitle">{feature.subtitle}</span>
-                <h3>{feature.title}</h3>
-                <p>{feature.desc}</p>
-                <div className="feature-pillar-image" aria-hidden>
-                  <Image
-                    src={feature.image}
-                    alt={feature.imageAlt}
-                    width={1600}
-                    height={1100}
-                  />
-                </div>
-              </article>
-            ))}
-          </div>
-          <div className="features-tablet" id="features-tablet">
-            <div className="tablet-mockup">
-              <div className="tablet-mockup-layers">
-                <div className="tablet-mockup-stack-inner">
-                  <video
-                    src="/marketing/area.mp4"
-                    autoPlay
-                    loop
-                    muted
-                    playsInline
-                    className="tablet-layer tablet-layer--video"
-                    style={{ width: '100%', height: '100%', objectFit: 'cover', borderRadius: 'inherit' }}
-                  />
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      {/* Solutions */}
-      <section id="developers" className="theme-light">
-        <div className="hub-section-head" lang="en">
-          <h2>The HashVault product family</h2>
-          <p className="intro">
-            Two structured strategies built on the same industrial mining infrastructure. HashVault Prime targets stable USDC yield with capital preservation. HashVault Growth adds Bitcoin upside with a mining-backed yield floor. Both deliver daily distributions, on-chain reporting, and 3-year horizons.
-          </p>
-        </div>
-
-        <div
-          className="hub-carousel-auto"
-          onMouseEnter={() => setIsPaused(true)}
-          onMouseLeave={() => setIsPaused(false)}
-          onTouchStart={() => setIsPaused(true)}
-          onTouchEnd={() => setIsPaused(false)}
-        >
-          <div
-            className="hub-carousel-auto-track"
-            style={{ transform: `translateX(calc(-${activeIndex} * (var(--slide-width) + var(--slide-gap))))` }}
-          >
-            {VAULT_PRODUCT_SLIDES.map((slide, i) => (
-              <article
-                key={slide.id}
-                className={`hub-carousel-auto-slide ${i === activeIndex ? 'is-active' : ''}`}
-                aria-hidden={i !== activeIndex}
-              >
-                <div className="hub-slide-card">
-                  <div className={`hub-vault-product-card hub-vault-product-card--${slide.variant}`}>
-                    <div className="hub-vault-product-inner">
-                      <h3 className="hub-vault-product-name">{slide.productName}</h3>
-                      <p className="hub-vault-product-apy" style={{ color: '#a7fb90' }}>{slide.apy}</p>
-                      <p className="hub-vault-product-tagline">{slide.tagline}</p>
-                      <p className="hub-vault-product-desc" style={{ whiteSpace: 'pre-line' }}>{slide.description}</p>
-                      <div className="hub-vault-product-cta">
-                        <a href={CTA_LINKS.launchApp.href} className="login-btn">
-                          Launch App
-                        </a>
-                      </div>
-                    </div>
-                    <div className="hub-vault-product-media">
-                      <video
-                        src={slide.video}
-                        aria-label={slide.videoAlt}
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        preload="metadata"
-                      />
-                    </div>
-                  </div>
-                </div>
-              </article>
-            ))}
-          </div>
-
-          <button
-            type="button"
-            className="hub-carousel-arrow hub-carousel-arrow-prev"
-            onClick={scrollPrev}
-            aria-label="Previous slide"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M15 18l-6-6 6-6" />
-            </svg>
-          </button>
-          <button
-            type="button"
-            className="hub-carousel-arrow hub-carousel-arrow-next"
-            onClick={scrollNext}
-            aria-label="Next slide"
-          >
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <path d="M9 18l6-6-6-6" />
-            </svg>
-          </button>
-
-        </div>
-      </section>
-
-      {/* Before You Go: outer card scroll-driven scale; inner hub-chapter parallax */}
-      <section id="beforeyougo" lang="en">
-        <div className="card dark hub-final-cta-card">
-          <div className="hub-chapter hub-final-cta-content">
-            <p>
-              <span className="typewriter">Real yield. Real infrastructure. On-chain.</span>
-            </p>
-            <div className="buttons">
-              <Link href={CTA_LINKS.launchApp.href} className="hub-cta-primary">
-                {CTA_LINKS.launchApp.label}
-              </Link>
-            </div>
-          </div>
-        </div>
-      </section>
-
-      <footer className="hub-footer-slim" id="hub-footer">
-        <div className="hub-footer-slim-inner">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logos/hearst-connect.svg"
-            alt="Hearst Connect"
-            className="hub-footer-slim-logo"
-            width={160}
-            height={54}
-            style={{ height: '54px', width: 'auto', display: 'block' }}
-            loading="lazy"
-          />
-          <div className="hub-footer-slim-cta">
-            <p className="hub-footer-slim-headline">Join the next wave of institutional Bitcoin yield.</p>
-            <EarlyAccessForm />
-          </div>
-        </div>
-        <div className="hub-footer-slim-bottom">
-          <span>© {new Date().getFullYear()} Hearst Corporation. All rights reserved.</span>
-          <div className="hub-footer-slim-links">
-            <a href={`mailto:${HEARST_EMAIL}`}>{HEARST_EMAIL}</a>
-            <span aria-hidden>·</span>
-            <a href="/terms">Terms</a>
-            <span aria-hidden>·</span>
-            <a href="/privacy">Privacy</a>
-          </div>
-        </div>
-      </footer>
+      <HubSmoothScroll />
+      <PremiumEffects />
+      <HubHeader isHeaderVisible={isHeaderVisible} />
+      <HubHero />
+      <HubTicker />
+      <HubMarquee />
+      <HubFeatures />
+      <HubSimulator />
+      <HubCarousel {...carouselState} />
+      <HubFooter />
     </div>
-  );
-}
-
-/** Inline Hearst Connect wordmark — bypasses Next.js Image optimization and the
- * embedded <defs><style> pattern in the source SVG that some renderers handle
- * unreliably. Fills are explicit on each path so the logo always renders. */
-function HearstConnectWordmark({ className }: { className?: string }) {
-  return (
-    <svg
-      className={className}
-      viewBox="572 466 791 268"
-      width="400"
-      height="135"
-      preserveAspectRatio="xMidYMid meet"
-      role="img"
-      aria-label="Hearst Connect"
-      style={{ display: 'block', height: 135, width: 400, maxWidth: '100%' }}
-    >
-      <g>
-        <path fill="#fff" d="M751.5,546.1v47.4h79.4l-7.4,16.3h-100.4v-142.3h119l-9.4,15.7h-81.2v47.4h43l-7.6,15.5h-35.4,0Z" />
-        <path fill="#fff" d="M1227.2,473.1h135.1l-19.2,18.8h-34v117.9h-28.7v-117.9h-34.9l-18.3-18.8h0Z" />
-        <path fill="#fff" d="M1040.6,531.6h19.2c11.9,0,21.6-9.4,21.6-20.9s-9.7-20.9-21.6-20.9h-41.8v120h-28.7v-142.3h70.6c24.7,0,44.7,19.4,44.7,43.2s-18,41.2-41,43.1l58.8,56.9h-30.6l-51.1-46.5v-32.6h0Z" />
-        <path fill="#fff" d="M918.7,467.4h-21.3l-57.7,142.3h29l39.4-97.1,39.4,97.1h29l-57.7-142.3h-.1Z" />
-        <path fill="#fff" d="M1226,549.1c-3.2-3.1-7.2-6.1-12-9s-9.3-5.2-13.3-6.9-8.5-3.4-13.5-5.2c-2.2-.8-4.8-1.6-7.8-2.7-5.7-2-10.1-3.6-13-4.7-2.9-1.1-5.9-2.5-8.9-4.1s-5.2-3.2-6.6-4.9c-1.4-1.7-2.3-3.8-2.8-6.1,0-1.1-.2-2.4-.2-3.9s.4-3.1,1.2-5.1c.8-2,1.8-3.8,3.1-5.4,4.9-5.9,13.1-8.9,24.4-8.9s20.3,3.6,28.2,10.8h26.2c-11.8-16.8-30-25.1-54.8-25.1s-13.8.8-19.8,2.5c-6.1,1.6-11.2,3.8-15.3,6.5-4.1,2.7-7.6,5.8-10.6,9.4s-5.1,7.1-6.4,10.6-1.9,6.9-1.9,10.2.3,6.3,1.1,9.2c.7,2.8,1.9,5.5,3.5,7.9s3.2,4.5,4.8,6.4c1.6,1.9,3.7,3.7,6.6,5.5,2.8,1.8,5.2,3.2,7.1,4.3,2,1.1,4.7,2.4,8.1,3.9s6.2,2.5,8.1,3.2,4.7,1.7,8.2,2.9l5.7,1.9c5.6,1.9,9.9,3.4,12.9,4.6,3,1.2,6.2,2.6,9.6,4.2,3.4,1.6,5.9,3.1,7.5,4.5s3,3,4,4.8c1.1,1.8,1.6,3.9,1.6,6.2,0,6.4-2.8,11.6-8.4,15.4-5.6,3.8-12,5.8-19.2,5.8-16.9,0-28.3-4.7-34.5-14.1h-23.1c3.3,8.6,9,15.4,17.1,20.4,9.7,6.1,22,9.2,36.9,9.2s13.8-.7,20.3-2.1c6.5-1.4,12.6-3.5,18.4-6.4,5.7-2.9,10.3-7,13.7-12.2,3.4-5.2,5.1-11.3,5.1-18.1s-1.1-9.6-3.2-14c-2.2-4.4-4.8-8.2-8-11.2h0v-.2h0Z" />
-        <polygon fill="#a7fb90" points="601.7 466.9 572.6 466.9 572.6 609.7 601.7 609.7 601.7 549.1 633.1 579.4 665.8 579.4 601.7 517.5 601.7 466.9" />
-        <polygon fill="#a7fb90" points="672.7 466.9 672.7 528.1 644.6 500.9 612 500.9 672.7 559.7 672.7 609.7 701.9 609.7 701.9 466.9 672.7 466.9" />
-      </g>
-      <g>
-        <path fill="#a7fb90" d="M887.2,630.1c25.1,0,35.8,15.4,36.4,27.8v1.7h-12.8c-.6-7.6-6.4-17.9-23.4-17.9s-26.9,11-26.9,30.3,9.8,30.3,26.9,30.3,22.8-10.5,23.7-18.4h12.8v1.7c-1,12.8-11.5,28.4-36.7,28.4s-40.7-15.2-40.7-41.9,15.3-41.9,40.7-41.9h0Z" />
-        <path fill="#a7fb90" d="M962.5,653.2c18,0,30.6,10.5,30.6,30.3s-12.6,30.3-30.6,30.3-30.5-10.5-30.5-30.3,12.6-30.3,30.5-30.3ZM962.5,703.4c10.3,0,17.1-7,17.1-19.9s-6.8-19.8-17.1-19.8-17,7-17,19.8,6.8,19.9,17,19.9Z" />
-        <path fill="#a7fb90" d="M1017.4,654.5v6.4h.9c4-5.4,10.4-7.6,18.3-7.6,13.7,0,22.1,7,22.1,21.2v37.9h-13.3v-36.7c0-8-4.3-11.8-12.2-11.8s-15.4,4.9-15.4,16.1v32.4h-13.3v-57.9h12.9Z" />
-        <path fill="#a7fb90" d="M1085.7,654.5v6.4h.9c4-5.4,10.4-7.6,18.3-7.6,13.7,0,22.1,7,22.1,21.2v37.9h-13.3v-36.7c0-8-4.3-11.8-12.2-11.8s-15.4,4.9-15.4,16.1v32.4h-13.3v-57.9h12.9Z" />
-        <path fill="#a7fb90" d="M1166.9,653.2c17.4,0,27.5,10.5,27.5,28v5.9h-43.8c.2,9.7,6.2,16.5,16.2,16.5s13.8-5.2,14.7-9.5h11.7v1.7c-1.6,7.6-8.5,18.1-26.2,18.1s-29.1-10.4-29.1-30.3,11.4-30.3,29-30.3h0ZM1181.9,677.2c0-7.9-5.2-14-15.2-14s-15.2,6.2-15.9,14h31.1Z" />
-        <path fill="#a7fb90" d="M1232.5,653.2c17.4,0,26.1,10.3,26.9,20.4v1.7h-12.3c-.5-5.4-4.2-11.6-14.2-11.6s-16.8,7.1-16.8,19.8,6.5,19.8,16.8,19.8,13.7-6.2,14.4-12h12.4v1.7c-.9,10.5-9.5,20.8-27.1,20.8s-29.8-10.4-29.8-30.3,12.2-30.3,29.8-30.3h-.1Z" />
-        <path fill="#a7fb90" d="M1277.8,654.5v-15.4h13.3v15.4h16.4v10.3h-16.4v35.8l.9.9h15.2v11h-13.4c-10,0-16-5.2-16-15v-32.6h-12.9v-10.3h12.9Z" />
-      </g>
-    </svg>
-  );
-}
-
-function EarlyAccessForm() {
-  const [email, setEmail] = useState('');
-  const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
-  const [message, setMessage] = useState<string | null>(null);
-
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!email.trim()) return;
-    setStatus('loading');
-    setMessage(null);
-    try {
-      const res = await fetch('/api/early-access', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim(), source: 'landing-footer' }),
-      });
-      const data = await res.json().catch(() => ({}));
-      if (!res.ok) {
-        setStatus('error');
-        setMessage(data?.error === 'Invalid email' ? 'Please enter a valid email.' : 'Something went wrong. Try again.');
-        return;
-      }
-      setStatus('success');
-      setMessage(data?.duplicate ? "You're already on the list — we'll be in touch." : "You're on the list. We'll be in touch shortly.");
-      setEmail('');
-    } catch {
-      setStatus('error');
-      setMessage('Network error. Try again.');
-    }
-  };
-
-  return (
-    <form className="hub-footer-slim-form" onSubmit={handleSubmit} noValidate>
-      <input
-        type="email"
-        placeholder="your@email.com"
-        className="hub-footer-slim-input"
-        aria-label="Email address"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        required
-        disabled={status === 'loading'}
-      />
-      <button
-        type="submit"
-        className="hub-footer-slim-btn"
-        disabled={status === 'loading'}
-      >
-        {status === 'loading' ? 'Submitting…' : 'Get Early Access'}
-      </button>
-      {message && (
-        <p
-          role="status"
-          className={`hub-footer-slim-form-msg ${status === 'error' ? 'is-error' : 'is-success'}`}
-        >
-          {message}
-        </p>
-      )}
-    </form>
   );
 }
