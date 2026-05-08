@@ -1,6 +1,5 @@
 'use client';
 
-import '@/styles/marketing/hub-font.css';
 import '@/styles/marketing/hub.css';
 
 import { useEffect, useState, useCallback } from 'react';

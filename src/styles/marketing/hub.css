@@ -733,119 +733,6 @@
 				text-wrap: pretty;
 			}
 
-			.hub-carousel-wrap {
-				width: calc(100% + 6rem);
-				max-width: none;
-				min-width: 0;
-				margin-inline: -3rem;
-				position: relative;
-			}
-
-			.hub-carousel-wrap .carousel {
-				margin-inline: 0;
-				padding-inline: 3rem;
-				width: 100%;
-				box-sizing: border-box;
-
-				overflow-x: auto;
-				-webkit-overflow-scrolling: touch;
-
-				display: flex;
-				flex-wrap: nowrap;
-				gap: var(--hub-space-md);
-
-				.developer {
-					flex: 0 0 100%;
-					flex-shrink: 0;
-					scroll-snap-align: center;
-					overflow: clip;
-					display: flex;
-					flex-direction: column;
-					gap: var(--hub-space-md);
-					padding-bottom: var(--hub-space-sm);
-
-					@media (width >= 930px) {
-						flex-basis: 60vw;
-						flex-basis: 60vi;
-					}
-
-					figure {
-						display: grid;
-						place-items: center;
-						> * {
-					    grid-area: 1 / 1;
-						}
-
-						figcaption.carousel-caption {
-							color: var(--dashboard-text-bright);
-							font-size: var(--dashboard-text-xl);
-							font-weight: 400;
-							letter-spacing: -0.02em;
-							line-height: 1.2;
-							text-align: center;
-							text-wrap: balance;
-							max-width: min(22ch, 92%);
-							padding-inline: 0.5rem;
-						}
-					}
-
-					img {
-						border-radius: 1.5rem;
-						border: 1px solid var(--dashboard-border);
-					}
-
-				h3 {
-					font-weight: 400;
-					font-size: var(--dashboard-text-xl);
-					line-height: 1.18;
-					margin: 0;
-					letter-spacing: -0.025em;
-					max-width: 100%;
-					text-wrap: balance;
-					color: var(--dashboard-text-primary);
-				}
-
-				p {
-					width: 100%;
-					max-width: var(--hub-measure-prose);
-					text-wrap: pretty;
-					color: var(--dashboard-text-secondary);
-					letter-spacing: 0.01em;
-					font-weight: 400;
-					line-height: 1.62;
-					margin: 0;
-				}
-
-					a {
-						display: inline-flex;
-						flex-direction: row;
-						align-items: center;
-						gap: 0.35em;
-						margin-top: var(--hub-space-xs);
-
-						color: var(--dashboard-accent);
-				    text-decoration: none;
-						font-weight: 600;
-						font-size: var(--dashboard-text-sm);
-						letter-spacing: 0.02em;
-
-						transition: gap 0.15s ease-in;
-
-						&:hover,
-						&:focus-visible {
-							gap: 0.55em;
-							color: var(--dashboard-accent-hover);
-						}
-
-						&::after {
-							content: '→';
-							font-size: var(--dashboard-text-xl);
-							line-height: 1;
-							display: inline-block;
-						}
-					}
-				}
-			}
 		}
 	}
 
@@ -1081,7 +968,6 @@
     --dashboard-overlay-10: rgba(255,255,255,0.10);
     --dashboard-overlay-12: rgba(255,255,255,0.12);
     --dashboard-shadow-lg: 0 12px 32px rgba(0,0,0,0.40);
-    --font-sans: 'Satoshi Variable', Inter, -apple-system, sans-serif;
     /* Landing HUB — rythme & mesure (tokens uniquement) */
     --hub-space-xs: 0.5rem;
     --hub-space-sm: 1rem;
@@ -1135,20 +1021,8 @@
   color: var(--dashboard-text-primary);
 }
 
-/* Modern carousel section overrides */
 #developers {
   overflow-x: visible;
-}
-
-#developers .hub-carousel-track-modern {
-  touch-action: pan-x pinch-zoom;
-  -webkit-user-drag: none;
-}
-
-#developers .hub-carousel-track-modern img,
-#developers .hub-carousel-track-modern video {
-  -webkit-user-drag: none;
-  user-select: none;
 }
 
 /* Refactored inline styles */
@@ -1559,10 +1433,6 @@ a.welcome-btn:focus-visible {
   overflow-x: visible;
 }
 
-#developers .hub-carousel-wrap .hub-carousel-track.carousel > .developer {
-  scroll-snap-align: center;
-}
-
 /* Plateforme : trois “beats” au scroll page (ancres #feature-*) */
 #features-section .feature-pillar {
   scroll-margin-top: calc(var(--hub-header-offset) + 0.75rem);
@@ -1574,31 +1444,6 @@ a.welcome-btn:focus-visible {
     min-height: min(32dvh, 330px);
   }
 }
-
-/* Bords du carrousel solutions — repère visuel léger au survol (classes togglées en JS) */
-.hub-font-scope .hub-carousel-wrap::before,
-.hub-font-scope .hub-carousel-wrap::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  bottom: 0;
-  width: min(22%, 180px);
-  z-index: 2;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-}
-
-.hub-font-scope .hub-carousel-wrap::before {
-  left: 0;
-  background: linear-gradient(to right, var(--dashboard-surface), transparent);
-}
-
-.hub-font-scope .hub-carousel-wrap::after {
-  right: 0;
-  background: linear-gradient(to left, var(--dashboard-surface), transparent);
-}
-
 
 /* CTA links inside final card — unlayered so they win over generic `a.hub-cta-*` */
 .hub-font-scope .dark a.hub-cta-primary {
@@ -1714,16 +1559,6 @@ z-index: 1;
 overflow: hidden;
 }
 
-.features-tablet .tablet-layer--back {
-  display: block;
-width: 100%;
-	height: auto;
-	border-radius: 0.5rem;
-  position: relative;
-z-index: 0;
-}
-
-
 /* Features layout — pleine largeur section ; mobile stacked, desktop text + sticky tablet */
 #features {
   display: block;
@@ -1802,10 +1637,6 @@ box-sizing: border-box;
   }
   .features-tablet .tablet-mockup .tablet-mockup-stack-inner {
   	border-radius: 0.75rem;
-  }
-
-  .features-tablet .tablet-layer--back {
-    border-radius: 0.75rem;
   }
 }
 
@@ -2571,40 +2402,6 @@ box-sizing: border-box;
 	text-wrap: pretty;
 }
 
-.hub-vault-product-specs {
-	display: flex;
-	flex-direction: row;
-	justify-content: space-between;
-	gap: 1rem;
-	width: 100%;
-	margin-top: 0.35rem;
-	padding-top: 1.15rem;
-	border-top: 1px solid var(--dashboard-border-mid);
-}
-
-.hub-vault-product-specs>div {
-	display: flex;
-	flex-direction: column;
-	gap: 0.3rem;
-	min-width: 0;
-}
-
-.hub-vault-product-specs dt {
-	margin: 0;
-	font-size: 0.68rem;
-	font-weight: 700;
-	letter-spacing: 0.08em;
-	text-transform: uppercase;
-	color: #71717A;
-}
-
-.hub-vault-product-specs dd {
-	margin: 0;
-	font-size: var(--dashboard-text-sm);
-	font-weight: 600;
-	color: #000000;
-}
-
 .hub-vault-product-cta {
 	margin-top: auto;
 	padding-top: 1.25rem;
@@ -2639,10 +2436,6 @@ box-sizing: border-box;
 @media (max-width: 640px) {
 	.hub-vault-product-card {
 		min-height: unset;
-	}
-
-	.hub-vault-product-specs {
-		grid-template-columns: 1fr;
 	}
 }
 /* ─── Fix min-height sections ─── */
@@ -3203,19 +2996,6 @@ box-sizing: border-box;
   background: rgba(255, 255, 255, 0.9);
 }
 
-/* Glitch Effect for Tablet Transitions */
-.glitch-anim {
-  animation: rgb-split 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94) both;
-}
-
-@keyframes rgb-split {
-  0% { filter: drop-shadow(0 0 0 red) drop-shadow(0 0 0 blue); transform: translate(0) scale(1); }
-  20% { filter: drop-shadow(-8px 0 0 rgba(255,0,0,0.8)) drop-shadow(8px 0 0 rgba(0,255,255,0.8)); transform: translate(-2px, 1px) scale(1.01); }
-  40% { filter: drop-shadow(8px 0 0 rgba(255,0,0,0.8)) drop-shadow(-8px 0 0 rgba(0,255,255,0.8)); transform: translate(2px, -1px) scale(1.01); }
-  60% { filter: drop-shadow(-4px 0 0 rgba(255,0,0,0.8)) drop-shadow(4px 0 0 rgba(0,255,255,0.8)); transform: translate(-1px, 0) scale(1); }
-  100% { filter: drop-shadow(0 0 0 red) drop-shadow(0 0 0 blue); transform: translate(0) scale(1); }
-}
-
 /* 3D Grid Background in Hero */
 .hero-cyber-grid {
   position: absolute;
@@ -3480,3 +3260,17 @@ box-sizing: border-box;
   opacity: 0.2;
   transition: opacity 0.1s;
 }
+
+/* Final CTA card — unlayered override so accent green wins over global
+ * `[data-theme="light"] .card` rule from tokens.css (which is also unlayered
+ * and would otherwise shadow the layered .card.dark / #beforeyougo rules). */
+.hub-font-scope #beforeyougo .hub-final-cta-card {
+  background-color: var(--dashboard-accent);
+  background-image: url('/patterns/hearst-dotted-h.svg');
+  background-repeat: no-repeat;
+  background-position: right 3rem center;
+  background-size: auto 58%;
+  border: 1px solid var(--dashboard-accent);
+  color: #000;
+}
+

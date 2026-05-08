@@ -12,28 +12,30 @@ export function ScrubText({ text }: { text: string }) {
       return;
     }
 
+    let rafId = 0;
+
     const handleScroll = () => {
-      if (!containerRef.current) return;
-      const rect = containerRef.current.getBoundingClientRect();
-      const windowHeight = window.innerHeight;
-
-      const start = windowHeight;
-      const end = windowHeight * 0.4;
-
-      const current = rect.top;
-
-      if (current > start) {
-        setProgress(0);
-      } else if (current < end) {
-        setProgress(1);
-      } else {
-        setProgress(1 - (current - end) / (start - end));
-      }
+      if (rafId !== 0) return;
+      rafId = window.requestAnimationFrame(() => {
+        rafId = 0;
+        if (!containerRef.current) return;
+        const rect = containerRef.current.getBoundingClientRect();
+        const wh = window.innerHeight;
+        const start = wh;
+        const end = wh * 0.4;
+        const cur = rect.top;
+        if (cur > start) setProgress(0);
+        else if (cur < end) setProgress(1);
+        else setProgress(1 - (cur - end) / (start - end));
+      });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
     handleScroll();
-    return () => window.removeEventListener('scroll', handleScroll);
+    return () => {
+      window.removeEventListener('scroll', handleScroll);
+      if (rafId !== 0) window.cancelAnimationFrame(rafId);
+    };
   }, []);
 
   const words = text.split(' ');
@@ -42,12 +44,11 @@ export function ScrubText({ text }: { text: string }) {
     <p className="intro scrub-text" ref={containerRef}>
       {words.map((word, i) => {
         const wordProgress = words.length <= 1 ? 0 : i / (words.length - 1);
-        const isVisible = progress >= wordProgress;
         return (
           <span
             key={i}
             style={{
-              opacity: isVisible ? 1 : 0.2,
+              opacity: progress >= wordProgress ? 1 : 0.2,
               transition: 'opacity 0.2s ease-out',
             }}
           >

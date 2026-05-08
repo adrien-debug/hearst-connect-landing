@@ -1,5 +1,6 @@
 'use client';
 
+import { useState, useCallback, useEffect } from 'react';
 import { CTA_LINKS } from '@/config/navigation';
 import { Odometer } from './Odometer';
 import { ScrubText } from './ScrubText';
@@ -31,38 +32,37 @@ const VAULT_PRODUCT_SLIDES = [
   },
 ] as const;
 
-interface HubCarouselProps {
-  activeIndex: number;
-  isPaused: boolean;
-  setIsPaused: (paused: boolean) => void;
-  scrollNext: () => void;
-  scrollPrev: () => void;
-}
+const INTERVAL_MS = 5000;
 
-export function HubCarousel({ activeIndex, isPaused, setIsPaused, scrollNext, scrollPrev }: HubCarouselProps) {
+export function HubCarousel() {
+  const count = VAULT_PRODUCT_SLIDES.length;
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [isPaused, setIsPaused] = useState(false);
+
+  const scrollNext = useCallback(() => setActiveIndex(i => (i + 1) % count), [count]);
+  const scrollPrev = useCallback(() => setActiveIndex(i => (i === 0 ? count - 1 : i - 1)), [count]);
+
+  useEffect(() => {
+    if (isPaused) return;
+    const timer = setInterval(scrollNext, INTERVAL_MS);
+    return () => clearInterval(timer);
+  }, [isPaused, scrollNext]);
+
   const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>, isActive: boolean) => {
     if (!isActive) return;
     const card = e.currentTarget;
     const rect = card.getBoundingClientRect();
     const x = e.clientX - rect.left;
     const y = e.clientY - rect.top;
-    const centerX = rect.width / 2;
-    const centerY = rect.height / 2;
-    
-    // Calculate rotation (max 8 degrees)
-    const rotateX = ((y - centerY) / centerY) * -8;
-    const rotateY = ((x - centerX) / centerX) * 8;
-
-    card.style.transform = `perspective(1200px) rotateX(${rotateX}deg) rotateY(${rotateY}deg) scale3d(1.02, 1.02, 1.02)`;
-    
-    // Update glow position
+    const cx = rect.width / 2;
+    const cy = rect.height / 2;
+    card.style.transform = `perspective(1200px) rotateX(${((y - cy) / cy) * -8}deg) rotateY(${((x - cx) / cx) * 8}deg) scale3d(1.02, 1.02, 1.02)`;
     card.style.setProperty('--mouse-x', `${x}px`);
     card.style.setProperty('--mouse-y', `${y}px`);
   };
 
   const handleMouseLeave = (e: React.MouseEvent<HTMLDivElement>) => {
-    const card = e.currentTarget;
-    card.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
+    e.currentTarget.style.transform = `perspective(1200px) rotateX(0deg) rotateY(0deg) scale3d(1, 1, 1)`;
   };
 
   return (
@@ -75,7 +75,7 @@ export function HubCarousel({ activeIndex, isPaused, setIsPaused, scrollNext, sc
       <div
         className="hub-carousel-auto"
         aria-roledescription="carousel"
-        aria-live={isPaused ? "polite" : "off"}
+        aria-live={isPaused ? 'polite' : 'off'}
         onMouseEnter={() => setIsPaused(true)}
         onMouseLeave={() => setIsPaused(false)}
         onTouchStart={() => setIsPaused(true)}
@@ -95,16 +95,16 @@ export function HubCarousel({ activeIndex, isPaused, setIsPaused, scrollNext, sc
                 tabIndex={isActive ? 0 : -1}
               >
                 <div className="hub-slide-card">
-                  <div 
+                  <div
                     className={`hub-vault-product-card hub-vault-product-card--${slide.variant} magnetic-card`}
                     onMouseMove={(e) => handleMouseMove(e, isActive)}
                     onMouseLeave={handleMouseLeave}
                   >
                     <div className="hub-carousel-progress-wrapper">
-                      <div 
+                      <div
                         className="hub-carousel-progress-bar"
                         style={{ animationPlayState: isPaused ? 'paused' : 'running' }}
-                      ></div>
+                      />
                     </div>
                     <div className="hub-vault-product-inner">
                       <h3 className="hub-vault-product-name">{slide.productName}</h3>
@@ -158,7 +158,6 @@ export function HubCarousel({ activeIndex, isPaused, setIsPaused, scrollNext, sc
             <path d="M9 18l6-6-6-6" />
           </svg>
         </button>
-
       </div>
     </section>
   );

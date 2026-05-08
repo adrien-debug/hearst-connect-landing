@@ -40,16 +40,7 @@ const FEATURE_PILLARS = [
 
 export function HubFeatures() {
   const [activeId, setActiveId] = useState<string>(FEATURE_PILLARS[0].id);
-  const [glitchKey, setGlitchKey] = useState(0);
   const observerRef = useRef<IntersectionObserver | null>(null);
-  const prevActiveRef = useRef<string | null>(null);
-
-  useEffect(() => {
-    if (prevActiveRef.current !== null && prevActiveRef.current !== activeId) {
-      setGlitchKey((k) => k + 1);
-    }
-    prevActiveRef.current = activeId;
-  }, [activeId]);
 
   useEffect(() => {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
@@ -78,13 +69,16 @@ export function HubFeatures() {
     });
 
     const tablet = document.querySelector('.tablet-mockup') as HTMLElement | null;
+    let tiltRafId = 0;
     const handleScroll = () => {
-      if (!tablet) return;
-      const rect = tablet.getBoundingClientRect();
-      const center = rect.top + rect.height / 2;
-      const windowCenter = window.innerHeight / 2;
-      const diff = (center - windowCenter) * 0.05;
-      tablet.style.transform = `perspective(1000px) rotateX(${diff}deg) rotateY(${-diff * 0.5}deg) translateY(${diff}px)`;
+      if (!tablet || tiltRafId !== 0) return;
+      tiltRafId = window.requestAnimationFrame(() => {
+        tiltRafId = 0;
+        if (!tablet) return;
+        const rect = tablet.getBoundingClientRect();
+        const diff = (rect.top + rect.height / 2 - window.innerHeight / 2) * 0.05;
+        tablet.style.transform = `perspective(1000px) rotateX(${diff}deg) rotateY(${-diff * 0.5}deg) translateY(${diff}px)`;
+      });
     };
 
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -92,6 +86,7 @@ export function HubFeatures() {
     return () => {
       observerRef.current?.disconnect();
       window.removeEventListener('scroll', handleScroll);
+      if (tiltRafId !== 0) window.cancelAnimationFrame(tiltRafId);
     };
   }, []);
 
@@ -133,7 +128,7 @@ export function HubFeatures() {
         <div className="features-tablet" id="features-tablet">
           <div className="tablet-mockup">
             <div className="tablet-mockup-layers">
-              <div key={glitchKey} className="tablet-mockup-stack-inner glitch-anim">
+              <div className="tablet-mockup-stack-inner">
                 <video
                   src="/marketing/area.mp4"
                   poster="/marketing/poster-area.jpg"
