@@ -93,36 +93,36 @@ function updateHubChapterStyles(scope: HTMLElement): void {
 
 const FEATURE_PILLARS = [
   {
-    id: 'feature-smart-input',
-    title: 'Smart Input',
-    subtitle: 'From Idea to Workflow',
-    desc: 'Describe your needs in natural language and instantly generate structured workflows, connecting tools, data, and logic without writing a single line of code.',
-    image: '/marketing/captures/1-v4.png',
-    imageAlt: 'Smart input prompt interface',
+    id: 'feature-real-infrastructure',
+    title: 'Real infrastructure',
+    subtitle: 'Industrial Bitcoin Mining',
+    desc: 'USDC exposure to industrial Bitcoin mining cash flows. Real hashrate, real operations, institutional-grade infrastructure — not synthetic exposure or paper claims.',
+    image: '/platform-screenshot.png',
+    imageAlt: 'Hearst Connect — vault portfolio overview',
   },
   {
-    id: 'feature-live-orchestration',
-    title: 'Live Orchestration',
-    subtitle: 'Agents in Motion',
-    desc: 'Watch your system activate in real time as agents connect services, deploy workflows, and coordinate tasks seamlessly across your entire digital infrastructure.',
-    image: '/marketing/captures/2-v3.png',
-    imageAlt: 'Live orchestration view',
+    id: 'feature-transparent-reporting',
+    title: 'Transparent reporting',
+    subtitle: 'Onchain Proof of Reserves',
+    desc: 'Monthly USDC distributions, on-chain proof of reserves, and third-party audits at every step. Every position, every payout — verifiable on Base.',
+    image: '/platform-screenshot.png',
+    imageAlt: 'Hearst Connect — reporting and analytics',
   },
   {
-    id: 'feature-instant-deployment',
-    title: 'Instant Deployment',
-    subtitle: 'Live From Day One',
-    desc: 'Your custom application is generated, configured, and ready to use, with integrations, automations, and insights fully operational from the moment it launches.',
-    image: '/marketing/captures/3-v4.png',
-    imageAlt: 'Instant deployment configuration',
+    id: 'feature-institutional-controls',
+    title: 'Institutional controls',
+    subtitle: 'Built for Allocators',
+    desc: 'Multi-signature governance, audited contracts, KYC/AML compliance, and custody integrations built for serious allocators — Fireblocks, Safe, Ledger Enterprise.',
+    image: '/platform-screenshot.png',
+    imageAlt: 'Hearst Connect — governance and custody',
   },
   {
-    id: 'feature-unified-control',
-    title: 'Unified Control',
-    subtitle: 'One Command Center',
-    desc: 'Monitor performance, manage agents, track workflows, and gain real-time insights through a centralized dashboard designed for clarity, speed, and intelligent decision-making.',
-    image: '/marketing/captures/4-v3.png',
-    imageAlt: 'Unified control dashboard',
+    id: 'feature-stable-yield',
+    title: 'Stable USDC yield',
+    subtitle: 'Daily Distributions',
+    desc: 'Mining-backed cashflow streams smooth Bitcoin volatility into predictable daily USDC yield. Track every accrual, claim on demand, redeem at maturity.',
+    image: '/platform-screenshot.png',
+    imageAlt: 'Hearst Connect — daily yield distributions',
   },
 ] as const;
 
@@ -138,55 +138,44 @@ function HearstMonogram({ className }: { className?: string }) {
 
 const VAULT_PRODUCT_SLIDES = [
   {
-    id: 'hospitality-travel',
+    id: 'hashvault-prime',
     variant: 'prime' as const,
-    productName: 'Hospitality & Travel',
-    screenshot: '/marketing/verticals/mamo.png',
-    screenshotAlt: 'Mamo Michelangelo — Hospitality AI workspace',
-    apy: 'More Yield',
-    tagline: 'AI Guest Operations',
+    productName: 'HashVault Prime',
+    video: '/videos/bg-prime.mp4',
+    videoAlt: 'HashVault Prime — animated background',
+    apy: '12% APY',
+    tagline: 'Stable yield, engineered for consistency.',
     description:
-      'Automate guest communication and personalize every interaction in real time.\nSynchronize bookings across all channels while optimizing pricing and revenue.\nCoordinate front desk, housekeeping, and operations within one unified platform.',
+      'Mining-backed cashflow combined with stablecoin income and hedged BTC exposure.\nDaily USDC distributions until 36% target or maturity.\nMin allocation $500,000 · 3-year lock · moderate risk profile.\nBuilt for capital preservation with institutional-grade reporting.',
   },
   {
-    id: 'real-estate-property',
+    id: 'hashvault-growth',
     variant: 'growth' as const,
-    productName: 'Premium Real Estate',
-    screenshot: '/marketing/verticals/mind.png',
-    screenshotAlt: 'MIND — Real Estate AI workspace',
-    apy: 'More imput',
-    tagline: 'AI Portfolio Management',
+    productName: 'HashVault Growth',
+    video: '/videos/bg-growth.mp4',
+    videoAlt: 'HashVault Growth — animated background',
+    apy: '15% APY',
+    tagline: 'Bitcoin upside, supported by mining yield.',
     description:
-      'Streamline listings, tenant workflows, and CRM pipelines in one place.\nAutomate operations and gain real-time insights across your portfolio.\nMake faster decisions with AI agents managing assets end-to-end.\nScale your portfolio with clarity, control, and confidence.',
+      'Spot BTC captures upside while mining cashflow cushions drawdowns.\nDynamic allocation, daily USDC yield until 45% target or maturity.\nMin allocation $250,000 · 3-year lock · growth risk profile.\nFor allocators seeking BTC exposure with a yield floor.',
   },
 ] as const;
 
 const ICONS = [
-  { name: 'Gmail', src: 'https://cdn.simpleicons.org/gmail' },
-  { name: 'Google Drive', src: 'https://cdn.simpleicons.org/googledrive' },
-  { name: 'Notion', src: 'https://cdn.simpleicons.org/notion' },
-  { name: 'HubSpot', src: 'https://cdn.simpleicons.org/hubspot' },
-  { name: 'Jira', src: 'https://cdn.simpleicons.org/jira' },
-  { name: 'GitHub', src: 'https://cdn.simpleicons.org/github' },
-  { name: 'Slack', src: '/logos/services/slack.svg' },
-  { name: 'Zapier', src: 'https://cdn.simpleicons.org/zapier' },
-  { name: 'Stripe', src: 'https://cdn.simpleicons.org/stripe' },
-  { name: 'Figma', src: 'https://cdn.simpleicons.org/figma' },
-  { name: 'Linear', src: 'https://cdn.simpleicons.org/linear' },
-  { name: 'Airtable', src: 'https://cdn.simpleicons.org/airtable' },
-  { name: 'Asana', src: 'https://cdn.simpleicons.org/asana' },
-  { name: 'Dropbox', src: 'https://cdn.simpleicons.org/dropbox' },
-  { name: 'Zoom', src: 'https://cdn.simpleicons.org/zoom' },
-  { name: 'Discord', src: 'https://cdn.simpleicons.org/discord' },
-  { name: 'Telegram', src: 'https://cdn.simpleicons.org/telegram' },
-  { name: 'WhatsApp', src: 'https://cdn.simpleicons.org/whatsapp' },
-  { name: 'Shopify', src: 'https://cdn.simpleicons.org/shopify' },
-  { name: 'Intercom', src: 'https://cdn.simpleicons.org/intercom' },
-  { name: 'Webflow', src: 'https://cdn.simpleicons.org/webflow' },
-  { name: 'Zendesk', src: 'https://cdn.simpleicons.org/zendesk' },
-  { name: 'Trello', src: 'https://cdn.simpleicons.org/trello' },
-  { name: 'Vercel', src: 'https://cdn.simpleicons.org/vercel' },
-  { name: 'Supabase', src: 'https://cdn.simpleicons.org/supabase' },
+  { name: 'Bitcoin', src: '/icons/crypto/btc.png' },
+  { name: 'Ethereum', src: '/icons/crypto/eth.png' },
+  { name: 'USDC', src: '/icons/crypto/usdc.png' },
+  { name: 'Tether', src: '/icons/crypto/usdt.png' },
+  { name: 'BNB', src: '/icons/crypto/bnb.png' },
+  { name: 'Solana', src: '/icons/crypto/sol.png' },
+  { name: 'XRP', src: '/icons/crypto/xrp.png' },
+  { name: 'Cardano', src: '/icons/crypto/ada.png' },
+  { name: 'Avalanche', src: '/icons/crypto/avax.png' },
+  { name: 'Dogecoin', src: '/icons/crypto/doge.png' },
+  { name: 'Polkadot', src: '/icons/crypto/dot.png' },
+  { name: 'Chainlink', src: '/icons/crypto/link.png' },
+  { name: 'Polygon', src: '/icons/crypto/matic.png' },
+  { name: 'TRON', src: '/icons/crypto/trx.png' },
 ] as const;
 
 function useAutoCarousel(itemCount: number, intervalMs = 5000) {
@@ -347,9 +336,9 @@ useEffect(() => {
       <section id="welcome" className="center" lang="en">
         <Image src="/logos/hearst-connect.svg" alt="Hearst Connect" className="welcome-logo" width={400} height={135} style={{ height: '135px', width: 'auto' }} priority />
         <h1 className="welcome-title hub-chapter">
-          One platform. 1000+ services.
+          Turning bitcoin mining
           <br />
-          <span style={{ color: '#2ECFCE' }}>Seamless execution.</span>
+          <span style={{ color: '#a7fb90' }}>into structured yield.</span>
         </h1>
         <Link href={CTA_LINKS.launchApp.href} className="welcome-btn hub-chapter" prefetch>
           <span>{CTA_LINKS.launchApp.label}</span>
@@ -363,7 +352,7 @@ useEffect(() => {
       <section id="intro" className="theme-light" lang="en">
         <div className="hub-section-lead">
           <h2>
-            <span className="typewriter"><span className="hub-lead-accent">Hearst Connect</span> orchestrates your entire stack through intelligent agents that automate workflows, streamline operations, and scale execution effortlessly across every sector.</span>
+            <span className="typewriter"><span className="hub-lead-accent">Hearst Connect</span> brings industrial Bitcoin mining cash flows on-chain. USDC vaults backed by real hashrate, institutional controls, and transparent reporting — built for qualified allocators.</span>
           </h2>
         </div>
 
@@ -392,7 +381,7 @@ useEffect(() => {
       </section>
 
       {/* Features */}
-      <section id="features-section" aria-label="Why Hearst, three pillars" lang="en">
+      <section id="features-section" aria-label="Why Hearst Connect, four pillars" lang="en">
         <div id="features">
           <div className="features-text">
             {FEATURE_PILLARS.map(feature => (
@@ -420,32 +409,32 @@ useEffect(() => {
               <div className="tablet-mockup-layers">
                 <div className="tablet-mockup-stack-inner">
                   <Image
-                    src="/marketing/captures/1-v4.png"
-                    alt="Smart input prompt interface"
-                    width={1600}
-                    height={1100}
+                    src="/platform-screenshot.png"
+                    alt="Hearst Connect — vault portfolio overview"
+                    width={1024}
+                    height={657}
                     className="tablet-layer tablet-layer--back"
                     priority
                   />
                   <Image
-                    src="/marketing/captures/2-v3.png"
-                    alt="Live orchestration view"
-                    width={1600}
-                    height={1100}
+                    src="/platform-screenshot.png"
+                    alt="Hearst Connect — reporting and analytics"
+                    width={1024}
+                    height={657}
                     className="tablet-layer tablet-layer--front"
                   />
                   <Image
-                    src="/marketing/captures/3-v4.png"
-                    alt="Instant deployment configuration"
-                    width={1600}
-                    height={1100}
+                    src="/platform-screenshot.png"
+                    alt="Hearst Connect — governance and custody"
+                    width={1024}
+                    height={657}
                     className="tablet-layer tablet-layer--third"
                   />
                   <Image
-                    src="/marketing/captures/4-v3.png"
-                    alt="Unified control dashboard"
-                    width={1600}
-                    height={1100}
+                    src="/platform-screenshot.png"
+                    alt="Hearst Connect — daily yield distributions"
+                    width={1024}
+                    height={657}
                     className="tablet-layer tablet-layer--fourth"
                   />
                 </div>
@@ -458,9 +447,9 @@ useEffect(() => {
       {/* Solutions */}
       <section id="developers" className="theme-light">
         <div className="hub-section-head" lang="en">
-          <h2>Execution-focused verticals</h2>
+          <h2>The HashVault product family</h2>
           <p className="intro">
-            Pre-configured agent packs, workflows, and integrations tailored for hospitality, real estate, and more — all fully customizable to match your brand identity, including your logo and color palette.
+            Two structured strategies built on the same industrial mining infrastructure. HashVault Prime targets stable USDC yield with capital preservation. HashVault Growth adds Bitcoin upside with a mining-backed yield floor. Both deliver daily distributions, on-chain reporting, and 3-year horizons.
           </p>
         </div>
 
@@ -485,7 +474,7 @@ useEffect(() => {
                   <div className={`hub-vault-product-card hub-vault-product-card--${slide.variant}`}>
                     <div className="hub-vault-product-inner">
                       <h3 className="hub-vault-product-name">{slide.productName}</h3>
-                      <p className="hub-vault-product-apy" style={{ color: '#2ECFCE' }}>{slide.apy}</p>
+                      <p className="hub-vault-product-apy" style={{ color: '#a7fb90' }}>{slide.apy}</p>
                       <p className="hub-vault-product-tagline">{slide.tagline}</p>
                       <p className="hub-vault-product-desc" style={{ whiteSpace: 'pre-line' }}>{slide.description}</p>
                       <div className="hub-vault-product-cta">
@@ -498,12 +487,22 @@ useEffect(() => {
                       <div className="hub-vault-product-imac" aria-hidden>
                         <div className="hub-vault-product-imac-bezel">
                           <div className="hub-vault-product-imac-screen">
-                            <Image
-                              src={slide.screenshot}
-                              alt={slide.screenshotAlt}
-                              fill
-                              sizes="(max-width: 929px) 90vw, 60vw"
+                            <video
+                              src={slide.video}
+                              aria-label={slide.videoAlt}
+                              autoPlay
+                              muted
+                              loop
+                              playsInline
+                              preload="metadata"
                               className="hub-vault-product-imac-image"
+                              style={{
+                                position: 'absolute',
+                                inset: 0,
+                                width: '100%',
+                                height: '100%',
+                                objectFit: 'cover',
+                              }}
                             />
                           </div>
                         </div>
@@ -546,7 +545,7 @@ useEffect(() => {
         <div className="card dark hub-final-cta-card">
           <div className="hub-chapter hub-final-cta-content">
             <p>
-              <span className="typewriter">Stop switching. Start scaling.</span>
+              <span className="typewriter">Real yield. Real infrastructure. On-chain.</span>
             </p>
             <div className="buttons">
               <Link href={CTA_LINKS.launchApp.href} className="hub-cta-primary">
@@ -569,16 +568,18 @@ useEffect(() => {
             loading="lazy"
           />
           <div className="hub-footer-slim-cta">
-            <p className="hub-footer-slim-headline">Join the next wave of intelligent operations.</p>
+            <p className="hub-footer-slim-headline">Join the next wave of institutional Bitcoin yield.</p>
             <EarlyAccessForm />
           </div>
         </div>
         <div className="hub-footer-slim-bottom">
           <span>© {new Date().getFullYear()} Hearst Corporation. All rights reserved.</span>
           <div className="hub-footer-slim-links">
-            <a href="/terms">Terms of Service</a>
+            <a href={`mailto:${HEARST_EMAIL}`}>{HEARST_EMAIL}</a>
             <span aria-hidden>·</span>
-            <a href="/privacy">Privacy Policy</a>
+            <a href="/terms">Terms</a>
+            <span aria-hidden>·</span>
+            <a href="/privacy">Privacy</a>
           </div>
         </div>
       </footer>

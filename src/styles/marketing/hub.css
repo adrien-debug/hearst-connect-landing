@@ -1101,8 +1101,8 @@
     --dashboard-surface: #111117;
     --dashboard-card: #171A1E;
     --dashboard-card-2: #1E2228;
-    /* Aligné sur logo hearst-ai-black.svg — #2ECFCE ; cyan accent (voir dashboard-vars.css) */
-    --dashboard-accent: #2ECFCE;
+    /* Aligned on Hearst Connect green accent — see --brand-accent in tokens.css */
+    --dashboard-accent: #a7fb90;
     --dashboard-accent-hover: #5FD9D8;
     --dashboard-accent-dim: rgba(167, 251, 144, 0.12);
     --dashboard-text-bright: #E6EAF0;
@@ -1174,13 +1174,13 @@
   color: var(--dashboard-text-primary);
 }
 
-/* Liens / accents lisibles sur fond clair (évite cyan #2ECFCE pur sur blanc) */
+/* Links / accents on light background (Connect green) */
 #intro.theme-light .hub-lead-accent {
-  color: #2ECFCE;
+  color: #a7fb90;
 }
 
 #intro.theme-light .typewriter::after {
-  color: #2ECFCE;
+  color: #a7fb90;
 }
 
 #developers.theme-light .hub-section-head h2 {
@@ -1194,7 +1194,7 @@
   content: '';
   width: min(2.75rem, 15vw);
   height: var(--hub-accent-bar);
-  background: #2ECFCE;
+  background: #a7fb90;
   border-radius: var(--dashboard-radius-sm, 8px);
   flex-shrink: 0;
   margin-bottom: var(--hub-space-sm);
@@ -1319,7 +1319,7 @@ a.welcome-btn:focus-visible {
 }
 
 .hub-font-scope ::selection {
-  background-color: #2ECFCE;
+  background-color: #a7fb90;
   color: #000;
 }
 
@@ -1388,7 +1388,7 @@ a.welcome-btn:focus-visible {
   color: #000000;
   --typewriter-text-color: #000000;
   text-align: left;
-  border-left: var(--hub-accent-bar) solid #2ECFCE;
+  border-left: var(--hub-accent-bar) solid #a7fb90;
   padding-left: var(--hub-space-md);
 }
 
@@ -1398,7 +1398,7 @@ a.welcome-btn:focus-visible {
 }
 
 #intro.theme-light .hub-section-lead .hub-lead-accent {
-  color: #2ECFCE;
+  color: #a7fb90;
 }
 
 /* Duplicate hardcoded overrides removed — canonical styles above use design tokens */
@@ -1846,7 +1846,7 @@ box-sizing: border-box;
 }
 
 .hub-footer-slim-form-msg.is-success {
-  color: #2ECFCE;
+  color: #a7fb90;
 }
 
 .hub-footer-slim-form-msg.is-error {
@@ -1878,7 +1878,7 @@ box-sizing: border-box;
 }
 
 .hub-footer-slim-btn {
-  background: #2ECFCE;
+  background: #a7fb90;
   color: #080a0c;
   border: none;
   border-radius: 9999px;
@@ -2184,8 +2184,8 @@ box-sizing: border-box;
   letter-spacing: 0.1em;
   text-transform: uppercase;
   color: var(--color-accent, #c8f5b8);
-  background: var(--color-accent-dim, rgba(var(--brand-accent-rgb), 0.18));
-  border: 1px solid var(--color-accent-subtle, rgba(var(--brand-accent-rgb), 0.28));
+  background: var(--color-accent-dim, rgba(167, 251, 144, 0.18));
+  border: 1px solid var(--color-accent-subtle, rgba(167, 251, 144, 0.28));
   border-radius: 999px;
   width: fit-content;
 }
@@ -2286,7 +2286,7 @@ box-sizing: border-box;
   height: 3.5rem;
   border-radius: 50%;
   background: rgba(0, 0, 0, 0.7);
-  border: 2px solid #2ECFCE;
+  border: 2px solid #a7fb90;
   box-shadow: 0 0 0 0 rgba(167, 251, 144, 0.4);
   display: flex;
   align-items: center;
@@ -2307,7 +2307,7 @@ box-sizing: border-box;
   width: 7px;
   height: 7px;
   border-radius: 50%;
-  background: #2ECFCE;
+  background: #a7fb90;
   pointer-events: none;
   animation: hub-arrow-dot-pulse 1.4s ease-in-out infinite;
 }
@@ -2367,7 +2367,7 @@ box-sizing: border-box;
 .hub-vault-product-card--prime {
 	box-shadow:
 		0 24px 48px rgba(0, 0, 0, 0.14),
-		0 0 0 1px rgba(var(--brand-accent-rgb), 0.12);
+		0 0 0 1px rgba(167, 251, 144, 0.12);
 }
 
 .hub-vault-product-card--growth {
@@ -2514,7 +2514,7 @@ box-sizing: border-box;
 
 .hub-vault-product-monogram {
 	display: flex;
-	color: var(--color-accent, #2ECFCE);
+	color: var(--color-accent, #a7fb90);
 	line-height: 0;
 }
 
@@ -2609,7 +2609,7 @@ box-sizing: border-box;
 }
 
 .hub-vault-product-cta .login-btn {
-	background: #2ECFCE;
+	background: #a7fb90;
 	color: #080a0c;
 }
 
@@ -3024,3 +3024,14 @@ box-sizing: border-box;
   }
 }
 
+
+/* ─── Defensive logo visibility ─────────────────────────────────────────────
+ * The starting-style animation on welcome items can leave the logo at
+ * opacity 0 in browsers that drop the transition (Safari < 17.4). Force
+ * the final state so the brand always renders. */
+#welcome .welcome-logo,
+.header-logo-link img,
+.hub-footer-slim-logo {
+  opacity: 1;
+  visibility: visible;
+}
