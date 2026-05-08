@@ -66,8 +66,8 @@ export function Canvas() {
         >
           <div style={{ display: 'flex', alignItems: 'center', height: '100%' }}>
             <img
-              src="/logos/hearst-connect.svg"
-              alt="Hearst Connect"
+              src="/logos/hearst-ai-black.svg"
+              alt="Hearst AI"
               style={{
                 height: TOKENS.spacing[8],
                 width: 'auto',
@@ -127,8 +127,8 @@ export function Canvas() {
         {/* Logo - aligné à gauche */}
         <div style={{ display: 'flex', alignItems: 'center', height: '100%', gap: TOKENS.spacing[4] }}>
           <img
-            src="/logos/hearst-connect.svg"
-            alt="Hearst Connect"
+            src="/logos/hearst-ai-black.svg"
+            alt="Hearst AI"
             style={{
               height: TOKENS.spacing[8],
               width: 'auto',

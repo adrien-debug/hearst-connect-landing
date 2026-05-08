@@ -1,21 +1,13 @@
 {
-  "name": "hearst-connect",
+  "name": "hearst-ai-new",
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "lsof -ti:8100 | xargs kill -9 2>/dev/null; sleep 1; next dev --port 8100 --webpack",
+    "dev": "lsof -ti:5555 | xargs kill -9 2>/dev/null; sleep 1; next dev --port 5555 --webpack",
     "build": "next build --webpack",
-    "start": "next start --port 8100",
-    "lint": "tsc -p . --noEmit && node scripts/check-design-system.mjs",
-    "lint:design": "node scripts/check-design-system.mjs",
-    "test": "vitest run",
-    "contracts:install": "cd contracts && forge install foundry-rs/forge-std@v1.16.0 --no-git && forge install OpenZeppelin/openzeppelin-contracts@v5.6.1 --no-git && forge install OpenZeppelin/openzeppelin-contracts-upgradeable@v5.6.1 --no-git && rm -rf lib/openzeppelin-contracts-upgradeable/test lib/openzeppelin-contracts-upgradeable/scripts lib/openzeppelin-contracts-upgradeable/fv lib/openzeppelin-contracts/test lib/openzeppelin-contracts/scripts lib/openzeppelin-contracts/fv",
-    "contracts:build": "cd contracts && forge build && cd .. && node scripts/sync-abi.mjs",
-    "contracts:test": "cd contracts && forge test -vvv",
-    "contracts:coverage": "cd contracts && forge coverage --report lcov",
-    "contracts:fmt": "cd contracts && forge fmt",
-    "contracts:deploy:sepolia": "cd contracts && forge script script/Deploy.s.sol:DeployScript --rpc-url base_sepolia --broadcast --verify -vvvv && cd .. && node scripts/sync-addresses.mjs 84532",
-    "contracts:sync": "node scripts/sync-abi.mjs"
+    "start": "next start --port 5555",
+    "lint": "tsc -p . --noEmit",
+    "test": "vitest run"
   },
   "dependencies": {
     "@anthropic-ai/sdk": "^0.91.1",

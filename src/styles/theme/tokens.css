@@ -212,17 +212,17 @@
   --color-border-strong: rgba(255, 255, 255, 0.20);
   --color-border-focus: rgba(255, 255, 255, 0.40);
 
-  /* Accent (neon green - excellent on dark) — derived from --brand-accent */
-  --color-accent: var(--brand-accent);
-  --color-accent-dim: rgba(var(--brand-accent-rgb), 0.10);
-  --color-accent-subtle: rgba(var(--brand-accent-rgb), 0.15);
-  --color-accent-glow: rgba(var(--brand-accent-rgb), 0.25);
-  --color-accent-text: var(--brand-accent-fg);
+  /* Accent (cyan accent - excellent on dark) */
+  --color-accent: #2ECFCE;
+  --color-accent-dim: rgba(46, 207, 206, 0.10);
+  --color-accent-subtle: rgba(46, 207, 206, 0.15);
+  --color-accent-glow: rgba(46, 207, 206, 0.25);
+  --color-accent-text: #000000;
 
   /* Status colors */
-  --color-success: var(--brand-accent);
-  --color-success-bg: rgba(var(--brand-accent-rgb), 0.15);
-  --color-success-border: rgba(var(--brand-accent-rgb), 0.30);
+  --color-success: #2ECFCE;
+  --color-success-bg: rgba(46, 207, 206, 0.15);
+  --color-success-border: rgba(46, 207, 206, 0.30);
   
   --color-error: #ef4444;
   --color-error-bg: rgba(239, 68, 68, 0.15);
@@ -241,12 +241,12 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.40);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.50);
   --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.60);
-  --shadow-glow: 0 0 20px rgba(var(--brand-accent-rgb), 0.30);
+  --shadow-glow: 0 0 20px rgba(46, 207, 206, 0.30);
 
   /* Interactive states */
   --color-hover: rgba(255, 255, 255, 0.06);
   --color-active: rgba(255, 255, 255, 0.10);
-  --color-selected: rgba(var(--brand-accent-rgb), 0.15);
+  --color-selected: rgba(46, 207, 206, 0.15);
 
   /* Scrollbar */
   --scrollbar-thumb: rgba(255, 255, 255, 0.20);
@@ -281,13 +281,13 @@
   --color-border-strong: rgba(0, 0, 0, 0.20);
   --color-border-focus: rgba(0, 0, 0, 0.40);
 
-  /* Accent (Citrus Neon - Identique au Dark) — derived from --brand-accent */
-  --color-accent: var(--brand-accent);
-  --color-accent-fg: var(--brand-accent-fg);
-  --color-accent-dim: rgba(var(--brand-accent-rgb), 0.10);
-  --color-accent-subtle: rgba(var(--brand-accent-rgb), 0.15);
-  --color-accent-glow: rgba(var(--brand-accent-rgb), 0.25);
-  --color-accent-text: var(--brand-accent-fg);
+  /* Accent (Cyan Accent - New Hearst AI brand) */
+  --color-accent: #2ECFCE;              /* Cyan accent */
+  --color-accent-fg: #000000;           /* Black text on accent */
+  --color-accent-dim: rgba(46, 207, 206, 0.10);
+  --color-accent-subtle: rgba(46, 207, 206, 0.15);
+  --color-accent-glow: rgba(46, 207, 206, 0.25);
+  --color-accent-text: #000000;
 
   /* Status colors (adapted for light theme) */
   --color-success: #22c55e;
@@ -311,23 +311,23 @@
   --shadow-md: 0 4px 12px rgba(0, 0, 0, 0.03);
   --shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.04);
   --shadow-xl: 0 24px 48px rgba(0, 0, 0, 0.06);
-  --shadow-glow: 0 0 20px rgba(var(--brand-accent-rgb), 0.20);
+  --shadow-glow: 0 0 20px rgba(46, 207, 206, 0.20);
 
   /* Card-specific multi-layer shadows (Light Stylé signature) */
   --shadow-card: 0 2px 4px rgba(0, 0, 0, 0.02),
                  0 12px 24px rgba(0, 0, 0, 0.03),
                  0 20px 40px -10px rgba(0, 0, 0, 0.04);
   --shadow-card-hover: 0 4px 8px rgba(0, 0, 0, 0.04),
-                       0 20px 40px rgba(var(--brand-accent-rgb), 0.15),
+                       0 20px 40px rgba(46, 207, 206, 0.15),
                        0 30px 60px -12px rgba(0, 0, 0, 0.06);
 
   /* Button shadows */
-  --shadow-button-primary-hover: 0 4px 16px rgba(var(--brand-accent-rgb), 0.25);
+  --shadow-button-primary-hover: 0 4px 16px rgba(46, 207, 206, 0.25);
 
   /* Interactive states */
   --color-hover: rgba(0, 0, 0, 0.04);
   --color-active: rgba(0, 0, 0, 0.08);
-  --color-selected: rgba(var(--brand-accent-rgb), 0.15);
+  --color-selected: rgba(46, 207, 206, 0.15);
 
   /* Scrollbar */
   --scrollbar-thumb: rgba(0, 0, 0, 0.15);
@@ -335,7 +335,7 @@
   --scrollbar-track: transparent;
 
   /* Cinematic Gradients (adaptés au blanc) */
-  --gradient-stage-shoulder: radial-gradient(ellipse 160% 100% at 50% -30%, rgba(var(--brand-accent-rgb), 0.08) 0%, transparent 55%);
+  --gradient-stage-shoulder: radial-gradient(ellipse 160% 100% at 50% -30%, rgba(46, 207, 206, 0.08) 0%, transparent 55%);
   --gradient-stage-carbon: radial-gradient(ellipse at 25% 15%, rgba(0, 0, 0, 0.01) 0%, transparent 45%),
                            radial-gradient(ellipse at 75% 85%, rgba(0, 0, 0, 0.01) 0%, transparent 40%),
                            radial-gradient(ellipse at 50% 50%, rgba(0, 0, 0, 0.02) 0%, transparent 70%);
@@ -363,13 +363,9 @@
   --hc-border-default: rgba(255, 255, 255, 0.12);
   --hc-border-strong: rgba(255, 255, 255, 0.14);
 
-  --hc-accent: var(--brand-accent);
-  --hc-accent-dim: rgba(var(--brand-accent-rgb), 0.05);
-  --hc-accent-glow: rgba(var(--brand-accent-rgb), 0.12);
-
-  --hc-danger: var(--color-error);
-  --hc-danger-dim: rgba(var(--color-error-rgb), 0.05);
-  --hc-danger-glow: rgba(var(--color-error-rgb), 0.12);
+  --hc-accent: #2ECFCE;
+  --hc-accent-dim: rgba(46, 207, 206, 0.05);
+  --hc-accent-glow: rgba(46, 207, 206, 0.12);
 
   --hc-overlay: rgba(0, 0, 0, 0.8);
 
@@ -383,9 +379,40 @@
   color-scheme: dark;
 }
 
-/* Connect is intentionally dark-only — overrides above stay in effect even
-   when [data-theme="light"] is set on <html>. Marketing keeps the light/dark
-   toggle; the command-center surface is one-mode for visual cohesion. */
+[data-theme="light"] .connect-scope {
+  /* "Light Stylé" - Bone White / High Contrast */
+  --hc-bg-app: #F9F9F7;
+  --hc-bg-page: #F9F9F7;
+  --hc-bg-sidebar: #FFFFFF;
+  --hc-bg-surface: #FFFFFF;
+  --hc-bg-secondary: #F4F4F5;
+  --hc-bg-tertiary: #F4F4F5;
+
+  --hc-text-primary: #000000;
+  --hc-text-secondary: #52525B;
+  --hc-text-ghost: #71717A;
+
+  --hc-border-subtle: rgba(0, 0, 0, 0.05);
+  --hc-border-default: rgba(0, 0, 0, 0.10);
+  --hc-border-strong: rgba(0, 0, 0, 0.20);
+
+  /* Cyan accent - identical to Dark theme */
+  --hc-accent: #2ECFCE;
+  --hc-accent-dim: rgba(46, 207, 206, 0.10);
+  --hc-accent-glow: rgba(46, 207, 206, 0.15);
+
+  --hc-overlay: rgba(0, 0, 0, 0.4);
+
+  /* Multi-layer shadows for Light theme */
+  --hc-shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.02);
+  --hc-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.03);
+  --hc-shadow-lg: 0 12px 32px rgba(0, 0, 0, 0.04);
+
+  --hc-scrollbar-thumb: rgba(0, 0, 0, 0.15);
+  --hc-scrollbar-thumb-hover: rgba(0, 0, 0, 0.25);
+
+  color-scheme: light;
+}
 
 /* ============================================
    GLOBAL SCROLLBAR STYLING
@@ -539,7 +566,6 @@
 /* ou garder le logo original blanc/vert */
 
 /* Option 1: Logos en noir complet (filter simple) */
-[data-theme="light"] .welcome-logo,
 [data-theme="light"] img[src*="hearst"] {
   filter: brightness(0);
 }

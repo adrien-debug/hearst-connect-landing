@@ -1,8 +1,9 @@
 export const THEME_INLINE_SCRIPT = `
 (function() {
-  const theme = (function() {
+  var isLanding = window.location.pathname === '/';
+  var theme = isLanding ? 'dark' : (function() {
     try {
-      const stored = localStorage.getItem('hearst-theme')
+      var stored = localStorage.getItem('hearst-theme')
       if (stored === 'dark' || stored === 'light') return stored
       if (stored === 'system' || !stored) {
         return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
@@ -10,7 +11,7 @@ export const THEME_INLINE_SCRIPT = `
     } catch (e) {}
     return 'dark'
   })()
-  
+
   document.documentElement.setAttribute('data-theme', theme)
   if (theme === 'dark') {
     document.documentElement.classList.add('dark')

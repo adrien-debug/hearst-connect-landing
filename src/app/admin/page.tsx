@@ -6,6 +6,7 @@ import { AdminHeader } from './components/header'
 import { DashboardSection } from './sections/dashboard'
 import { VaultsSection } from './sections/vaults'
 import { ActivitySection } from './sections/activity'
+import { EarlyAccessSection } from './sections/early-access'
 import { SettingsSection } from './sections/settings'
 import { SignalsSection } from './sections/signals'
 import { MarketSection } from './sections/market'
@@ -26,6 +27,7 @@ const SECTIONS: Record<string, React.ComponentType> = {
   'agent-config': AgentConfigSection,
   agents: AgentsSection,
   activity: ActivitySection,
+  'early-access': EarlyAccessSection,
   settings: SettingsSection,
 }
 
@@ -38,6 +40,7 @@ const SECTION_TITLES: Record<string, { title: string; subtitle: string }> = {
   'agent-config': { title: 'Agent Config', subtitle: 'Seuils, timings, prompts — tout se règle ici' },
   agents: { title: 'Managed Agents', subtitle: 'Déclencher et monitorer les agents en temps réel' },
   activity: { title: 'Activity Log', subtitle: 'Recent actions and events' },
+  'early-access': { title: 'Early Access', subtitle: 'Landing-page signups — list & export' },
   settings: { title: 'Settings', subtitle: 'System configuration' },
 }
 
