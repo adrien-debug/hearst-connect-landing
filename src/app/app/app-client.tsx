@@ -477,46 +477,15 @@ function AccessGate({ children }: { children: React.ReactNode }) {
       : handleConnect
 
     return (
-      <div 
-        className="connect-scope access-gate-layout"
-        style={{
-          position: 'fixed',
-          inset: 0,
-          display: 'flex',
-          flexDirection: 'column',
-          background: TOKENS.colors.bgApp,
-          overflow: 'auto',
-        }}
-      >
-        <style>{`
-          @media (min-width: 768px) {
-            .access-gate-layout { flex-direction: row !important; overflow: hidden !important; }
-            .access-gate-left { width: 50%; border-right: ${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}; border-bottom: none !important; max-height: none !important; }
-            .access-gate-right { width: 50%; }
-          }
-        `}</style>
-        {/* LEFT - Marketing */}
-        <div 
-          className="access-gate-left"
-          style={{
-            display: 'flex',
-            flexDirection: 'column',
-            alignItems: 'center',
-            justifyContent: 'center',
-            textAlign: 'center',
-            padding: TOKENS.spacing[8],
-            background: TOKENS.colors.black,
-            borderBottom: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
-            maxHeight: '45vh',
-            overflow: 'auto',
-          }}
-        >
-          {/* Logo - Solo */}
-          <div style={{ marginBottom: TOKENS.spacing[10] }}>
-            <img 
-              src="/logos/hearst-ai-black.svg" 
-              alt="Hearst AI" 
-              style={{ width: '72px', height: '72px', filter: 'drop-shadow(0 0 30px rgba(46, 207, 206, 0.15))' }} 
+      <div className="connect-scope access-gate">
+        <style>{ACCESS_GATE_CSS}</style>
+
+        <section className="access-gate__pane access-gate__pane--marketing" aria-label="Hearst Connect">
+          <div className="access-gate__brand">
+            <img
+              src="/logos/hearst-connect.svg"
+              alt="Hearst Connect"
+              className="access-gate__brand-logo"
             />
           </div>
 

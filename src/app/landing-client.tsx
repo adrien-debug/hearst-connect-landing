@@ -7,7 +7,7 @@ import '@/styles/marketing/intro.css';
 import Link from 'next/link';
 import Image from 'next/image';
 import { useEffect, useState, useCallback } from 'react';
-import { NAV_LINKS, CTA_LINKS, HEARST_EMAIL } from '@/config/navigation';
+import { NAV_LINKS, CTA_LINKS, HUB_MAILTO_SALES, HEARST_EMAIL } from '@/config/navigation';
 
 function MenuIcon() {
   return (
@@ -351,25 +351,12 @@ useEffect(() => {
           <br />
           <span style={{ color: '#2ECFCE' }}>Seamless execution.</span>
         </h1>
-        <div className="hub-chapter" style={{ display: 'inline-flex', gap: 'var(--space-3)', alignItems: 'center', flexWrap: 'wrap', justifyContent: 'center' }}>
-          <Link href={CTA_LINKS.launchApp.href} className="welcome-btn" prefetch>
-            <span>{CTA_LINKS.launchApp.label}</span>
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18" style={{ marginLeft: '4px' }}>
-              <path d="M5 12h14M12 5l7 7-7 7" />
-            </svg>
-          </Link>
-          <Link
-            href={CTA_LINKS.viewDemo.href}
-            className="welcome-btn"
-            prefetch
-            style={{
-              background: 'transparent',
-              border: '1px solid currentColor',
-            }}
-          >
-            <span>{CTA_LINKS.viewDemo.label}</span>
-          </Link>
-        </div>
+        <Link href={CTA_LINKS.launchApp.href} className="welcome-btn hub-chapter" prefetch>
+          <span>{CTA_LINKS.launchApp.label}</span>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18" style={{ marginLeft: '4px' }}>
+            <path d="M5 12h14M12 5l7 7-7 7" />
+          </svg>
+        </Link>
       </section>
 
       {/* Intro */}

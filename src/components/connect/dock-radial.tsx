@@ -76,13 +76,11 @@ export function DockRadial({ onSelect, activeId = null }: DockRadialProps) {
           }
         />
 
-        {/* Official Hearst AI wordmark monogram (cyan HB from /logos/hearst-ai-black.svg); larger hit area reads clearer than 22px */}
-        <svg
-          viewBox="572.6 466.87 129.26 142.86"
-          width={26}
-          height={26}
-          preserveAspectRatio="xMidYMid meet"
-          aria-hidden
+        <button
+          type="button"
+          onClick={() => onSelect(null)}
+          aria-label="Portfolio"
+          aria-current={activeId === null ? 'page' : undefined}
           style={{
             width: TOKENS.dock.buttonSize,
             height: TOKENS.dock.buttonSize,
