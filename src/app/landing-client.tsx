@@ -308,8 +308,8 @@ useEffect(() => {
       {/* Header */}
       <div className={`header-wrapper ${isHeaderVisible ? 'is-visible' : ''}`}>
         <header>
-          <a href="#" className="header-logo-link" aria-label="Hearst AI">
-            <Image src="/logos/hearst-ai-black.svg" alt="Hearst AI" width={160} height={54} style={{ height: '54px', width: 'auto', display: 'block' }} priority />
+          <a href="#" className="header-logo-link" aria-label="Hearst Connect">
+            <Image src="/logos/hearst-connect.svg" alt="Hearst Connect" width={160} height={54} style={{ height: '54px', width: 'auto', display: 'block' }} priority />
           </a>
           <input
             className="menu-checkbox"
@@ -345,7 +345,7 @@ useEffect(() => {
 
       {/* Welcome */}
       <section id="welcome" className="center" lang="en">
-        <Image src="/logos/hearst-ai-black.svg" alt="Hearst AI" className="welcome-logo" width={400} height={135} style={{ height: '135px', width: 'auto' }} priority />
+        <Image src="/logos/hearst-connect.svg" alt="Hearst Connect" className="welcome-logo" width={400} height={135} style={{ height: '135px', width: 'auto' }} priority />
         <h1 className="welcome-title hub-chapter">
           One platform. 1000+ services.
           <br />
@@ -363,7 +363,7 @@ useEffect(() => {
       <section id="intro" className="theme-light" lang="en">
         <div className="hub-section-lead">
           <h2>
-            <span className="typewriter"><span className="hub-lead-accent">Hearst AI</span> orchestrates your entire stack through intelligent agents that automate workflows, streamline operations, and scale execution effortlessly across every sector.</span>
+            <span className="typewriter"><span className="hub-lead-accent">Hearst Connect</span> orchestrates your entire stack through intelligent agents that automate workflows, streamline operations, and scale execution effortlessly across every sector.</span>
           </h2>
         </div>
 
@@ -560,8 +560,8 @@ useEffect(() => {
       <footer className="hub-footer-slim" id="hub-footer">
         <div className="hub-footer-slim-inner">
           <Image
-            src="/logos/hearst-ai-black.svg"
-            alt="Hearst AI"
+            src="/logos/hearst-connect.svg"
+            alt="Hearst Connect"
             className="hub-footer-slim-logo"
             width={160}
             height={54}
