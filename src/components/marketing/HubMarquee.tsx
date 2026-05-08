@@ -37,8 +37,8 @@ export function HubMarquee() {
                     src={icon.src}
                     alt={copy === 0 ? icon.name : ''}
                     className="icon-img"
-                    width={480}
-                    height={200}
+                    width={60}
+                    height={60}
                     loading="lazy"
                   />
                 </div>

@@ -116,7 +116,7 @@ export function HubSimulator() {
           </div>
 
           <div className="hub-simulator-chart">
-            <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} preserveAspectRatio="none" aria-hidden>
+            <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} width="100%" height="auto" aria-hidden>
               <defs>
                 <linearGradient id={chartGradientId} x1="0" y1="0" x2="0" y2="1">
                   <stop offset="0%" stopColor="var(--dashboard-accent)" stopOpacity="0.4" />
@@ -136,7 +136,7 @@ export function HubSimulator() {
                 y1={chartHeight}
                 x2={chartWidth}
                 y2={chartHeight}
-                stroke="rgba(0,0,0,0.1)"
+                stroke="var(--dashboard-border-mid)"
                 strokeWidth="1"
               />
               <line
@@ -144,7 +144,7 @@ export function HubSimulator() {
                 y1={chartHeight / 2}
                 x2={chartWidth}
                 y2={chartHeight / 2}
-                stroke="rgba(0,0,0,0.06)"
+                stroke="var(--dashboard-border)"
                 strokeWidth="1"
                 strokeDasharray="4 4"
               />
@@ -165,7 +165,7 @@ export function HubSimulator() {
                 cx={chartWidth}
                 cy={Number.isFinite(endCy) ? endCy : chartHeight - 20}
                 r="6"
-                fill="#fff"
+                fill="var(--dashboard-page)"
                 stroke="var(--dashboard-accent)"
                 strokeWidth="3"
               />

@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useState, useRef } from 'react';
+import { prefersReducedMotion } from '@/lib/reduced-motion';
 
 export function Odometer({ value, suffix = '' }: { value: number; suffix?: string }) {
   const [displayValue, setDisplayValue] = useState(value);
   const ref = useRef<HTMLSpanElement>(null);
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (prefersReducedMotion()) {
       setDisplayValue(value);
       return;
     }

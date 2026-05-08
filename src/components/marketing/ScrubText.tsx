@@ -1,13 +1,14 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
+import { prefersReducedMotion } from '@/lib/reduced-motion';
 
 export function ScrubText({ text }: { text: string }) {
   const containerRef = useRef<HTMLParagraphElement>(null);
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (prefersReducedMotion()) {
       setProgress(1);
       return;
     }

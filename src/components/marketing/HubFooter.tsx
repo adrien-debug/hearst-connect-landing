@@ -1,6 +1,7 @@
 import Link from 'next/link';
 import { useState } from 'react';
 import { CTA_LINKS, HEARST_EMAIL } from '@/config/navigation';
+import { HearstConnectLogo } from './HearstConnectLogo';
 
 function EarlyAccessForm() {
   const [email, setEmail] = useState('');
@@ -85,15 +86,9 @@ export function HubFooter() {
 
       <footer className="hub-footer-slim" id="hub-footer">
         <div className="hub-footer-slim-inner">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img
-            src="/logos/hearst-connect.svg"
-            alt="Hearst Connect"
+          <HearstConnectLogo
             className="hub-footer-slim-logo"
-            width={160}
-            height={54}
             style={{ height: '54px', width: 'auto', display: 'block' }}
-            loading="lazy"
           />
           <div className="hub-footer-slim-cta">
             <p className="hub-footer-slim-headline">Join the next wave of institutional Bitcoin yield.</p>

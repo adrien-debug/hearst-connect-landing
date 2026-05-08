@@ -2,11 +2,11 @@
 
 import { useEffect } from 'react';
 import Lenis from 'lenis';
+import { prefersReducedMotion } from '@/lib/reduced-motion';
 
 export function HubSmoothScroll() {
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (prefersReducedMotion()) return;
 
     const lenis = new Lenis({
       duration: 1.2,

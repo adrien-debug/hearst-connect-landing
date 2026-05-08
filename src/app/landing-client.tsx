@@ -2,7 +2,7 @@
 
 import '@/styles/marketing/hub.css';
 
-import { useEffect, useState, useCallback } from 'react';
+import { useEffect, useState } from 'react';
 
 import { HubHeader } from '@/components/marketing/HubHeader';
 import { HubHero } from '@/components/marketing/HubHero';
@@ -14,6 +14,7 @@ import { HubSimulator } from '@/components/marketing/HubSimulator';
 import { HubFooter } from '@/components/marketing/HubFooter';
 import { PremiumEffects } from '@/components/marketing/PremiumEffects';
 import { HubSmoothScroll } from '@/components/marketing/HubSmoothScroll';
+import { prefersReducedMotion } from '@/lib/reduced-motion';
 
 /** Scroll-driven fade + parallax for `.hub-chapter` nodes (reliable vs CSS view timelines). */
 function updateHubChapterStyles(scope: HTMLElement): void {
@@ -37,42 +38,17 @@ function updateHubChapterStyles(scope: HTMLElement): void {
     const ty = (center - midY) * -0.11;
     let tyClamped = Math.max(-44, Math.min(44, ty));
     /* Final CTA: never translate upward; negative ty clips the top under section overflow */
-    if (inFinalCta) {
-      tyClamped = Math.max(0, tyClamped);
-    }
+    if (inFinalCta) tyClamped = Math.max(0, tyClamped);
     el.style.setProperty('--hub-ch-opacity', opacity.toFixed(4));
     el.style.setProperty('--hub-ch-ty', `${tyClamped.toFixed(2)}px`);
   });
 }
 
-function useAutoCarousel(itemCount: number, intervalMs = 5000) {
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [isPaused, setIsPaused] = useState(false);
-
-  const scrollNext = useCallback(() => {
-    setActiveIndex((current) => (current + 1) % itemCount);
-  }, [itemCount]);
-
-  const scrollPrev = useCallback(() => {
-    setActiveIndex((current) => (current === 0 ? itemCount - 1 : current - 1));
-  }, [itemCount]);
-
-  useEffect(() => {
-    if (isPaused) return;
-    const timer = setInterval(scrollNext, intervalMs);
-    return () => clearInterval(timer);
-  }, [isPaused, intervalMs, scrollNext]);
-
-  return { activeIndex, setActiveIndex, isPaused, setIsPaused, scrollNext, scrollPrev };
-}
-
 export default function HubPageClient() {
-  const carouselState = useAutoCarousel(2); // 2 slides
   const [isHeaderVisible, setIsHeaderVisible] = useState(false);
 
   useEffect(() => {
     const handleScroll = () => {
-      // Show header once scrolled past the hero section (~60% of viewport)
       setIsHeaderVisible(window.scrollY > window.innerHeight * 0.6);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
@@ -85,9 +61,7 @@ export default function HubPageClient() {
     const menuToggle = document.getElementById('menu-checkbox') as HTMLInputElement | null;
     if (!nav || !menuToggle) return;
     const anchors = nav.querySelectorAll<HTMLAnchorElement>('a[href^="#"]');
-    const closeMenu = (): void => {
-      menuToggle.checked = false;
-    };
+    const closeMenu = (): void => { menuToggle.checked = false; };
     anchors.forEach(a => a.addEventListener('click', closeMenu));
     return () => anchors.forEach(a => a.removeEventListener('click', closeMenu));
   }, []);
@@ -96,8 +70,7 @@ export default function HubPageClient() {
     const scope = document.querySelector<HTMLElement>('.hub-font-scope');
     if (!scope) return;
 
-    const reducedMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
-    if (reducedMotion) {
+    if (prefersReducedMotion()) {
       scope.querySelectorAll<HTMLElement>('.hub-chapter').forEach(el => {
         el.style.setProperty('--hub-ch-opacity', '1');
         el.style.setProperty('--hub-ch-ty', '0px');
@@ -123,8 +96,7 @@ export default function HubPageClient() {
   }, []);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return;
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    if (prefersReducedMotion()) return;
     if (!('paintWorklet' in CSS)) return;
 
     const $welcome = document.querySelector('#welcome') as HTMLElement | null;
@@ -158,7 +130,6 @@ export default function HubPageClient() {
 
     void (async (): Promise<void> => {
       try {
-        // Houdini paint worklet (see public/ringparticles.js)
         // @ts-expect-error CSS.paintWorklet is not in TS lib.dom for all targets
         await CSS.paintWorklet.addModule('/ringparticles.js');
       } catch (err) {
@@ -183,7 +154,7 @@ export default function HubPageClient() {
       <HubMarquee />
       <HubFeatures />
       <HubSimulator />
-      <HubCarousel {...carouselState} />
+      <HubCarousel />
       <HubFooter />
     </div>
   );

@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useRef, useState } from 'react';
+import { prefersReducedMotion } from '@/lib/reduced-motion';
 
 const FEATURE_PILLARS = [
   {
@@ -43,7 +44,7 @@ export function HubFeatures() {
   const observerRef = useRef<IntersectionObserver | null>(null);
 
   useEffect(() => {
-    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) {
+    if (prefersReducedMotion()) {
       return;
     }
 

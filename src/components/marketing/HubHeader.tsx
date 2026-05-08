@@ -1,5 +1,6 @@
 import Link from 'next/link';
 import { NAV_LINKS, CTA_LINKS } from '@/config/navigation';
+import { HearstConnectLogo } from './HearstConnectLogo';
 
 function MenuIcon() {
   return (
@@ -22,8 +23,7 @@ export function HubHeader({ isHeaderVisible }: { isHeaderVisible: boolean }) {
     <div className={`header-wrapper ${isHeaderVisible ? 'is-visible' : ''}`}>
       <header>
         <a href="#" className="header-logo-link" aria-label="Hearst Connect">
-          {/* eslint-disable-next-line @next/next/no-img-element */}
-          <img src="/logos/hearst-connect.svg" alt="Hearst Connect" width={160} height={54} style={{ height: '54px', width: 'auto', display: 'block' }} />
+          <HearstConnectLogo style={{ height: '54px', width: 'auto', display: 'block' }} />
         </a>
         <input
           className="menu-checkbox"
