@@ -43,20 +43,6 @@ export function buildMonthlyPortfolioCurve(
   return { data, labels }
 }
 
-/** Next daily distribution timestamp (00:00 UTC tomorrow), with relative + absolute labels. */
-export function computeNextDailyDistribution(now: Date = new Date()): { relative: string; absolute: string } {
-  const next = new Date(Date.UTC(
-    now.getUTCFullYear(),
-    now.getUTCMonth(),
-    now.getUTCDate() + 1,
-    0, 0, 0, 0,
-  ))
-  const day = next.getUTCDate()
-  const month = next.toLocaleString('en-US', { month: 'short', timeZone: 'UTC' })
-  const absolute = `${day} ${month} · 00:00 UTC`
-  return { relative: 'Tomorrow', absolute }
-}
-
 /** Round-number axis ticks across [min, max] aiming for ~target divisions. */
 export function generateNiceTicks(min: number, max: number, target = 6): number[] {
   if (max <= min) return [min]

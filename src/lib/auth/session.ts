@@ -54,7 +54,7 @@ function parseAddressWhitelist(raw: string | undefined, label: string): Set<stri
 }
 
 // Admin whitelist drives the `isAdmin` JWT claim — gates /admin and any
-// API route guarded by requireAdmin().
+// API route guarded by requireAdminAccess().
 const ADMIN_ADDRESSES = parseAddressWhitelist(process.env.ADMIN_ADDRESSES, 'admin')
 
 // Demo whitelist drives the `isDemoAuthorized` JWT claim. Anyone in the admin
@@ -142,16 +142,6 @@ export async function getSessionFromRequest(request: Request): Promise<Session |
 export function requireSession(session: Session | null): asserts session is Session {
   if (!session) {
     throw new AuthError('Authentication required', 401)
-  }
-}
-
-/**
- * Require admin session (JWT with isAdmin flag)
- */
-export function requireAdmin(session: Session | null): asserts session is Session {
-  requireSession(session)
-  if (!session.isAdmin) {
-    throw new AuthError('Admin access required', 403)
   }
 }
 

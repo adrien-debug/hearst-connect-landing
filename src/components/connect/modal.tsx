@@ -7,6 +7,13 @@ import { prefersReducedMotion } from '@/lib/reduced-motion'
 
 const FOCUSABLE_SELECTORS = 'a[href], button:not([disabled]), textarea, input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
+// An element is reachable if it's actually rendered + not visually hidden.
+// `offsetParent === null` catches display:none ancestors and out-of-tree nodes
+// — cheap heuristic that the standard focusable selector misses.
+function isVisible(el: HTMLElement): boolean {
+  return !!el.offsetParent || el === document.activeElement
+}
+
 type ModalSize = 'sm' | 'md' | 'lg'
 
 interface ModalProps {
@@ -49,14 +56,24 @@ export function Modal({
         return
       }
       if (event.key === 'Tab' && modalRef.current) {
-        const focusable = Array.from(modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS))
+        const focusable = Array.from(
+          modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS)
+        ).filter(isVisible)
         if (!focusable.length) return
         const first = focusable[0]
         const last = focusable[focusable.length - 1]
+        const active = document.activeElement
+        // If focus escaped the modal entirely (programmatic blur, content
+        // re-render, etc.), pull it back to the first focusable.
+        if (!(active instanceof Node) || !modalRef.current.contains(active)) {
+          event.preventDefault()
+          first.focus()
+          return
+        }
         if (event.shiftKey) {
-          if (document.activeElement === first) { event.preventDefault(); last.focus() }
+          if (active === first) { event.preventDefault(); last.focus() }
         } else {
-          if (document.activeElement === last) { event.preventDefault(); first.focus() }
+          if (active === last) { event.preventDefault(); first.focus() }
         }
       }
     },
@@ -77,11 +94,18 @@ export function Modal({
   useEffect(() => {
     if (isOpen) {
       scrollYRef.current = window.scrollY
+      // Compensate the disappearing scrollbar so the page underneath doesn't
+      // shift horizontally when the modal opens (desktop with permanent
+      // scrollbars). Mobile gets 0 here, which is correct.
+      const scrollbarWidth = window.innerWidth - document.documentElement.clientWidth
       document.addEventListener('keydown', handleKeyDown)
       document.body.style.overflow = 'hidden'
       document.body.style.position = 'fixed'
       document.body.style.top = `-${scrollYRef.current}px`
       document.body.style.width = '100%'
+      if (scrollbarWidth > 0) {
+        document.body.style.paddingRight = `${scrollbarWidth}px`
+      }
     }
 
     return () => {
@@ -90,6 +114,7 @@ export function Modal({
       document.body.style.position = ''
       document.body.style.top = ''
       document.body.style.width = ''
+      document.body.style.paddingRight = ''
       window.scrollTo(0, scrollYRef.current)
       // Return focus to the opener so keyboard users don't get dumped at the
       // top of the page after the modal unmounts.

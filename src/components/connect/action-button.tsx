@@ -10,6 +10,8 @@ interface ActionButtonProps {
   variant: ActionButtonVariant
   onClick: (e: React.MouseEvent) => void
   disabled?: boolean
+  loading?: boolean
+  loadingLabel?: string
 }
 
 const variantStyles: Record<ActionButtonVariant, React.CSSProperties> = {
@@ -35,12 +37,16 @@ const variantStyles: Record<ActionButtonVariant, React.CSSProperties> = {
   },
 }
 
-export function ActionButton({ 
-  label, 
-  variant, 
+export function ActionButton({
+  label,
+  variant,
   onClick,
-  disabled = false
+  disabled = false,
+  loading = false,
+  loadingLabel,
 }: ActionButtonProps) {
+  // Loading implies disabled — prevents double-submit during async work.
+  const isInactive = disabled || loading
   const baseStyles: React.CSSProperties = {
     padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}`,
     // md (≈12px) aligns this button with the admin button radius — connect
@@ -50,16 +56,20 @@ export function ActionButton({
     fontWeight: TOKENS.fontWeights.black,
     textTransform: 'uppercase',
     letterSpacing: TOKENS.letterSpacing.wide,
-    cursor: disabled ? 'not-allowed' : 'pointer',
+    cursor: isInactive ? (loading ? 'wait' : 'not-allowed') : 'pointer',
     transition: TOKENS.transitions.fast,
     whiteSpace: 'nowrap',
-    opacity: disabled ? 0.5 : 1,
+    opacity: disabled ? 0.5 : loading ? 0.85 : 1,
     filter: disabled ? 'grayscale(0.5)' : undefined,
+    display: 'inline-flex',
+    alignItems: 'center',
+    justifyContent: 'center',
+    gap: TOKENS.spacing[2],
     ...variantStyles[variant],
   }
 
   const applyHover = (el: HTMLButtonElement) => {
-    if (!disabled && !prefersReducedMotion()) {
+    if (!isInactive && !prefersReducedMotion()) {
       el.style.transform = 'scale(1.05)'
     }
   }
@@ -67,18 +77,38 @@ export function ActionButton({
     el.style.transform = ''
   }
 
+  const displayLabel = loading ? (loadingLabel ?? `${label}…`) : label
+
   return (
     <button
-      onClick={disabled ? undefined : onClick}
-      disabled={disabled}
-      aria-disabled={disabled}
+      onClick={isInactive ? undefined : onClick}
+      disabled={isInactive}
+      aria-disabled={isInactive}
+      aria-busy={loading}
       style={baseStyles}
       onMouseEnter={(e) => applyHover(e.currentTarget)}
       onMouseLeave={(e) => resetHover(e.currentTarget)}
       onFocus={(e) => applyHover(e.currentTarget)}
       onBlur={(e) => resetHover(e.currentTarget)}
     >
-      {label}
+      {loading && (
+        <span
+          aria-hidden
+          style={{
+            width: 10,
+            height: 10,
+            borderRadius: TOKENS.radius.full,
+            border: `1.5px solid currentColor`,
+            borderTopColor: 'transparent',
+            animation: prefersReducedMotion() ? 'none' : 'ab-spin 0.8s linear infinite',
+            display: 'inline-block',
+          }}
+        />
+      )}
+      {displayLabel}
+      <style jsx>{`
+        @keyframes ab-spin { to { transform: rotate(360deg); } }
+      `}</style>
     </button>
   )
 }

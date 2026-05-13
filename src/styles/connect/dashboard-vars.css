@@ -3,12 +3,16 @@
  * Import once from the connect shell (e.g. `canvas.tsx`).
  */
 .connect-scope {
-  /** Stage cinematic gradients (dark) */
+  /** Stage cinematic gradients (dark) — overlay layers are pulled into named
+   *  vars so a future tuning pass touches one value, not three raw rgba(). */
+  --hc-overlay-carbon-1: rgba(15, 15, 15, 0.6);
+  --hc-overlay-carbon-2: rgba(8, 8, 8, 0.5);
+  --hc-overlay-carbon-3: rgba(5, 5, 5, 0.8);
   --hc-stage-shoulder: radial-gradient(ellipse 160% 100% at 50% -30%, rgba(255, 255, 255, 0.045) 0%, transparent 55%);
   --hc-stage-veil: linear-gradient(180deg, rgba(255, 255, 255, 0.008) 0%, transparent 55%);
-  --hc-stage-carbon: radial-gradient(ellipse at 25% 15%, rgba(15, 15, 15, 0.6) 0%, transparent 45%),
-                     radial-gradient(ellipse at 75% 85%, rgba(8, 8, 8, 0.5) 0%, transparent 40%),
-                     radial-gradient(ellipse at 50% 50%, rgba(5, 5, 5, 0.8) 0%, transparent 70%);
+  --hc-stage-carbon: radial-gradient(ellipse at 25% 15%, var(--hc-overlay-carbon-1) 0%, transparent 45%),
+                     radial-gradient(ellipse at 75% 85%, var(--hc-overlay-carbon-2) 0%, transparent 40%),
+                     radial-gradient(ellipse at 50% 50%, var(--hc-overlay-carbon-3) 0%, transparent 70%);
   --hc-space-2: 8px;
   --hc-space-3: 12px;
   --hc-space-4: 16px;

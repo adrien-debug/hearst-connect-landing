@@ -2882,25 +2882,31 @@ box-sizing: border-box;
 
 /* ─── Final CTA card on accent bg ───────────────────────────────────────────
  * Green accent box: white text/typewriter color is overridden to black for
- * legibility on the lime bg, and the primary CTA flips to dark-on-white style. */
+ * legibility on the lime bg, and the primary CTA flips to dark-on-white style.
+ * --hub-on-accent / --hub-on-accent-inv keep the contrast pair in one place so
+ * a future skin can tune them without grepping for raw #000/#fff. */
+#beforeyougo {
+  --hub-on-accent: #000;
+  --hub-on-accent-inv: #fff;
+}
 #beforeyougo .hub-final-cta-card,
 #beforeyougo .hub-final-cta-card .hub-final-cta-content {
-  color: #000;
+  color: var(--hub-on-accent);
 }
 #beforeyougo .hub-final-cta-card .typewriter,
 #beforeyougo .hub-final-cta-card p {
-  color: #000;
-  --typewriter-text-color: #000;
+  color: var(--hub-on-accent);
+  --typewriter-text-color: var(--hub-on-accent);
 }
 #beforeyougo .hub-final-cta-card .hub-cta-primary {
-  background: #000;
+  background: var(--hub-on-accent);
   color: var(--dashboard-accent);
-  border: 1px solid #000;
+  border: 1px solid var(--hub-on-accent);
 }
 #beforeyougo .hub-final-cta-card .hub-cta-primary:hover {
-  background: #fff;
-  color: #000;
-  border-color: #fff;
+  background: var(--hub-on-accent-inv);
+  color: var(--hub-on-accent);
+  border-color: var(--hub-on-accent-inv);
 }
 
 /* ─── Welcome logo: minimum visibility guarantees ──────────────────────────
