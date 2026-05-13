@@ -177,7 +177,11 @@ export function Canvas() {
       />
 
       {/* Dock Radial Navigation */}
-      <DockRadial onSelect={handleSelect} activeId={selectedId} />
+      <DockRadial
+        onSelect={handleSelect}
+        activeId={selectedId}
+        isInInvestFlow={selected?.type === 'available'}
+      />
     </div>
   )
 }
@@ -201,7 +205,7 @@ function MainPanel({
   onBack: () => void
   onVaultSelect: (vaultId: string) => void
 }) {
-  if (isSimulation) return <SimulationPanel />
+  if (isSimulation) return <SimulationPanel onBack={onBack} />
   if (selected) {
     if (selected.type === 'available') return <SubscribePanel vault={selected} onBack={onBack} />
     return <PositionDetailContainer vault={selected} onBack={onBack} />
@@ -286,15 +290,15 @@ function PositionDetailContainer({
         onBack={onBack}
         onClaim={live.canClaim ? handleClaim : undefined}
         onExit={live.canWithdraw ? () => setExitModalOpen(true) : undefined}
-        isClaiming={live.isPending}
-        isExiting={live.isPending}
+        isClaiming={live.isClaimPending}
+        isExiting={live.isWithdrawPending}
       />
       <Modal
         isOpen={exitModalOpen}
         onClose={() => setExitModalOpen(false)}
         title="Exit position"
         size="sm"
-        dismissable={!live.isPending}
+        dismissable={!live.isWithdrawPending}
         footer={
           <div style={{
             display: 'flex',
@@ -304,7 +308,7 @@ function PositionDetailContainer({
             <button
               type="button"
               onClick={() => setExitModalOpen(false)}
-              disabled={live.isPending}
+              disabled={live.isWithdrawPending}
               style={{
                 padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[4]}`,
                 background: 'transparent',
@@ -316,7 +320,7 @@ function PositionDetailContainer({
                 fontWeight: TOKENS.fontWeights.bold,
                 letterSpacing: TOKENS.letterSpacing.display,
                 textTransform: 'uppercase',
-                cursor: live.isPending ? 'wait' : 'pointer',
+                cursor: live.isWithdrawPending ? 'wait' : 'pointer',
               }}
             >
               Cancel
@@ -324,7 +328,7 @@ function PositionDetailContainer({
             <button
               type="button"
               onClick={handleConfirmExit}
-              disabled={live.isPending}
+              disabled={live.isWithdrawPending}
               style={{
                 padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[4]}`,
                 background: TOKENS.colors.accent,
@@ -336,11 +340,11 @@ function PositionDetailContainer({
                 fontWeight: TOKENS.fontWeights.black,
                 letterSpacing: TOKENS.letterSpacing.display,
                 textTransform: 'uppercase',
-                cursor: live.isPending ? 'wait' : 'pointer',
-                opacity: live.isPending ? 0.6 : 1,
+                cursor: live.isWithdrawPending ? 'wait' : 'pointer',
+                opacity: live.isWithdrawPending ? 0.6 : 1,
               }}
             >
-              {live.isPending ? 'Exiting…' : 'Confirm exit →'}
+              {live.isWithdrawPending ? 'Exiting…' : 'Confirm exit →'}
             </button>
           </div>
         }

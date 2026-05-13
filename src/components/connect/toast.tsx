@@ -31,6 +31,9 @@ export interface ToastInput {
 
 interface ToastRecord extends ToastInput {
   id: string
+  // Pre-resolved auto-dismiss delay (ms). The item owns its timer so it can
+  // pause on hover/focus and resume on leave/blur.
+  duration: number
 }
 
 interface ToastApi {
@@ -52,31 +55,19 @@ function genId(): string {
 
 export function ToastProvider({ children }: { children: ReactNode }) {
   const [toasts, setToasts] = useState<ToastRecord[]>([])
-  const timeoutsRef = useRef<Map<string, ReturnType<typeof setTimeout>>>(new Map())
 
   const dismiss = useCallback((id: string) => {
     setToasts((prev) => prev.filter((t) => t.id !== id))
-    const handle = timeoutsRef.current.get(id)
-    if (handle) {
-      clearTimeout(handle)
-      timeoutsRef.current.delete(id)
-    }
   }, [])
 
   const show = useCallback(
     (input: ToastInput): string => {
       const id = genId()
       const duration = input.duration ?? (input.variant === 'error' ? ERROR_DURATION : DEFAULT_DURATION)
-      setToasts((prev) => [...prev, { ...input, id }])
-      if (duration > 0) {
-        const handle = setTimeout(() => {
-          dismiss(id)
-        }, duration)
-        timeoutsRef.current.set(id, handle)
-      }
+      setToasts((prev) => [...prev, { ...input, id, duration }])
       return id
     },
-    [dismiss],
+    [],
   )
 
   const api = useMemo<ToastApi>(
@@ -90,18 +81,16 @@ export function ToastProvider({ children }: { children: ReactNode }) {
     [show, dismiss],
   )
 
-  useEffect(() => {
-    const timeouts = timeoutsRef.current
-    return () => {
-      for (const handle of timeouts.values()) clearTimeout(handle)
-      timeouts.clear()
-    }
-  }, [])
+  // Split hosts: errors are announced assertively so screen readers interrupt
+  // the current task to surface a failure; success/info stay polite.
+  const errorToasts = toasts.filter((t) => t.variant === 'error')
+  const politeToasts = toasts.filter((t) => t.variant !== 'error')
 
   return (
     <ToastContext.Provider value={api}>
       {children}
-      <ToastHost toasts={toasts} onDismiss={dismiss} />
+      <ToastHost toasts={politeToasts} onDismiss={dismiss} live="polite" />
+      <ToastHost toasts={errorToasts} onDismiss={dismiss} live="assertive" offset />
     </ToastContext.Provider>
   )
 }
@@ -117,19 +106,25 @@ export function useToast(): ToastApi {
 function ToastHost({
   toasts,
   onDismiss,
+  live,
+  offset,
 }: {
   toasts: ToastRecord[]
   onDismiss: (id: string) => void
+  live: 'polite' | 'assertive'
+  offset?: boolean
 }) {
   if (toasts.length === 0) return null
   return (
     <div
-      role="status"
-      aria-live="polite"
+      role={live === 'assertive' ? 'alert' : 'status'}
+      aria-live={live}
       style={{
         position: 'fixed',
         right: TOKENS.spacing[6],
-        bottom: TOKENS.spacing[20],
+        // Errors stack above success toasts so a failure is never visually
+        // buried by a stale success message.
+        bottom: offset ? TOKENS.spacing[24] : TOKENS.spacing[20],
         zIndex: TOKENS.zIndex.toast,
         display: 'flex',
         flexDirection: 'column',
@@ -147,8 +142,45 @@ function ToastHost({
 
 function ToastItem({ toast, onDismiss }: { toast: ToastRecord; onDismiss: () => void }) {
   const accent = variantAccent(toast.variant)
+  const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null)
+  const remainingRef = useRef<number>(toast.duration)
+  const startRef = useRef<number>(Date.now())
+
+  const clear = useCallback(() => {
+    if (timerRef.current) {
+      clearTimeout(timerRef.current)
+      timerRef.current = null
+    }
+  }, [])
+
+  const start = useCallback(
+    (delay: number) => {
+      clear()
+      if (delay <= 0) return
+      startRef.current = Date.now()
+      timerRef.current = setTimeout(() => onDismiss(), delay)
+    },
+    [clear, onDismiss],
+  )
+
+  useEffect(() => {
+    start(toast.duration)
+    return clear
+  }, [start, clear, toast.duration])
+
+  const pause = () => {
+    if (!timerRef.current) return
+    remainingRef.current = Math.max(0, remainingRef.current - (Date.now() - startRef.current))
+    clear()
+  }
+  const resume = () => start(remainingRef.current)
+
   return (
     <div
+      onMouseEnter={pause}
+      onMouseLeave={resume}
+      onFocus={pause}
+      onBlur={resume}
       style={{
         pointerEvents: 'auto',
         display: 'flex',

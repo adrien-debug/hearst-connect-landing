@@ -29,7 +29,11 @@ export function useLiveActions(vaultId: string) {
     vaultAddress ? (vaultAddress as Address) : undefined
   )
 
-  const [isPending, setIsPending] = useState(false)
+  // Per-action pending flags so simultaneous-but-distinct actions (claim vs
+  // withdraw) don't disable each other's UI based on the wrong label.
+  const [isDepositPending, setIsDepositPending] = useState(false)
+  const [isClaimPending, setIsClaimPending] = useState(false)
+  const [isWithdrawPending, setIsWithdrawPending] = useState(false)
   const [lastTxHash, setLastTxHash] = useState<string | undefined>()
 
   const existingPosition = livePositions.find(p => p.vaultId === vaultId && p.state !== 'withdrawn')
@@ -44,7 +48,7 @@ export function useLiveActions(vaultId: string) {
     }
 
     try {
-      setIsPending(true)
+      setIsDepositPending(true)
       let txHash: `0x${string}`
 
       if (isTestVault) {
@@ -71,9 +75,9 @@ export function useLiveActions(vaultId: string) {
       console.error('[useLiveActions] Deposit error:', error)
       return { success: false, error: error instanceof Error ? error.message : 'Deposit failed' }
     } finally {
-      setIsPending(false)
+      setIsDepositPending(false)
     }
-  }, [isConnected, isAuthenticated, vaultAddress, vaultConfig, deposit, userActions, vaultId, vaultName])
+  }, [isConnected, isAuthenticated, vaultAddress, vaultConfig, deposit, userActions, vaultId, vaultName, isTestVault])
 
   // --- CLAIM ---
   const executeClaim = useCallback(async (): Promise<LiveActionResult> => {
@@ -86,7 +90,7 @@ export function useLiveActions(vaultId: string) {
     }
 
     try {
-      setIsPending(true)
+      setIsClaimPending(true)
       let txHash: `0x${string}`
 
       if (isTestVault) {
@@ -110,9 +114,9 @@ export function useLiveActions(vaultId: string) {
       console.error('[useLiveActions] Claim error:', error)
       return { success: false, error: error instanceof Error ? error.message : 'Claim failed' }
     } finally {
-      setIsPending(false)
+      setIsClaimPending(false)
     }
-  }, [isConnected, isAuthenticated, existingPosition, claim, userActions, vaultId, vaultName])
+  }, [isConnected, isAuthenticated, existingPosition, claim, userActions, vaultId, vaultName, isTestVault])
 
   // --- WITHDRAW ---
   const executeWithdraw = useCallback(async (): Promise<LiveActionResult> => {
@@ -125,7 +129,7 @@ export function useLiveActions(vaultId: string) {
     }
 
     try {
-      setIsPending(true)
+      setIsWithdrawPending(true)
       const total = existingPosition.deposited + existingPosition.claimable
       let txHash: `0x${string}`
 
@@ -151,15 +155,22 @@ export function useLiveActions(vaultId: string) {
       console.error('[useLiveActions] Withdraw error:', error)
       return { success: false, error: error instanceof Error ? error.message : 'Withdraw failed' }
     } finally {
-      setIsPending(false)
+      setIsWithdrawPending(false)
     }
-  }, [isConnected, isAuthenticated, existingPosition, withdraw, userActions, vaultId, vaultName])
+  }, [isConnected, isAuthenticated, existingPosition, withdraw, userActions, vaultId, vaultName, isTestVault])
+
+  const anyPending = isDepositPending || isClaimPending || isWithdrawPending || isChainPending
 
   return {
     deposit: executeDeposit,
     claim: executeClaim,
     withdraw: executeWithdraw,
-    isPending: isPending || isChainPending,
+    // Aggregate (kept for backwards-compat with existing callers).
+    isPending: anyPending,
+    // Per-action flags — prefer these for correctly labelled CTAs.
+    isDepositPending: isDepositPending || isChainPending,
+    isClaimPending: isClaimPending || isChainPending,
+    isWithdrawPending: isWithdrawPending || isChainPending,
     lastTxHash,
     existingPosition,
     canDeposit: isConnected && !!vaultAddress,

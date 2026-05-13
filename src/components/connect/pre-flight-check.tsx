@@ -23,13 +23,15 @@ export function PreFlightCheck({
 }) {
   const { address, isConnected, chain } = useAccount()
   const { switchChain, isPending: isSwitching } = useSwitchChain()
-  const isOnBase = chain?.id === 8453
   const isTestVault = vault.isTest ?? false
 
   // Get vault addresses from registry
   const vaultConfig = useVaultById(vault.id)
   const usdcAddress = vaultConfig?.usdcAddress
   const vaultAddress = vaultConfig?.vaultAddress
+  const expectedChainId = vaultConfig?.chain?.id ?? 8453
+  const expectedChainName = vaultConfig?.chain?.name ?? 'Base'
+  const isOnExpectedChain = chain?.id === expectedChainId
 
   const {
     allowance,
@@ -56,7 +58,7 @@ export function PreFlightCheck({
   const allGood = isTestVault
     ? isConnected
     : isConnected &&
-      isOnBase &&
+      isOnExpectedChain &&
       hasAllowance(depositAmount) &&
       epochOk
 
@@ -101,13 +103,19 @@ export function PreFlightCheck({
         ) : (
         <>
         {/* Network */}
-        <CheckItem 
-          status={isOnBase ? 'success' : chain ? 'warning' : 'error'}
+        <CheckItem
+          status={isOnExpectedChain ? 'success' : chain ? 'warning' : 'error'}
           label="Network"
-          value={isOnBase ? `✓ Base` : chain ? `⚠ Switch to Base (on ${chain.name})` : '✗ Unknown network'}
-          action={!isOnBase && isConnected ? {
+          value={
+            isOnExpectedChain
+              ? `✓ ${expectedChainName}`
+              : chain
+                ? `⚠ Switch to ${expectedChainName} (on ${chain.name})`
+                : '✗ Unknown network'
+          }
+          action={!isOnExpectedChain && isConnected ? {
             label: isSwitching ? 'Switching…' : 'Switch',
-            onClick: () => switchChain({ chainId: 8453 }),
+            onClick: () => switchChain({ chainId: expectedChainId }),
             disabled: isSwitching,
           } : undefined}
         />

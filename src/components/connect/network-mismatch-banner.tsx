@@ -3,6 +3,7 @@
 import { useAccount, useSwitchChain } from 'wagmi'
 import { useDemoMode } from '@/lib/demo/use-demo-mode'
 import { TOKENS } from './constants'
+import { useToast } from './toast'
 
 /** NetworkMismatchBanner — shows a persistent strip when the connected wallet
  * is on a different chain than the active vault expects. Hides itself in demo
@@ -16,7 +17,8 @@ export function NetworkMismatchBanner({
   expectedChainName?: string
 }) {
   const { isConnected, chainId: connectedChainId } = useAccount()
-  const { switchChain, isPending } = useSwitchChain()
+  const { switchChainAsync, isPending } = useSwitchChain()
+  const toast = useToast()
   const isDemo = useDemoMode()
 
   if (isDemo) return null
@@ -24,9 +26,26 @@ export function NetworkMismatchBanner({
   if (!expectedChainId || !connectedChainId) return null
   if (connectedChainId === expectedChainId) return null
 
-  const handleSwitch = () => {
+  const handleSwitch = async () => {
     if (isPending) return
-    switchChain({ chainId: expectedChainId })
+    try {
+      await switchChainAsync({ chainId: expectedChainId })
+    } catch (err) {
+      // MetaMask code 4902 = chain unknown; code 4001 = user rejected.
+      const code = (err as { code?: number })?.code
+      if (code === 4001) {
+        toast.error('Network switch cancelled', {
+          body: 'You declined the request in your wallet.',
+        })
+      } else if (code === 4902) {
+        toast.error(`${expectedChainName ?? 'Network'} not in wallet`, {
+          body: 'Add the network to your wallet to continue.',
+        })
+      } else {
+        const message = err instanceof Error ? err.message : 'Unknown wallet error.'
+        toast.error('Could not switch network', { body: message })
+      }
+    }
   }
 
   return (

@@ -84,7 +84,12 @@ export const TOKENS = {
     normal: '0',
     /** Subtle uppercase opener. */
     loose: 'var(--tracking-loose)',
-    /** Caption tracker (0.08em). */
+    /**
+     * Caption tracker (0.08em). USE THIS for `text-transform: uppercase`
+     * labels by default — it maps to the global `--tracking-uppercase`
+     * semantic and keeps every uppercase run in the product visually consistent.
+     * Reserve `micro`/`display` for the small-cap 11px micro labels where the
+     * extra airiness is intentional. */
     caption: 'var(--dashboard-letter-spacing-caption)',
     /** UI micro labels (0.1em). */
     micro: 'var(--dashboard-letter-spacing-micro)',

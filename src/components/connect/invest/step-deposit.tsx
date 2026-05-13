@@ -1,9 +1,11 @@
 'use client'
 
+import { useState } from 'react'
 import { TOKENS, fmtUsd, fmtUsdCompact, VALUE_LETTER_SPACING, LINE_HEIGHT } from '../constants'
 import type { AvailableVault } from '../data'
 import type { VaultConfig, MarketRegime } from '@/types/vault'
 import { TimeToTargetChart } from './time-to-target-chart'
+import { PreFlightCheck } from '../pre-flight-check'
 
 interface StepDepositProps {
   vault: AvailableVault
@@ -39,6 +41,8 @@ export function StepDeposit({
   onAgreedChange,
   isReady,
   isDepositing,
+  isApproving,
+  onApprove,
   onDeposit,
   onBack,
 }: StepDepositProps) {
@@ -49,8 +53,14 @@ export function StepDeposit({
   const totalYield = num * (cumulativeTarget / 100)
   const minDeposit = vault.minDeposit
   const isAmountValid = num >= minDeposit
-  const showError = num > 0 && !isAmountValid
+  // Defer the min-deposit error message until the input loses focus so the
+  // user isn't yelled at while still typing a valid amount.
+  const [touched, setTouched] = useState(false)
+  const showError = touched && num > 0 && !isAmountValid
   const rebalance = vaultConfig?.rebalanceWeights
+  // Pre-flight check (wallet/network/allowance/epoch) gates the Confirm CTA.
+  const [preFlightReady, setPreFlightReady] = useState(false)
+  const isReadyToDeposit = isReady && preFlightReady
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[4] }}>
@@ -141,6 +151,7 @@ export function StepDeposit({
                 placeholder="0.00"
                 value={amount}
                 onChange={(e) => onAmountChange(e.target.value)}
+                onBlur={() => setTouched(true)}
                 aria-invalid={showError}
                 style={{
                   flex: 1,
@@ -219,41 +230,56 @@ export function StepDeposit({
               </button>
               <button
                 type="button"
-                disabled={!isReady || isDepositing}
+                disabled={!isReadyToDeposit || isDepositing}
                 onClick={onDeposit}
                 style={{
                   flex: 1,
                   minWidth: 200,
                   padding: `${TOKENS.spacing[3]} ${TOKENS.spacing[5]}`,
-                  background: isReady ? TOKENS.colors.accentSubtle : TOKENS.colors.bgTertiary,
-                  color: isReady ? TOKENS.colors.accent : TOKENS.colors.textGhost,
-                  border: `${TOKENS.borders.thin} solid ${isReady ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
+                  background: isReadyToDeposit ? TOKENS.colors.accentSubtle : TOKENS.colors.bgTertiary,
+                  color: isReadyToDeposit ? TOKENS.colors.accent : TOKENS.colors.textGhost,
+                  border: `${TOKENS.borders.thin} solid ${isReadyToDeposit ? TOKENS.colors.accent : TOKENS.colors.borderSubtle}`,
                   borderRadius: TOKENS.radius.md,
                   fontFamily: TOKENS.fonts.mono,
                   fontSize: TOKENS.fontSizes.sm,
                   fontWeight: TOKENS.fontWeights.black,
                   letterSpacing: TOKENS.letterSpacing.display,
                   textTransform: 'uppercase',
-                  cursor: isReady && !isDepositing ? 'pointer' : 'not-allowed',
+                  cursor: isReadyToDeposit && !isDepositing ? 'pointer' : 'not-allowed',
                   opacity: isDepositing ? 0.7 : 1,
                 }}
               >
-                {isDepositing ? 'Confirming…' : isReady ? `Confirm deposit · ${fmtUsdCompact(num)} →` : 'Enter amount to confirm'}
+                {isDepositing
+                  ? 'Confirming…'
+                  : !isReady
+                    ? 'Enter amount to confirm'
+                    : !preFlightReady
+                      ? 'Complete pre-flight check'
+                      : `Confirm deposit · ${fmtUsdCompact(num)} →`}
               </button>
             </div>
           </div>
 
-          {/* RIGHT — Summary */}
-          <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[3] }}>
-            <SectionLabel>Summary</SectionLabel>
-            <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2] }}>
-              <SumRow label="You deposit"             value={`${fmtUsd(num)} USDC`} />
-              <SumRow label="Target APY"              value={`${vault.apr}%`} accent />
-              <SumRow label="Est. yearly yield"       value={`${fmtUsd(yearlyYield)} USDC`} />
-              <SumRow label="Total yield at close"    value={`${fmtUsd(totalYield)} USDC`} accent />
-              <SumRow label="Capital unlocks"         value={`when target is hit · max ${lockMonths} months`} />
-              <SumRow label="Fees"                    value={vault.fees ?? '—'} />
+          {/* RIGHT — Summary + Pre-flight */}
+          <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[4] }}>
+            <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[3] }}>
+              <SectionLabel>Summary</SectionLabel>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: TOKENS.spacing[2] }}>
+                <SumRow label="You deposit"             value={`${fmtUsd(num)} USDC`} />
+                <SumRow label="Target APY"              value={`${vault.apr}%`} accent />
+                <SumRow label="Est. yearly yield"       value={`${fmtUsd(yearlyYield)} USDC`} />
+                <SumRow label="Total yield at close"    value={`${fmtUsd(totalYield)} USDC`} accent />
+                <SumRow label="Capital unlocks"         value={`when target is hit · max ${lockMonths} months`} />
+                <SumRow label="Fees"                    value={vault.fees ?? '—'} />
+              </div>
             </div>
+            <PreFlightCheck
+              vault={vault}
+              depositAmount={amount}
+              onApprove={onApprove}
+              isApproving={isApproving}
+              onReadyChange={setPreFlightReady}
+            />
           </div>
         </div>
       </div>

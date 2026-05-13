@@ -14,7 +14,7 @@ function formatPercent(value: number) {
   return `${value.toFixed(1)}%`
 }
 
-export function SimulationPanel() {
+export function SimulationPanel({ onBack }: { onBack?: () => void }) {
   const { mode, isLimit } = useSmartFit({
     tightHeight: 880,
     limitHeight: 720,
@@ -96,10 +96,31 @@ export function SimulationPanel() {
         {/* Top row — Context */}
         <div style={{
           display: 'flex',
-          justifyContent: 'flex-end',
+          justifyContent: 'space-between',
           alignItems: 'center',
           marginBottom: TOKENS.spacing[3],
+          gap: TOKENS.spacing[3],
         }}>
+          {onBack ? (
+            <button
+              type="button"
+              onClick={onBack}
+              style={{
+                background: 'none',
+                border: 'none',
+                padding: 0,
+                color: TOKENS.colors.textSecondary,
+                fontFamily: MONO,
+                fontSize: TOKENS.fontSizes.xs,
+                fontWeight: TOKENS.fontWeights.bold,
+                letterSpacing: TOKENS.letterSpacing.display,
+                textTransform: 'uppercase',
+                cursor: 'pointer',
+              }}
+            >
+              ← Portfolio
+            </button>
+          ) : <span />}
           <div style={{
             fontFamily: MONO,
             fontSize: TOKENS.fontSizes.micro,

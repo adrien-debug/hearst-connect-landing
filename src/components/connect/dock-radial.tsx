@@ -8,6 +8,11 @@ interface DockRadialProps {
   /** Currently active selection — used to highlight the matching dock target.
    * `null` means we're on the portfolio (home). */
   activeId?: string | null
+  /** True when the user is inside the Invest wizard (a specific available
+   * vault is selected). Highlights the Invest satellite so the dock keeps
+   * its "you are here" affordance even when the active route is a vault id
+   * rather than the vaults list. */
+  isInInvestFlow?: boolean
 }
 
 /** Bottom dock — fixed chrome with three navigation targets:
@@ -16,7 +21,8 @@ interface DockRadialProps {
  * satellites jump straight into the Available Vaults list and the Simulation
  * panel — historically reachable only via in-panel CTAs which made them
  * dead ends once you'd left them. The active satellite gets an accent ring. */
-export function DockRadial({ onSelect, activeId = null }: DockRadialProps) {
+export function DockRadial({ onSelect, activeId = null, isInInvestFlow = false }: DockRadialProps) {
+  const investActive = activeId === AVAILABLE_VAULTS_VIEW_ID || isInInvestFlow
   return (
     <>
       <div style={{
@@ -67,7 +73,7 @@ export function DockRadial({ onSelect, activeId = null }: DockRadialProps) {
           label="Invest"
           ariaLabel="Browse available vaults"
           onClick={() => onSelect(AVAILABLE_VAULTS_VIEW_ID)}
-          isActive={activeId === AVAILABLE_VAULTS_VIEW_ID}
+          isActive={investActive}
           icon={
             <svg viewBox="0 0 24 24" width={18} height={18} fill="none" stroke="currentColor" strokeWidth={1.6} aria-hidden>
               <path d="M12 5v14" strokeLinecap="round" />
