@@ -32,7 +32,7 @@ export function EmptyState({
           {icon}
         </div>
       )}
-      <div style={{ fontSize: TOKENS.fontSizes.lg, fontWeight: 600, color: TOKENS.colors.textPrimary }}>
+      <div style={{ fontSize: TOKENS.fontSizes.lg, fontWeight: TOKENS.fontWeights.semibold, color: TOKENS.colors.textPrimary }}>
         {title}
       </div>
       <div style={{ fontSize: TOKENS.fontSizes.sm, maxWidth: '280px', lineHeight: 'var(--dashboard-line-height-normal)' }}>

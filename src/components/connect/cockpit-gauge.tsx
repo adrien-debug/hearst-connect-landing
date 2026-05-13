@@ -68,6 +68,16 @@ export function CockpitGauge({
           e.currentTarget.style.background = 'transparent'
         }
       }}
+      onFocus={(e) => {
+        if (onClick && !active) {
+          e.currentTarget.style.background = TOKENS.colors.bgTertiary
+        }
+      }}
+      onBlur={(e) => {
+        if (!active) {
+          e.currentTarget.style.background = 'transparent'
+        }
+      }}
     >
       <div style={{
         fontSize: TOKENS.fontSizes.xs,

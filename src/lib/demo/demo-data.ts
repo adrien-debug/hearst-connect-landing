@@ -439,12 +439,6 @@ export const DEMO_ADMIN_ACTIVITY = [
   { id: 'l5', userId: 'sys', vaultId: 'demo-growth', vaultName: 'Hearst Growth #1', type: 'deposit' as const, amount: 250_000,      timestamp: NOW() - 12 * 30 * DAY_MS },
 ]
 
-// ───────────────────────────────────────────── Per-vault activity (for vault detail page)
-
-export function getDemoVaultActivity(vaultId: string): UserActivityItem[] {
-  return DEMO_ACTIVITY.filter((a) => a.vaultId === vaultId).sort((a, b) => b.timestamp - a.timestamp)
-}
-
 // ───────────────────────────────────────────── Position data (on-chain shape)
 
 export function getDemoPositionData(vaultId: string, positionId?: string) {

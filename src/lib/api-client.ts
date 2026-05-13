@@ -26,10 +26,6 @@ export function setApiAuthenticated(value: boolean) {
   isAuthenticated = value
 }
 
-export function getApiAuthenticated(): boolean {
-  return isAuthenticated
-}
-
 // Error handling helper
 class ApiError extends Error {
   constructor(public status: number, message: string) {

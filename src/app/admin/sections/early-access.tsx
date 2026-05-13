@@ -99,7 +99,7 @@ export function EarlyAccessSection() {
                 className="activity-row"
                 style={{ gridTemplateColumns: '2fr 1.5fr 1fr 1fr' }}
               >
-                <span className="activity-event-message" style={{ fontWeight: 600 }}>
+                <span className="activity-event-message" style={{ fontWeight: 'var(--weight-semibold)' }}>
                   {s.email}
                 </span>
                 <span className="activity-cell-time">

@@ -609,6 +609,14 @@ function PositionHeader({
                 e.currentTarget.style.color = TOKENS.colors.textSecondary
                 e.currentTarget.style.borderColor = TOKENS.colors.borderSubtle
               }}
+              onFocus={(e) => {
+                e.currentTarget.style.color = TOKENS.colors.accent
+                e.currentTarget.style.borderColor = TOKENS.colors.accent
+              }}
+              onBlur={(e) => {
+                e.currentTarget.style.color = TOKENS.colors.textSecondary
+                e.currentTarget.style.borderColor = TOKENS.colors.borderSubtle
+              }}
               aria-label="Back to portfolio"
             >
               ← Portfolio
@@ -750,6 +758,14 @@ function PositionHeader({
                   e.currentTarget.style.textDecorationColor = TOKENS.colors.accent
                 }}
                 onMouseLeave={(e) => {
+                  e.currentTarget.style.color = TOKENS.colors.textSecondary
+                  e.currentTarget.style.textDecorationColor = TOKENS.colors.borderSubtle
+                }}
+                onFocus={(e) => {
+                  e.currentTarget.style.color = TOKENS.colors.accent
+                  e.currentTarget.style.textDecorationColor = TOKENS.colors.accent
+                }}
+                onBlur={(e) => {
                   e.currentTarget.style.color = TOKENS.colors.textSecondary
                   e.currentTarget.style.textDecorationColor = TOKENS.colors.borderSubtle
                 }}
@@ -1920,13 +1936,21 @@ function TxHashLink({ hash, explorerUrl }: { hash: string; explorerUrl?: string 
         color: TOKENS.colors.textSecondary,
         textDecoration: 'underline',
         textDecorationColor: TOKENS.colors.borderSubtle,
-        textUnderlineOffset: '2px',
+        textUnderlineOffset: '3px',
       }}
       onMouseEnter={(e) => {
         e.currentTarget.style.color = TOKENS.colors.accent
         e.currentTarget.style.textDecorationColor = TOKENS.colors.accent
       }}
       onMouseLeave={(e) => {
+        e.currentTarget.style.color = TOKENS.colors.textSecondary
+        e.currentTarget.style.textDecorationColor = TOKENS.colors.borderSubtle
+      }}
+      onFocus={(e) => {
+        e.currentTarget.style.color = TOKENS.colors.accent
+        e.currentTarget.style.textDecorationColor = TOKENS.colors.accent
+      }}
+      onBlur={(e) => {
         e.currentTarget.style.color = TOKENS.colors.textSecondary
         e.currentTarget.style.textDecorationColor = TOKENS.colors.borderSubtle
       }}

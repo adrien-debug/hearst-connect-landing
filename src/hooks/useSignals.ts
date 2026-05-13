@@ -22,20 +22,6 @@ export function useSignals(status?: string) {
   return query
 }
 
-export function useSignalById(id: string) {
-  const isDemo = useDemoMode()
-  const query = useQuery({
-    queryKey: ['signal', id],
-    queryFn: () => SignalsApi.getById(id),
-    enabled: !!id && !isDemo,
-  })
-  if (isDemo) {
-    const signal = DEMO_SIGNALS.signals.find((s) => s.id === id) ?? null
-    return { ...query, data: signal ? { signal } : null, isLoading: false, isFetching: false, error: null }
-  }
-  return query
-}
-
 export function useSignalMutations() {
   const qc = useQueryClient()
   const isDemo = useDemoMode()

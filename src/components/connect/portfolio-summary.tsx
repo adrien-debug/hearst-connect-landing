@@ -585,9 +585,13 @@ function AllocationDonut({
             strokeWidth={strokeWidth}
           />
 
-          {/* Segments — interactive with hover effects */}
+          {/* Segments — interactive with hover effects + keyboard a11y.
+           * SVG <circle> is keyboard-focusable via tabIndex; we mirror hover
+           * via onFocus/onBlur and trigger click via Enter/Space so screen
+           * reader and keyboard users get the same affordances. */}
           {segments.map((seg) => {
             const isHovered = hoveredId === seg.id
+            const interactive = !!onSegmentClick
             return (
               <circle
                 key={seg.id}
@@ -601,11 +605,23 @@ function AllocationDonut({
                 strokeDashoffset={seg.offset}
                 strokeLinecap="round"
                 style={{
-                  cursor: onSegmentClick ? 'pointer' : 'default',
+                  cursor: interactive ? 'pointer' : 'default',
                   transition: TOKENS.transitions.fast,
+                  outline: 'none',
                 }}
+                role={interactive ? 'button' : undefined}
+                tabIndex={interactive ? 0 : undefined}
+                aria-label={interactive ? `${seg.name}: ${seg.pct.toFixed(1)}%, ${fmtUsdCompact(seg.value)}` : undefined}
                 onMouseEnter={() => setHoveredId(seg.id)}
                 onMouseLeave={() => setHoveredId(null)}
+                onFocus={() => setHoveredId(seg.id)}
+                onBlur={() => setHoveredId(null)}
+                onKeyDown={interactive ? (e) => {
+                  if (e.key === 'Enter' || e.key === ' ') {
+                    e.preventDefault()
+                    onSegmentClick(seg.id)
+                  }
+                } : undefined}
                 onClick={() => onSegmentClick?.(seg.id)}
               />
             )
@@ -750,6 +766,14 @@ function AllocationDonut({
           <div
             key={vault.id}
             onClick={() => onSegmentClick?.(vault.id)}
+            role={onSegmentClick ? 'button' : undefined}
+            tabIndex={onSegmentClick ? 0 : undefined}
+            onKeyDown={onSegmentClick ? (e) => {
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
+                onSegmentClick(vault.id)
+              }
+            } : undefined}
             style={{
               display: 'flex',
               alignItems: 'center',
@@ -763,6 +787,8 @@ function AllocationDonut({
             }}
             onMouseEnter={() => setHoveredId(vault.id)}
             onMouseLeave={() => setHoveredId(null)}
+            onFocus={() => setHoveredId(vault.id)}
+            onBlur={() => setHoveredId(null)}
           >
             <div style={{
               display: 'flex',

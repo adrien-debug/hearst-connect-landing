@@ -17,10 +17,8 @@ import { useSiweAuth } from '@/hooks/useSiweAuth'
  *   - DEMO  (active):  filled accent chip, label "Demo · switch to live"
  */
 export function DemoToggle({
-  variant = 'compact',
   className,
 }: {
-  variant?: 'compact' | 'admin'
   className?: string
 }) {
   const isDemo = useDemoMode()
@@ -33,10 +31,6 @@ export function DemoToggle({
   const handleClick = () => {
     setDemoMode(!isDemo)
   }
-
-  const fontSize = variant === 'admin' ? 11 : 11
-  const padY = variant === 'admin' ? 6 : 6
-  const padX = variant === 'admin' ? 10 : 10
 
   const accentColor = 'var(--demo-accent, var(--hc-accent))'
   const borderColor = isDemo ? accentColor : 'var(--color-border-subtle, rgba(255,255,255,0.12))'
@@ -53,16 +47,16 @@ export function DemoToggle({
       style={{
         display: 'inline-flex',
         alignItems: 'center',
-        gap: 6,
-        padding: `${padY}px ${padX}px`,
+        gap: 'var(--space-1-5, 6px)',
+        padding: 'var(--space-1-5, 6px) var(--space-2-5, 10px)',
         background,
         border: `1px solid ${borderColor}`,
-        borderRadius: 6,
+        borderRadius: 'var(--radius-md)',
         color: textColor,
         fontFamily: 'var(--font-mono)',
-        fontSize,
-        fontWeight: 700,
-        letterSpacing: '0.1em',
+        fontSize: 'var(--dashboard-font-size-xs)',
+        fontWeight: 'var(--weight-bold)',
+        letterSpacing: 'var(--dashboard-letter-spacing-micro)',
         textTransform: 'uppercase',
         cursor: 'pointer',
         whiteSpace: 'nowrap',
@@ -72,11 +66,11 @@ export function DemoToggle({
       <span
         aria-hidden
         style={{
-          width: 6,
-          height: 6,
-          borderRadius: '50%',
+          width: 'var(--space-1-5, 6px)',
+          height: 'var(--space-1-5, 6px)',
+          borderRadius: 'var(--radius-full)',
           background: isDemo ? accentColor : 'var(--hc-text-ghost, rgba(255,255,255,0.4))',
-          boxShadow: isDemo ? `0 0 6px ${accentColor}` : 'none',
+          boxShadow: isDemo ? `0 0 var(--space-1-5, 6px) ${accentColor}` : 'none',
         }}
       />
       {isDemo ? 'Demo · switch to live' : 'Switch to demo'}

@@ -22,7 +22,7 @@ export function AdminHeader({ title, subtitle }: AdminHeaderProps) {
         <p style={styles.subtitle}>{subtitle}</p>
       </div>
       <div style={styles.meta}>
-        <DemoToggle variant="admin" />
+        <DemoToggle />
         <ThemeToggle variant="minimal" size="sm" />
         <span style={styles.version}>v1.0.0</span>
         <div style={styles.status}>

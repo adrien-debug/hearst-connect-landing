@@ -1113,7 +1113,8 @@ a.welcome-btn:focus-visible {
 	transition: filter 0.3s ease, transform 0.3s ease;
 }
 
-.icon-img:hover {
+.icon-img:hover,
+.icon-img:focus-visible {
 	filter: grayscale(0%) opacity(100%);
 	transform: scale(1.1);
 }
@@ -1148,7 +1149,8 @@ a.welcome-btn:focus-visible {
   gap: 0.75rem;
 }
 
-.login-btn:hover::after {
+.login-btn:hover::after,
+.login-btn:focus-visible::after {
   transform: translateX(2px);
 }
 
@@ -2272,7 +2274,8 @@ box-sizing: border-box;
   }
 }
 
-.hub-carousel-auto:hover .hub-carousel-arrow {
+.hub-carousel-auto:hover .hub-carousel-arrow,
+.hub-carousel-auto:focus-within .hub-carousel-arrow {
   opacity: 1;
 }
 
@@ -2339,7 +2342,7 @@ box-sizing: border-box;
 .hub-vault-product-card--prime {
 	box-shadow:
 		0 24px 48px rgba(0, 0, 0, 0.14),
-		0 0 0 1px rgba(167, 251, 144, 0.12);
+		0 0 0 1px rgba(var(--brand-accent-rgb), 0.12);
 }
 
 .hub-vault-product-card--growth {
@@ -3059,6 +3062,20 @@ box-sizing: border-box;
   .hub-ticker-track {
     animation: none;
     transform: none;
+  }
+  .hero-cyber-grid {
+    animation: none !important;
+  }
+  .hub-carousel-arrow::after {
+    animation: none !important;
+  }
+  /* Reveal animations start at opacity:0 + translateY — if the animation is
+   * suppressed, neutralize the initial state so content remains visible. */
+  .hero-reveal-line,
+  .hero-reveal-btn {
+    animation: none !important;
+    transform: none !important;
+    opacity: 1 !important;
   }
 }
 

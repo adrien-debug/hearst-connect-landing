@@ -510,6 +510,13 @@ function WalletButton() {
         onMouseLeave={(e) => {
           if (mounted && !isConnecting) e.currentTarget.style.opacity = '1'
         }}
+        onFocus={(e) => {
+          if (mounted && !isConnecting) e.currentTarget.style.opacity = '0.9'
+        }}
+        onBlur={(e) => {
+          if (mounted && !isConnecting) e.currentTarget.style.opacity = '1'
+        }}
+        aria-busy={isConnecting}
       >
         <svg width={TOKENS.spacing[4]} height={TOKENS.spacing[4]} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={TOKENS.borders.thin}>
           <path d="M19 7H5a2 2 0 00-2 2v8a2 2 0 002 2h14a2 2 0 002-2V9a2 2 0 00-2-2z" />
@@ -556,7 +563,16 @@ function WalletButton() {
           e.currentTarget.style.borderColor = TOKENS.colors.borderSubtle
           e.currentTarget.style.color = TOKENS.colors.textSecondary
         }}
+        onFocus={(e) => {
+          e.currentTarget.style.borderColor = TOKENS.colors.accent
+          e.currentTarget.style.color = TOKENS.colors.accent
+        }}
+        onBlur={(e) => {
+          e.currentTarget.style.borderColor = TOKENS.colors.borderSubtle
+          e.currentTarget.style.color = TOKENS.colors.textSecondary
+        }}
         title="Disconnect"
+        aria-label="Disconnect wallet"
       >
         <svg width={TOKENS.spacing[3]} height={TOKENS.spacing[3]} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth={TOKENS.borders.thin}>
           <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
