@@ -130,10 +130,16 @@ export function InvestWizard({ vault, onBack }: InvestWizardProps) {
         }}
       >
         <StepProgress active={step} />
-        {onBack && step === 'product' && (
+        {onBack && step !== 'confirmed' && (
           <button
             type="button"
-            onClick={onBack}
+            onClick={() => {
+              if (step === 'deposit' && (amount.length > 0 || agreed)) {
+                if (!window.confirm('Discard your deposit setup and go back to vaults?')) return
+              }
+              onBack()
+            }}
+            disabled={isDepositing || isLivePending}
             style={{
               background: 'none',
               border: 'none',
@@ -144,7 +150,8 @@ export function InvestWizard({ vault, onBack }: InvestWizardProps) {
               fontWeight: TOKENS.fontWeights.bold,
               letterSpacing: TOKENS.letterSpacing.display,
               textTransform: 'uppercase',
-              cursor: 'pointer',
+              cursor: isDepositing || isLivePending ? 'not-allowed' : 'pointer',
+              opacity: isDepositing || isLivePending ? 0.5 : 1,
             }}
           >
             ← Back to vaults

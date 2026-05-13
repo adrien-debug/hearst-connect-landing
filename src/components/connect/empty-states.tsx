@@ -1,6 +1,7 @@
 'use client'
 
 import { TOKENS } from './constants'
+import { prefersReducedMotion } from '@/lib/reduced-motion'
 
 export function EmptyState({
   title,
@@ -100,6 +101,9 @@ export function WalletNotConnected({ onConnect }: { onConnect?: () => void }) {
 }
 
 export function LoadingState() {
+  // Skip the infinite rotation for users who opted out of motion. The
+  // accent-coloured arc still reads as a loading indicator on its own.
+  const reduceMotion = prefersReducedMotion()
   return (
     <div
       style={{
@@ -110,13 +114,17 @@ export function LoadingState() {
       }}
     >
       <div
+        role="status"
+        aria-label="Loading"
         style={{
           width: TOKENS.icon.xl,
           height: TOKENS.icon.xl,
           border: `${TOKENS.borders.thick} solid ${TOKENS.colors.borderSubtle}`,
           borderTopColor: TOKENS.colors.accent,
           borderRadius: TOKENS.radius.full,
-          animation: 'spin var(--dashboard-duration-loader, 1s) linear infinite',
+          animation: reduceMotion
+            ? 'none'
+            : 'spin var(--dashboard-duration-loader, 1s) linear infinite',
         }}
       />
     </div>

@@ -67,7 +67,10 @@ export function HubHero() {
   return (
     <section id="welcome" className="center" lang="en">
       <div className="hero-cyber-grid"></div>
-      <HearstConnectLogo className="welcome-logo" style={{ display: 'block', height: 135, width: 400, maxWidth: '100%' }} />
+      <HearstConnectLogo
+        className="welcome-logo"
+        style={{ display: 'block', height: 'var(--logo-height-hero)', width: 'auto', maxWidth: '100%' }}
+      />
 
       <h1 className="welcome-title hub-chapter hero-reveal">
         <span className="hero-reveal-line">
@@ -87,7 +90,7 @@ export function HubHero() {
           onMouseLeave={handleMagneticLeave}
         >
           <span>{CTA_LINKS.launchApp.label}</span>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18" style={{ marginLeft: '4px' }}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" width="18" height="18" style={{ marginLeft: 'var(--space-1)' }}>
             <path d="M5 12h14M12 5l7 7-7 7" />
           </svg>
         </Link>

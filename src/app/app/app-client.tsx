@@ -79,19 +79,13 @@ const ACCESS_GATE_CSS = `
 
 @media (min-width: 900px) {
   .access-gate {
-    grid-template-columns: minmax(360px, 1fr) minmax(360px, 1fr);
+    grid-template-columns: minmax(360px, 1.1fr) minmax(360px, 1fr);
     grid-template-rows: 1fr;
     overflow: hidden;
   }
   .access-gate__pane--marketing {
     border-bottom: 0;
     border-right: 1px solid var(--hc-border-subtle);
-  }
-}
-
-@media (min-width: 1200px) {
-  .access-gate {
-    grid-template-columns: 1.1fr 1fr;
   }
 }
 

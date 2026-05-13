@@ -23,7 +23,7 @@ export function HubHeader({ isHeaderVisible }: { isHeaderVisible: boolean }) {
     <div className={`header-wrapper ${isHeaderVisible ? 'is-visible' : ''}`}>
       <header>
         <a href="#" className="header-logo-link" aria-label="Hearst Connect">
-          <HearstConnectLogo style={{ height: '54px', width: 'auto', display: 'block' }} />
+          <HearstConnectLogo style={{ height: 'var(--logo-height-header)', width: 'auto', display: 'block' }} />
         </a>
         <input
           className="menu-checkbox"

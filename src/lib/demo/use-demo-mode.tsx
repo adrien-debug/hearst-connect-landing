@@ -1,7 +1,7 @@
 'use client'
 
 /**
- * Demo mode detection — gated by the SIWE session.
+ * Demo mode — gated by SIWE session, centralized in DemoModeProvider.
  *
  * Activation paths:
  *   - ?demo=true in URL (also persisted to localStorage)
@@ -11,11 +11,13 @@
  * Authorization: a wallet must be in `process.env.DEMO_ADDRESSES` (or implicitly
  * in `ADMIN_ADDRESSES`) for `useDemoMode()` to actually return true. The flag
  * itself can be set by anyone, but it's silently revoked on the next mount if
- * the session lacks authorization. This keeps the demo surface internal to the
- * team without breaking the existing toggle UX for whitelisted users.
+ * the session lacks authorization.
+ *
+ * The provider runs ONE auth check for the whole tree; previously each consumer
+ * fired its own `/api/auth/me` fetch (13 callers → 13 requests on mount).
  */
 
-import { useEffect, useState } from 'react'
+import { createContext, useContext, useEffect, useState, type ReactNode } from 'react'
 
 const STORAGE_KEY = 'hc.demo'
 
@@ -69,9 +71,9 @@ async function fetchDemoAuthorized(signal: AbortSignal): Promise<boolean> {
   }
 }
 
-export function useDemoMode(): boolean {
-  // SSR returns false (no window). On the client we sync after mount to avoid
-  // hydration mismatches; consumers must pair this with a loader gate.
+const DemoModeContext = createContext<boolean>(false)
+
+export function DemoModeProvider({ children }: { children: ReactNode }) {
   const [isDemo, setIsDemo] = useState<boolean>(false)
 
   useEffect(() => {
@@ -84,9 +86,6 @@ export function useDemoMode(): boolean {
         setIsDemo(false)
         return
       }
-      // Flag intended → check session authorization. An unauthorized wallet
-      // (or no wallet at all) silently clears the flag so the next reload
-      // doesn't show demo again.
       const authorized = await fetchDemoAuthorized(controller.signal)
       if (controller.signal.aborted) return
       if (authorized) {
@@ -99,8 +98,6 @@ export function useDemoMode(): boolean {
 
     void evaluate()
 
-    // React to back/forward + manual storage tweaks. Re-evaluating runs the
-    // auth check again so a wallet that just got whitelisted picks it up.
     const onPop = () => { void evaluate() }
     const onStorage = (e: StorageEvent) => {
       if (e.key === STORAGE_KEY) void evaluate()
@@ -114,7 +111,11 @@ export function useDemoMode(): boolean {
     }
   }, [])
 
-  return isDemo
+  return <DemoModeContext.Provider value={isDemo}>{children}</DemoModeContext.Provider>
+}
+
+export function useDemoMode(): boolean {
+  return useContext(DemoModeContext)
 }
 
 export function setDemoMode(on: boolean) {

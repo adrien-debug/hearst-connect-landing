@@ -294,6 +294,7 @@ function PositionDetailContainer({
         onClose={() => setExitModalOpen(false)}
         title="Exit position"
         size="sm"
+        dismissable={!live.isPending}
         footer={
           <div style={{
             display: 'flex',

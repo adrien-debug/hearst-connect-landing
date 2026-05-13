@@ -88,7 +88,7 @@ export function HubFooter() {
         <div className="hub-footer-slim-inner">
           <HearstConnectLogo
             className="hub-footer-slim-logo"
-            style={{ height: '54px', width: 'auto', display: 'block' }}
+            style={{ height: 'var(--logo-height-footer)', width: 'auto', display: 'block' }}
           />
           <div className="hub-footer-slim-cta">
             <p className="hub-footer-slim-headline">Join the next wave of institutional Bitcoin yield.</p>

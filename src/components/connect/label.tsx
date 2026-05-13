@@ -1,5 +1,5 @@
 import type { CSSProperties, ReactNode } from 'react'
-import { TOKENS } from '@/components/connect/constants'
+import { TOKENS } from './constants'
 
 export type ConnectLabelProps = {
   children: ReactNode
@@ -18,8 +18,7 @@ const toneColor: Record<NonNullable<ConnectLabelProps['tone']>, string> = {
   inverted: 'var(--hc-text-secondary)',
 }
 
-/** Standardized label margin-bottom for pixel alignment */
-const LABEL_MARGIN_BOTTOM = TOKENS.spacing[2] // 8px
+const LABEL_MARGIN_BOTTOM = TOKENS.spacing[2]
 
 export function Label({ children, id, variant = 'bar', tone = 'scene', className, style }: ConnectLabelProps) {
   if (variant === 'text') {

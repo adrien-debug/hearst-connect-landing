@@ -1,6 +1,7 @@
 'use client'
 
 import { TOKENS } from './constants'
+import { prefersReducedMotion } from '@/lib/reduced-motion'
 
 type ActionButtonVariant = 'accent' | 'primary' | 'danger' | 'secondary'
 
@@ -42,7 +43,9 @@ export function ActionButton({
 }: ActionButtonProps) {
   const baseStyles: React.CSSProperties = {
     padding: `${TOKENS.spacing[2]} ${TOKENS.spacing[3]}`,
-    borderRadius: TOKENS.radius.sm,
+    // md (≈12px) aligns this button with the admin button radius — connect
+    // primary actions and admin actions look like the same product now.
+    borderRadius: TOKENS.radius.md,
     fontSize: TOKENS.fontSizes.micro,
     fontWeight: TOKENS.fontWeights.black,
     textTransform: 'uppercase',
@@ -55,19 +58,25 @@ export function ActionButton({
     ...variantStyles[variant],
   }
 
+  const applyHover = (el: HTMLButtonElement) => {
+    if (!disabled && !prefersReducedMotion()) {
+      el.style.transform = 'scale(1.05)'
+    }
+  }
+  const resetHover = (el: HTMLButtonElement) => {
+    el.style.transform = ''
+  }
+
   return (
     <button
       onClick={disabled ? undefined : onClick}
       disabled={disabled}
+      aria-disabled={disabled}
       style={baseStyles}
-      onMouseEnter={(e) => {
-        if (!disabled) {
-          e.currentTarget.style.transform = 'scale(1.05)'
-        }
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'scale(1)'
-      }}
+      onMouseEnter={(e) => applyHover(e.currentTarget)}
+      onMouseLeave={(e) => resetHover(e.currentTarget)}
+      onFocus={(e) => applyHover(e.currentTarget)}
+      onBlur={(e) => resetHover(e.currentTarget)}
     >
       {label}
     </button>

@@ -207,6 +207,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     minHeight: '100vh',
     background: TOKENS.colors.bgApp,
+    color: TOKENS.colors.textPrimary,
   },
   spinner: {
     width: TOKENS.spacing[10],
@@ -222,6 +223,7 @@ const styles: Record<string, React.CSSProperties> = {
     justifyContent: 'center',
     minHeight: '100vh',
     background: TOKENS.colors.bgApp,
+    color: TOKENS.colors.textPrimary,
     padding: TOKENS.spacing[6],
   },
   loginBox: {
@@ -237,7 +239,7 @@ const styles: Record<string, React.CSSProperties> = {
     marginBottom: TOKENS.spacing[6],
   },
   logo: {
-    height: '40px',
+    height: 'var(--logo-height-card)',
     marginBottom: TOKENS.spacing[4],
   },
   loginTitle: {

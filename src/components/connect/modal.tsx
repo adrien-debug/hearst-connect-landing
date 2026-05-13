@@ -1,8 +1,11 @@
 'use client'
 
-import { useEffect, useCallback, useRef } from 'react'
+import { useEffect, useCallback, useId, useRef } from 'react'
 import { TOKENS } from './constants'
 import { fitValue, type SmartFitMode } from './smart-fit'
+import { prefersReducedMotion } from '@/lib/reduced-motion'
+
+const FOCUSABLE_SELECTORS = 'a[href], button:not([disabled]), textarea, input:not([disabled]), select:not([disabled]), [tabindex]:not([tabindex="-1"])'
 
 type ModalSize = 'sm' | 'md' | 'lg'
 
@@ -14,6 +17,9 @@ interface ModalProps {
   size?: ModalSize
   mode?: SmartFitMode
   footer?: React.ReactNode
+  // When false, ESC and backdrop click are ignored. Use during in-flight
+  // transactions to prevent accidental dismissal of a pending action.
+  dismissable?: boolean
 }
 
 export function Modal({
@@ -24,18 +30,49 @@ export function Modal({
   size = 'md',
   mode = 'normal',
   footer,
+  dismissable = true,
 }: ModalProps) {
+  const modalRef = useRef<HTMLDivElement>(null)
+  const scrollYRef = useRef<number>(0)
+  // Snapshot the element that had focus when the modal opened so we can
+  // restore focus there on close — standard a11y pattern.
+  const openerRef = useRef<HTMLElement | null>(null)
+  // Tracks whether the current click sequence started on the backdrop, so a
+  // drag-out from an input selection doesn't dismiss the modal.
+  const backdropMouseDownRef = useRef<boolean>(false)
+  const titleId = useId()
+
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
       if (event.key === 'Escape') {
-        onClose()
+        if (dismissable) onClose()
+        return
+      }
+      if (event.key === 'Tab' && modalRef.current) {
+        const focusable = Array.from(modalRef.current.querySelectorAll<HTMLElement>(FOCUSABLE_SELECTORS))
+        if (!focusable.length) return
+        const first = focusable[0]
+        const last = focusable[focusable.length - 1]
+        if (event.shiftKey) {
+          if (document.activeElement === first) { event.preventDefault(); last.focus() }
+        } else {
+          if (document.activeElement === last) { event.preventDefault(); first.focus() }
+        }
       }
     },
-    [onClose]
+    [onClose, dismissable]
   )
 
-  // Store scroll position to restore on close
-  const scrollYRef = useRef<number>(0)
+  useEffect(() => {
+    if (isOpen && modalRef.current) {
+      // Capture the opener (typically the button that triggered the modal)
+      // so we can return focus there on close.
+      openerRef.current = document.activeElement instanceof HTMLElement
+        ? document.activeElement
+        : null
+      modalRef.current.querySelector<HTMLElement>(FOCUSABLE_SELECTORS)?.focus()
+    }
+  }, [isOpen])
 
   useEffect(() => {
     if (isOpen) {
@@ -54,15 +91,26 @@ export function Modal({
       document.body.style.top = ''
       document.body.style.width = ''
       window.scrollTo(0, scrollYRef.current)
+      // Return focus to the opener so keyboard users don't get dumped at the
+      // top of the page after the modal unmounts.
+      openerRef.current?.focus?.()
+      openerRef.current = null
     }
   }, [isOpen, handleKeyDown])
 
   if (!isOpen) return null
 
+  const reducedMotion = prefersReducedMotion()
+  const backdropAnim = reducedMotion ? 'none' : 'fadeIn var(--dashboard-duration) var(--dashboard-ease)'
+  const dialogAnim = reducedMotion ? 'none' : 'scaleIn var(--dashboard-duration) var(--dashboard-ease)'
+
+  // Semantic widths from theme/tokens.css. Each var clamps with min() so the
+  // modal can never exceed the viewport minus a gutter — kills the mobile
+  // edge-bleed without per-call media queries.
   const sizeStyles = {
-    sm: { maxWidth: '420px' },
-    md: { maxWidth: '560px' },
-    lg: { maxWidth: '720px' },
+    sm: { maxWidth: 'var(--modal-width-sm)' },
+    md: { maxWidth: 'var(--modal-width-md)' },
+    lg: { maxWidth: 'var(--modal-width-lg)' },
   }
 
   return (
@@ -77,19 +125,35 @@ export function Modal({
         padding: TOKENS.spacing[4],
       }}
     >
-      {/* Backdrop */}
+      {/* Backdrop — clicking dismisses; not focusable, hidden from a11y tree.
+       * mousedown/click both required on the backdrop itself, so a click that
+       * starts inside an input and drags onto the backdrop never closes. */}
       <div
-        onClick={onClose}
+        onMouseDown={(e) => {
+          backdropMouseDownRef.current = e.target === e.currentTarget
+        }}
+        onClick={(e) => {
+          if (!dismissable) return
+          if (e.target === e.currentTarget && backdropMouseDownRef.current) {
+            onClose()
+          }
+          backdropMouseDownRef.current = false
+        }}
+        aria-hidden="true"
         style={{
           position: 'absolute',
           inset: 0,
           background: 'var(--hc-overlay)',
-          animation: 'fadeIn var(--dashboard-duration) var(--dashboard-ease)',
+          animation: backdropAnim,
         }}
       />
 
       {/* Modal */}
       <div
+        ref={modalRef}
+        role="dialog"
+        aria-modal="true"
+        aria-labelledby={titleId}
         style={{
           position: 'relative',
           width: '100%',
@@ -98,10 +162,10 @@ export function Modal({
           borderRadius: TOKENS.radius.lg,
           border: `${TOKENS.borders.thin} solid ${TOKENS.colors.borderSubtle}`,
           boxShadow: 'var(--hc-shadow-lg)',
-          animation: 'scaleIn var(--dashboard-duration) var(--dashboard-ease)',
+          animation: dialogAnim,
           display: 'flex',
           flexDirection: 'column',
-          maxHeight: 'calc(100vh - var(--space-12))',
+          maxHeight: 'calc(100dvh - var(--space-12))',
         }}
       >
         {/* Header */}
@@ -120,6 +184,7 @@ export function Modal({
           }}
         >
           <h2
+            id={titleId}
             style={{
               fontSize: fitValue(mode, {
                 normal: TOKENS.fontSizes.lg,
@@ -134,26 +199,28 @@ export function Modal({
           >
             {title}
           </h2>
-          <button
-            onClick={onClose}
-            style={{
-              display: 'flex',
-              alignItems: 'center',
-              justifyContent: 'center',
-              width: TOKENS.spacing[8],
-              height: TOKENS.spacing[8],
-              background: 'transparent',
-              border: 'none',
-              borderRadius: TOKENS.radius.md,
-              color: TOKENS.colors.textSecondary,
-              cursor: 'pointer',
-              fontSize: TOKENS.fontSizes.xl,
-              lineHeight: 1,
-            }}
-            aria-label="Close"
-          >
-            ×
-          </button>
+          {dismissable && (
+            <button
+              onClick={onClose}
+              style={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                width: TOKENS.spacing[8],
+                height: TOKENS.spacing[8],
+                background: 'transparent',
+                border: 'none',
+                borderRadius: TOKENS.radius.md,
+                color: TOKENS.colors.textSecondary,
+                cursor: 'pointer',
+                fontSize: TOKENS.fontSizes.xl,
+                lineHeight: 1,
+              }}
+              aria-label="Close"
+            >
+              ×
+            </button>
+          )}
         </div>
 
         {/* Content */}

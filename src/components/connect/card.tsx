@@ -27,7 +27,7 @@ export function CardAction({ label, onClick }: CardActionProps) {
         height: 'var(--dashboard-control-height-sm)',
         display: 'flex',
         alignItems: 'center',
-        transition: `all ${TOKENS.animation.durationFast} ${TOKENS.animation.easeSharp}`,
+        transition: `background ${TOKENS.animation.durationFast} ${TOKENS.animation.easeSharp}, border-color ${TOKENS.animation.durationFast} ${TOKENS.animation.easeSharp}, color ${TOKENS.animation.durationFast} ${TOKENS.animation.easeSharp}`,
       }}
     >
       {label}

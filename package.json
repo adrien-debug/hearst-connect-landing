@@ -3,9 +3,9 @@
   "version": "1.0.0",
   "private": true,
   "scripts": {
-    "dev": "lsof -ti:5555 | xargs kill -9 2>/dev/null; sleep 1; next dev --port 5555 --webpack",
+    "dev": "lsof -ti:4103 | xargs kill -9 2>/dev/null; sleep 1; next dev --port 4103 --webpack",
     "build": "next build --webpack",
-    "start": "next start --port 5555",
+    "start": "next start --port 4103",
     "lint": "tsc -p . --noEmit",
     "test": "vitest run"
   },

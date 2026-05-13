@@ -1,0 +1,424 @@
+[     400ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[     444ms] [LOG] [HMR] connected @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    3542ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778694903703 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[    5418ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    5992ms] [LOG] [Fast Refresh] done in 574ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[    9035ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778694903703 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[   18213ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778694903703 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[   71138ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   71654ms] [LOG] [Fast Refresh] done in 516ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   74695ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778694903703 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[   90119ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   90459ms] [LOG] [Fast Refresh] done in 341ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[   93500ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778694903703 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  107275ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  107698ms] [WARNING] [Fast Refresh] performing full reload
+
+Fast Refresh will perform a full reload when you edit a file that's imported by modules outside of the React rendering tree.
+You might have a file which exports a React component but also exports a value that is imported by a non-React component file.
+Consider migrating the non-React component export to a separate file and importing it into both files.
+
+It is also possible the parent component of the component you edited is a class component, which disables Fast Refresh.
+Fast Refresh requires at least one parent function component in your React tree. @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  108151ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  108196ms] [LOG] [HMR] connected @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  111271ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695011415 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  115407ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  115604ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  115605ms] [LOG] [Fast Refresh] done in 1ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  115756ms] [LOG] [Fast Refresh] done in 152ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  116931ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  117198ms] [LOG] [Fast Refresh] done in 267ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  120245ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695011415 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  128415ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  128757ms] [LOG] [Fast Refresh] done in 342ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  131806ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695011415 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  140496ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  140800ms] [LOG] [Fast Refresh] done in 305ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  143843ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695011415 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  147755ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  147975ms] [LOG] [Fast Refresh] done in 220ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  148886ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  149202ms] [LOG] [Fast Refresh] done in 315ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  149961ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  150071ms] [LOG] [Fast Refresh] done in 110ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  153111ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695011415 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  154842ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  155017ms] [LOG] [Fast Refresh] done in 175ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  155022ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  155196ms] [LOG] [Fast Refresh] done in 174ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  157388ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  157774ms] [LOG] [Fast Refresh] done in 386ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  158568ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  158671ms] [LOG] [Fast Refresh] done in 104ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  161709ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695011415 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  166036ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  166155ms] [LOG] [Fast Refresh] done in 119ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  169193ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695011415 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  169892ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  170004ms] [LOG] [Fast Refresh] done in 113ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  170009ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  170174ms] [LOG] [Fast Refresh] done in 166ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  173247ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695011415 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  177546ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  177650ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error:   x Expected '>', got 'ident'
+     ,-[/Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts:114:1]
+ 111 |     }
+ 112 |   }, [])
+ 113 | 
+ 114 |   return <DemoModeContext.Provider value={isDemo}>{children}</DemoModeContext.Provider>
+     :                                    ^^^^^
+ 115 | }
+ 116 | 
+ 117 | export function useDemoMode(): boolean {
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  177673ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  177834ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error:   x Expected '>', got 'ident'
+     ,-[/Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts:114:1]
+ 111 |     }
+ 112 |   }, [])
+ 113 | 
+ 114 |   return <DemoModeContext.Provider value={isDemo}>{children}</DemoModeContext.Provider>
+     :                                    ^^^^^
+ 115 | }
+ 116 | 
+ 117 | export function useDemoMode(): boolean {
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  177842ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error:   x Expected '>', got 'ident'
+     ,-[/Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts:114:1]
+ 111 |     }
+ 112 |   }, [])
+ 113 | 
+ 114 |   return <DemoModeContext.Provider value={isDemo}>{children}</DemoModeContext.Provider>
+     :                                    ^^^^^
+ 115 | }
+ 116 | 
+ 117 | export function useDemoMode(): boolean {
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  177945ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error:   x Expected '>', got 'ident'
+     ,-[/Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts:114:1]
+ 111 |     }
+ 112 |   }, [])
+ 113 | 
+ 114 |   return <DemoModeContext.Provider value={isDemo}>{children}</DemoModeContext.Provider>
+     :                                    ^^^^^
+ 115 | }
+ 116 | 
+ 117 | export function useDemoMode(): boolean {
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  177947ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  178047ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error:   x Expected '>', got 'ident'
+     ,-[/Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts:114:1]
+ 111 |     }
+ 112 |   }, [])
+ 113 | 
+ 114 |   return <DemoModeContext.Provider value={isDemo}>{children}</DemoModeContext.Provider>
+     :                                    ^^^^^
+ 115 | }
+ 116 | 
+ 117 | export function useDemoMode(): boolean {
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  180689ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695011415 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  184702ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error:   x Expected '>', got 'ident'
+     ,-[/Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts:114:1]
+ 111 |     }
+ 112 |   }, [])
+ 113 | 
+ 114 |   return <DemoModeContext.Provider value={isDemo}>{children}</DemoModeContext.Provider>
+     :                                    ^^^^^
+ 115 | }
+ 116 | 
+ 117 | export function useDemoMode(): boolean {
+     `----
+
+Caused by:
+    Syntax Error
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  184935ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  185792ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  185792ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  186052ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  187961ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  187962ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  188112ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/app/app/app-client.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  222613ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/app/app/app-client.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  222773ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  222791ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  222896ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  224133ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  224237ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  224262ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  224396ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  237104ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  237104ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  237225ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  255396ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  255981ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  256141ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  256275ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  256276ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  256355ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  256376ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  256476ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+
+Import trace for requested module:
+./src/lib/demo/use-demo-mode.ts
+./src/components/demo/demo-banner.tsx @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/userspace/app/errors/intercept-console-error.js:57
+[  256754ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5555/?_rsc=wnywt:0
+[  256767ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5555/?_rsc=wnywt:0
+[  256939ms] [ERROR] Failed to load resource: the server responded with a status of 500 (Internal Server Error) @ http://localhost:5555/:0
+[  257094ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(pages-dir-browser)/./node_modules/react-dom/cjs/react-dom-client.development.js:28004
+[  257147ms] ModuleBuildError: Module build failed (from ./node_modules/next/dist/build/webpack/loaders/next-swc-loader.js):
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2)
+    at processResult (file:///Users/adrienbeyondcrypto/Dev/hearst-connect/node_modules/next/dist/compiled/webpack/bundle5.js:29:407096)
+    at <unknown> (file:///Users/adrienbeyondcrypto/Dev/hearst-connect/node_modules/next/dist/compiled/webpack/bundle5.js:29:408891)
+    at <unknown> (file:///Users/adrienbeyondcrypto/Dev/hearst-connect/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:8645)
+    at <unknown> (file:///Users/adrienbeyondcrypto/Dev/hearst-connect/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:5019)
+    at r.callback (file:///Users/adrienbeyondcrypto/Dev/hearst-connect/node_modules/next/dist/compiled/loader-runner/LoaderRunner.js:1:4039)
+[  257147ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  257148ms] [ERROR] ./src/lib/demo/use-demo-mode.ts
+Error: 
+
+Caused by:
+    0: Failed to read source code from /Users/adrienbeyondcrypto/Dev/hearst-connect/src/lib/demo/use-demo-mode.ts
+    1: No such file or directory (os error 2) @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/userspace/pages/pages-dev-overlay-setup.js:70
+[  282553ms] [ERROR] WebSocket connection to 'ws://localhost:5555/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:86
+[  283555ms] [ERROR] WebSocket connection to 'ws://localhost:5555/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:86
+[  284557ms] [ERROR] WebSocket connection to 'ws://localhost:5555/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:86
+[  285560ms] [ERROR] WebSocket connection to 'ws://localhost:5555/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:86
+[  286567ms] [ERROR] WebSocket connection to 'ws://localhost:5555/_next/webpack-hmr' failed: Error in connection establishment: net::ERR_CONNECTION_REFUSED @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/client/dev/hot-reloader/pages/websocket.js:86
+[  291574ms] [LOG] [HMR] connected @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  291586ms] [ERROR] Failed to load resource: the server responded with a status of 404 (Not Found) @ http://localhost:5555/_next/static/webpack/f9e5f63657e91ff5.webpack.hot-update.json:0
+[  291587ms] [WARNING] [Fast Refresh] performing full reload because your application had an unrecoverable error @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  291981ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  293970ms] [WARNING] [Fast Refresh] performing full reload
+
+Fast Refresh will perform a full reload when you edit a file that's imported by modules outside of the React rendering tree.
+You might have a file which exports a React component but also exports a value that is imported by a non-React component file.
+Consider migrating the non-React component export to a separate file and importing it into both files.
+
+It is also possible the parent component of the component you edited is a class component, which disables Fast Refresh.
+Fast Refresh requires at least one parent function component in your React tree. @ webpack-internal:///(pages-dir-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  294623ms] [INFO] %cDownload the React DevTools for a better development experience: https://react.dev/link/react-devtools font-weight:bold @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  294670ms] [LOG] [HMR] connected @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  297217ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  297743ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695197510 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0
+[  298130ms] [LOG] [Fast Refresh] done in 913ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  298206ms] [LOG] [Fast Refresh] rebuilding @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  298974ms] [LOG] [Fast Refresh] done in 768ms @ webpack-internal:///(app-pages-browser)/./node_modules/next/dist/next-devtools/shared/forward-logs-shared.js:27
+[  301976ms] [WARNING] The resource http://localhost:5555/_next/static/media/d9396795aa5ec363-s.p.woff2?v=1778695197510 was preloaded using link preload but not used within a few seconds from the window's load event. Please make sure it has an appropriate `as` value and it is preloaded intentionally. @ http://localhost:5555/:0

@@ -1,6 +1,6 @@
 'use client'
 
-import { Label } from '@/components/ui/label'
+import { Label } from './label'
 import { TOKENS, MONO, VALUE_LETTER_SPACING } from './constants'
 import type { CSSProperties } from 'react'
 

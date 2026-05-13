@@ -32,6 +32,8 @@ export function NetworkMismatchBanner({
   return (
     <div
       role="alert"
+      aria-live="assertive"
+      aria-atomic="true"
       style={{
         display: 'flex',
         flexWrap: 'wrap',
@@ -81,6 +83,9 @@ export function NetworkMismatchBanner({
         type="button"
         onClick={handleSwitch}
         disabled={isPending}
+        aria-disabled={isPending}
+        aria-label={isPending ? 'Switching network…' : `Switch network${expectedChainName ? ` to ${expectedChainName}` : ''}`}
+        title={isPending ? 'Switching network…' : undefined}
         style={{
           padding: `${TOKENS.spacing[1]} ${TOKENS.spacing[3]}`,
           background: TOKENS.colors.warning,

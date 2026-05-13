@@ -76,6 +76,26 @@
   --radius-2xl: 24px;
   --radius-full: 9999px;
 
+  /* Semantic radius — derived from the primitive scale so a re-skin only
+     touches the primitives. Use these in components instead of --radius-md
+     directly when the surface has a clear role (button / card / modal). */
+  --button-radius: var(--radius-md);
+  --card-radius: var(--radius-lg);
+  --modal-radius: var(--radius-lg);
+
+  /* Semantic logo heights — referenced by HubHero / HubHeader / HubFooter
+     and the admin login card so all four stay in sync. */
+  --logo-height-hero: 135px;
+  --logo-height-header: 54px;
+  --logo-height-footer: 54px;
+  --logo-height-card: 40px;
+
+  /* Semantic modal widths — mobile-safe via min() so they never exceed the
+     viewport minus a comfortable gutter. */
+  --modal-width-sm: min(420px, calc(100vw - var(--space-8)));
+  --modal-width-md: min(560px, calc(100vw - var(--space-8)));
+  --modal-width-lg: min(720px, calc(100vw - var(--space-8)));
+
   /* Borders */
   --border-thin: 1px;
   --border-medium: 3px;
@@ -119,16 +139,16 @@
   --tracking-wide: 0.12em;
   --tracking-display: 0.2em;
 
+  /* Semantic letter-spacing for uppercase labels — apply this to ALL
+     `text-transform: uppercase` runs so we don't get the current chaos of
+     `tracking-normal | tracking-wide | tracking-display` for the same role. */
+  --tracking-uppercase: 0.08em;
+
   /* Line heights */
   --leading-tight: 1.2;
   --leading-base: 1.5;
   --leading-relaxed: 1.6;
   --leading-loose: 1.8;
-
-  /* Transitions */
-  --transition-fast: 0.15s ease;
-  --transition-base: 0.2s ease;
-  --transition-slow: 0.3s ease;
 
   /* Opacities */
   --opacity-subtle: 0.2;
@@ -476,17 +496,17 @@
 /* Buttons - Primary: Black bg, Citrus text */
 [data-theme="light"] .btn-primary,
 [data-theme="light"] button[data-variant="primary"] {
-  background: #000000;
+  background: var(--color-text-primary);
   color: var(--color-accent);
-  border: 2px solid #000000;
+  border: 2px solid var(--color-text-primary);
   transition: all 0.2s ease;
 }
 
 [data-theme="light"] .btn-primary:hover,
 [data-theme="light"] button[data-variant="primary"]:hover {
   background: var(--color-accent);
-  color: #000000;
-  border-color: #000000;
+  color: var(--brand-accent-fg);
+  border-color: var(--color-text-primary);
   transform: scale(1.02);
   box-shadow: var(--shadow-button-primary-hover);
 }
@@ -495,7 +515,7 @@
 [data-theme="light"] .btn-ghost,
 [data-theme="light"] button[data-variant="ghost"] {
   background: transparent;
-  color: #000000;
+  color: var(--color-text-primary);
   border: 1px solid var(--color-border-default);
 }
 
@@ -519,15 +539,15 @@
 [data-theme="light"] select:not(.connect-scope select):focus {
   outline: none;
   background: var(--color-bg-secondary);
-  border-color: #000000;
+  border-color: var(--color-text-primary);
   box-shadow: 4px 4px 0px var(--color-accent);
 }
 
 /* Badges with accent — explicit .badge class only, not wildcard */
 [data-theme="light"] .badge {
   background: var(--color-accent);
-  color: #000000;
-  border: 1px solid #000000;
+  color: var(--brand-accent-fg);
+  border: 1px solid var(--color-text-primary);
 }
 
 /* ============================================
@@ -546,6 +566,14 @@
    of the user's system / [data-theme] setting.
    These rules appear AFTER all [data-theme="light"]
    rules so they win on equal specificity (0,2,0).
+
+   NOTE (post-audit 2026-05-13): the /app and /admin routes are now hard-locked
+   to data-theme="dark" via the pre-paint inline script (theme-script.tsx) and
+   the ThemeProvider hydration guard (theme-provider.tsx, isDarkOnlyRoute).
+   Under normal flow these resets should never match anything. They stay as a
+   defense-in-depth ceinture in case a future component sets data-theme="light"
+   locally, or the theme-script logic is reverted. Safe to delete once we are
+   confident no other code path can leak the light theme into connect.
    ============================================ */
 
 /* Reset any light-mode card overrides inside connect */

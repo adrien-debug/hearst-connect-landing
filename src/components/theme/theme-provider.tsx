@@ -59,24 +59,35 @@ export function ThemeProvider({
   const [resolvedTheme, setResolvedTheme] = useState<ResolvedTheme>('dark')
   const [mounted, setMounted] = useState(false)
 
+  // Dark-only routes (/admin and /app) — must NOT inherit light from
+  // storage or OS preference. Mirrors the logic in theme-script.tsx so
+  // the pre-paint attribute and the hydrated provider agree.
+  const isDarkOnlyRoute = (() => {
+    if (typeof window === 'undefined') return false
+    const p = window.location.pathname
+    return p === '/admin' || p.startsWith('/admin/') || p === '/app' || p.startsWith('/app/')
+  })()
+
   useEffect(() => {
     const stored = getStoredTheme()
     const initialTheme = stored || defaultTheme
     setThemeState(initialTheme)
-    
-    if (forcedTheme) {
+
+    if (isDarkOnlyRoute) {
+      setResolvedTheme('dark')
+    } else if (forcedTheme) {
       setResolvedTheme(forcedTheme)
     } else if (initialTheme === 'system' && enableSystem) {
       setResolvedTheme(getSystemTheme())
     } else {
       setResolvedTheme(initialTheme as ResolvedTheme)
     }
-    
+
     setMounted(true)
-  }, [defaultTheme, forcedTheme, enableSystem])
+  }, [defaultTheme, forcedTheme, enableSystem, isDarkOnlyRoute])
 
   useEffect(() => {
-    if (!enableSystem || theme !== 'system' || forcedTheme) return
+    if (!enableSystem || theme !== 'system' || forcedTheme || isDarkOnlyRoute) return
     
     const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
     const handler = (e: MediaQueryListEvent) => {
@@ -89,9 +100,9 @@ export function ThemeProvider({
 
   useEffect(() => {
     if (!mounted) return
-    
+
     const root = document.documentElement
-    const effectiveTheme = forcedTheme || resolvedTheme
+    const effectiveTheme = isDarkOnlyRoute ? 'dark' : (forcedTheme || resolvedTheme)
     
     if (disableTransitionOnChange) {
       root.style.transition = 'none'
