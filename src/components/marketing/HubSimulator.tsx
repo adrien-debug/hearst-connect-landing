@@ -1,55 +1,81 @@
 'use client';
 
-import { useState, useMemo, useId } from 'react';
+import { useState, useEffect, useRef, useMemo, useId } from 'react';
+
+// Internal SVG padding (px) — applied inside the dynamically-measured viewport
+const PAD = 12;
 
 export function HubSimulator() {
   const uid = useId().replace(/[^a-zA-Z0-9]/g, '');
-  const chartGradientId = `hub-sim-grad-${uid}`;
-  const chartGlowId = `hub-sim-glow-${uid}`;
+  const gradId = `hsg-${uid}`;
+  const glowId = `hsgw-${uid}`;
 
-  const [investment, setInvestment] = useState(500000);
+  const [investment, setInvestment] = useState(500_000);
   const [product, setProduct] = useState<'prime' | 'growth'>('prime');
-
   const apy = product === 'prime' ? 0.12 : 0.15;
-  const years = 3;
 
-  const points = useMemo(() => {
-    const pts: number[] = [];
-    for (let i = 0; i <= years * 12; i++) {
-      const t = i / 12;
-      pts.push(investment * Math.pow(1 + apy, t));
+  // Real pixel dimensions of the chart container, kept in state so any resize
+  // triggers a re-render and the SVG redraws without distortion.
+  const [dims, setDims] = useState<{ w: number; h: number }>({ w: 800, h: 240 });
+  const chartRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    const el = chartRef.current;
+    if (!el) return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const { width, height } = entry.contentRect;
+      setDims({ w: Math.round(width), h: Math.round(height) });
+    });
+
+    observer.observe(el);
+
+    // Seed with current size immediately
+    const rect = el.getBoundingClientRect();
+    setDims({ w: Math.round(rect.width), h: Math.round(rect.height) });
+
+    return () => observer.disconnect();
+  }, []);
+
+  const { w, h } = dims;
+
+  // Derived inner dimensions after padding
+  const iw = Math.max(w - PAD * 2, 1);
+  const ih = Math.max(h - PAD * 2, 1);
+  const rightX = PAD + iw;
+  const bottomY = PAD + ih;
+
+  const { pathD, areaD, endX, endY, finalValue } = useMemo(() => {
+    // Y scale anchored to 15% Growth ceiling so Prime vs Growth stay comparable
+    const maxVal = investment * Math.pow(1.15, 3);
+    const minVal = investment;
+    const range = maxVal - minVal || 1;
+
+    const coords: string[] = [];
+    let ex = PAD;
+    let ey = bottomY;
+
+    for (let m = 0; m <= 36; m++) {
+      const val = investment * Math.pow(1 + apy, m / 12);
+      const x = PAD + (m / 36) * iw;
+      const y = PAD + ih - ((val - minVal) / range) * ih;
+      coords.push(`${m === 0 ? 'M' : 'L'}${x.toFixed(1)},${y.toFixed(1)}`);
+      if (m === 36) { ex = x; ey = y; }
     }
-    return pts;
-  }, [investment, apy]);
 
-  const finalValue = points[points.length - 1];
+    const pathStr = coords.join(' ');
+    const areaStr = `${pathStr} L${rightX},${bottomY} L${PAD},${bottomY} Z`;
+    const finalVal = investment * Math.pow(1 + apy, 3);
+
+    return { pathD: pathStr, areaD: areaStr, endX: ex, endY: ey, finalValue: finalVal };
+  }, [investment, apy, iw, ih, bottomY, rightX]);
+
   const profit = finalValue - investment;
 
-  const chartWidth = 800;
-  const chartHeight = 200;
-  const minVal = investment;
-  const maxVal = investment * Math.pow(1 + 0.15, years);
-  const denom = maxVal - minVal || 1;
-
-  const pathD = useMemo(() => {
-    const last = points.length - 1;
-    return points
-      .map((val, i) => {
-        const x = last === 0 ? 0 : (i / last) * chartWidth;
-        const y =
-          chartHeight - ((val - minVal) / denom) * chartHeight * 0.8 - 20;
-        const safeY = Number.isFinite(y) ? y : chartHeight - 20;
-        return `${i === 0 ? 'M' : 'L'} ${x} ${safeY}`;
-      })
-      .join(' ');
-  }, [points, minVal, denom, chartWidth, chartHeight]);
-
-  const areaD = `${pathD} L ${chartWidth} ${chartHeight} L 0 ${chartHeight} Z`;
-
-  const endCy =
-    chartHeight -
-    ((finalValue - minVal) / denom) * chartHeight * 0.8 -
-    20;
+  // Horizontal reference lines at 25 / 50 / 75% of inner height
+  const refLines = [0.25, 0.5, 0.75].map((t) => PAD + ih * (1 - t));
 
   return (
     <section id="simulator" className="hub-simulator-section">
@@ -88,9 +114,9 @@ export function HubSimulator() {
               <input
                 id="hub-sim-allocation"
                 type="range"
-                min={250000}
-                max={5000000}
-                step={50000}
+                min={250_000}
+                max={5_000_000}
+                step={50_000}
                 value={investment}
                 onChange={(e) => setInvestment(Number(e.target.value))}
                 className="hub-simulator-slider"
@@ -115,59 +141,83 @@ export function HubSimulator() {
             </div>
           </div>
 
-          <div className="hub-simulator-chart">
-            <svg viewBox={`0 0 ${chartWidth} ${chartHeight}`} width="100%" height="auto" aria-hidden>
+          {/* ResizeObserver target — SVG fills it exactly, no distortion */}
+          <div className="hub-simulator-chart" ref={chartRef}>
+            <svg
+              viewBox={`0 0 ${w} ${h}`}
+              width="100%"
+              height="100%"
+              aria-hidden
+            >
               <defs>
-                <linearGradient id={chartGradientId} x1="0" y1="0" x2="0" y2="1">
-                  <stop offset="0%" stopColor="var(--dashboard-accent)" stopOpacity="0.4" />
+                <linearGradient id={gradId} x1="0" y1="0" x2="0" y2="1">
+                  <stop offset="0%" stopColor="var(--dashboard-accent)" stopOpacity="0.38" />
                   <stop offset="100%" stopColor="var(--dashboard-accent)" stopOpacity="0" />
                 </linearGradient>
-                <filter id={chartGlowId}>
-                  <feGaussianBlur stdDeviation="4" result="coloredBlur" />
+                {/* filterUnits="userSpaceOnUse" with generous bounds prevents glow clipping */}
+                <filter
+                  id={glowId}
+                  filterUnits="userSpaceOnUse"
+                  x={-PAD}
+                  y={-PAD}
+                  width={w + PAD * 2}
+                  height={h + PAD * 2}
+                >
+                  <feGaussianBlur stdDeviation="3" result="blur" />
                   <feMerge>
-                    <feMergeNode in="coloredBlur" />
+                    <feMergeNode in="blur" />
                     <feMergeNode in="SourceGraphic" />
                   </feMerge>
                 </filter>
               </defs>
 
+              {/* Dashed reference lines */}
+              {refLines.map((y) => (
+                <line
+                  key={y}
+                  x1={PAD}
+                  y1={y}
+                  x2={rightX}
+                  y2={y}
+                  stroke="var(--dashboard-border)"
+                  strokeWidth="1"
+                  strokeDasharray="5 7"
+                />
+              ))}
+
+              {/* Solid baseline */}
               <line
-                x1="0"
-                y1={chartHeight}
-                x2={chartWidth}
-                y2={chartHeight}
+                x1={PAD}
+                y1={bottomY}
+                x2={rightX}
+                y2={bottomY}
                 stroke="var(--dashboard-border-mid)"
                 strokeWidth="1"
               />
-              <line
-                x1="0"
-                y1={chartHeight / 2}
-                x2={chartWidth}
-                y2={chartHeight / 2}
-                stroke="var(--dashboard-border)"
-                strokeWidth="1"
-                strokeDasharray="4 4"
-              />
 
-              <path d={areaD} fill={`url(#${chartGradientId})`} />
+              {/* Area fill */}
+              <path d={areaD} fill={`url(#${gradId})`} />
 
+              {/* Glowing line — keyed on product so animation replays on product switch */}
               <path
-                key={`${product}-${investment}`}
+                key={product}
                 d={pathD}
                 fill="none"
                 stroke="var(--dashboard-accent)"
-                strokeWidth="3"
-                filter={`url(#${chartGlowId})`}
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                filter={`url(#${glowId})`}
                 className="chart-line-anim"
               />
 
+              {/* Endpoint dot */}
               <circle
-                cx={chartWidth}
-                cy={Number.isFinite(endCy) ? endCy : chartHeight - 20}
+                cx={endX}
+                cy={endY}
                 r="6"
                 fill="var(--dashboard-page)"
                 stroke="var(--dashboard-accent)"
-                strokeWidth="3"
+                strokeWidth="2.5"
               />
             </svg>
           </div>

@@ -1,0 +1,194 @@
+- generic [ref=e1]:
+  - generic [ref=e2]:
+    - banner [ref=e4]:
+      - link "Hearst Connect" [ref=e5]:
+        - /url: "#"
+        - img "Hearst Connect" [ref=e6]
+      - navigation "Navigation principale" [ref=e23]:
+        - list [ref=e24]:
+          - listitem [ref=e25]:
+            - link "Why Connect" [ref=e26]:
+              - /url: "#features-section"
+          - listitem [ref=e27]:
+            - link "Vaults" [ref=e28]:
+              - /url: "#developers"
+          - listitem [ref=e29]:
+            - link "Simulator" [ref=e30]:
+              - /url: "#simulator"
+      - link "Launch App →" [ref=e31]:
+        - /url: /app
+        - generic [ref=e32]: Launch App
+        - text: →
+    - generic [ref=e33]:
+      - img "Hearst Connect" [ref=e34]
+      - heading "Turning bitcoin mining into structured yield." [level=1] [ref=e322]:
+        - generic [ref=e52]: Turning bitcoin mining
+        - generic [ref=e53]: into structured yield.
+      - link "Launch App" [ref=e55]:
+        - /url: /app
+        - generic [ref=e56]: Launch App
+        - img [ref=e57]
+    - generic [ref=e60]:
+      - generic [ref=e61]:
+        - generic [ref=e62]: BTC/USD $64,230.00 (+2.4%)
+        - generic [ref=e64]: "Network Hashrate: 620 EH/s"
+        - generic [ref=e66]: "Next Difficulty Retarget: 4d 12h"
+        - generic [ref=e68]: "Last Block Mined: 2 mins ago"
+        - generic [ref=e70]: "Total Value Locked: $142.5M"
+        - generic [ref=e72]: "Prime APY: 12.00%"
+        - generic [ref=e74]: "Growth APY: 15.00%"
+      - generic [ref=e76]:
+        - generic [ref=e77]: BTC/USD $64,230.00 (+2.4%)
+        - generic [ref=e79]: "Network Hashrate: 620 EH/s"
+        - generic [ref=e81]: "Next Difficulty Retarget: 4d 12h"
+        - generic [ref=e83]: "Last Block Mined: 2 mins ago"
+        - generic [ref=e85]: "Total Value Locked: $142.5M"
+        - generic [ref=e87]: "Prime APY: 12.00%"
+        - generic [ref=e89]: "Growth APY: 15.00%"
+    - generic [ref=e91]:
+      - heading "Hearst Connect brings industrial Bitcoin mining cash flows on-chain. USDC vaults backed by real hashrate, institutional controls, and transparent reporting — built for qualified allocators.|" [level=2] [ref=e93]:
+        - generic [ref=e94]: Hearst Connect brings industrial Bitcoin mining cash flows on-chain. USDC vaults backed by real hashrate, institutional controls, and transparent reporting — built for qualified allocators.|
+      - generic [ref=e97]:
+        - img "Bitcoin" [ref=e99]
+        - img "Ethereum" [ref=e101]
+        - img "USDC" [ref=e103]
+        - img "Tether" [ref=e105]
+        - img "BNB" [ref=e107]
+        - img "Solana" [ref=e109]
+        - img "XRP" [ref=e111]
+        - img "Cardano" [ref=e113]
+        - img "Avalanche" [ref=e115]
+        - img "Dogecoin" [ref=e117]
+        - img "Polkadot" [ref=e119]
+        - img "Chainlink" [ref=e121]
+        - img "Polygon" [ref=e123]
+        - img "TRON" [ref=e125]
+    - region "Why Hearst Connect, four pillars" [ref=e156]:
+      - generic [ref=e158]:
+        - article [ref=e159]:
+          - generic [ref=e160]: Industrial Bitcoin Mining
+          - heading "Real infrastructure" [level=3] [ref=e161]
+          - paragraph [ref=e162]: USDC exposure to industrial Bitcoin mining cash flows. Real hashrate, real operations, institutional-grade infrastructure — not synthetic exposure or paper claims.
+        - article [ref=e163]:
+          - generic [ref=e164]: Onchain Proof of Reserves
+          - heading "Transparent reporting" [level=3] [ref=e165]
+          - paragraph [ref=e166]: Monthly USDC distributions, on-chain proof of reserves, and third-party audits at every step. Every position, every payout — verifiable on Base.
+        - article [ref=e167]:
+          - generic [ref=e168]: Built for Allocators
+          - heading "Institutional controls" [level=3] [ref=e169]
+          - paragraph [ref=e170]: Multi-signature governance, audited contracts, KYC/AML compliance, and custody integrations built for serious allocators — Fireblocks, Safe, Ledger Enterprise.
+        - article [ref=e171]:
+          - generic [ref=e172]: Daily Distributions
+          - heading "Stable USDC yield" [level=3] [ref=e173]
+          - paragraph [ref=e174]: Mining-backed cashflow streams smooth Bitcoin volatility into predictable daily USDC yield. Track every accrual, claim on demand, redeem at maturity.
+    - generic [ref=e181]:
+      - generic [ref=e182]:
+        - heading "Project your yield" [level=2] [ref=e183]
+        - paragraph [ref=e184]: Interactive 3-year forecast (illustrative; not a guarantee of future results).
+      - generic [ref=e185]:
+        - generic [ref=e186]:
+          - group "Product strategy" [ref=e187]:
+            - button "HashVault Prime (12%)" [ref=e188]
+            - button "HashVault Growth (15%)" [active] [pressed] [ref=e189]
+          - generic [ref=e190]:
+            - generic [ref=e191]: Initial allocation
+            - generic [ref=e192]: $500,000
+            - slider "Initial allocation" [ref=e193]: "500000"
+            - generic [ref=e194]:
+              - generic [ref=e195]: $250k
+              - generic [ref=e196]: $5M+
+          - generic [ref=e197]:
+            - generic [ref=e198]:
+              - generic [ref=e199]: Projected return (3Y)
+              - strong [ref=e200]: +$260,437
+            - generic [ref=e201]:
+              - generic [ref=e202]: Total value
+              - strong [ref=e203]: $760,437
+        - img [ref=e205]
+    - generic [ref=e209]:
+      - generic [ref=e210]:
+        - heading "The HashVault product family" [level=2] [ref=e211]
+        - paragraph [ref=e212]:
+          - generic [ref=e213]: Two
+          - generic [ref=e214]: structured
+          - generic [ref=e215]: strategies
+          - generic [ref=e216]: built
+          - generic [ref=e217]: "on"
+          - generic [ref=e218]: the
+          - generic [ref=e219]: same
+          - generic [ref=e220]: industrial
+          - generic [ref=e221]: mining
+          - generic [ref=e222]: infrastructure.
+          - generic [ref=e223]: HashVault
+          - generic [ref=e224]: Prime
+          - generic [ref=e225]: targets
+          - generic [ref=e226]: stable
+          - generic [ref=e227]: USDC
+          - generic [ref=e228]: yield
+          - generic [ref=e229]: with
+          - generic [ref=e230]: capital
+          - generic [ref=e231]: preservation.
+          - generic [ref=e232]: HashVault
+          - generic [ref=e233]: Growth
+          - generic [ref=e234]: adds
+          - generic [ref=e235]: Bitcoin
+          - generic [ref=e236]: upside
+          - generic [ref=e237]: with
+          - generic [ref=e238]: a
+          - generic [ref=e239]: mining-backed
+          - generic [ref=e240]: yield
+          - generic [ref=e241]: floor.
+          - generic [ref=e242]: Both
+          - generic [ref=e243]: deliver
+          - generic [ref=e244]: daily
+          - generic [ref=e245]: distributions,
+          - generic [ref=e246]: on-chain
+          - generic [ref=e247]: reporting,
+          - generic [ref=e248]: and
+          - generic [ref=e249]: 3-year
+          - generic [ref=e250]: horizons.
+      - generic [ref=e251]:
+        - generic [ref=e252]:
+          - article [ref=e253]:
+            - generic [ref=e258]:
+              - heading [level=3] [ref=e324]: HashVault Prime
+              - paragraph [ref=e260]: 12% APY
+              - paragraph [ref=e262]: Stable yield, engineered for consistency.
+              - paragraph [ref=e263]: Mining-backed cashflow combined with stablecoin income and hedged BTC exposure. Daily USDC distributions until 36% target or maturity. Min allocation $500,000 · 3-year lock · moderate risk profile. Built for capital preservation with institutional-grade reporting.
+              - link [ref=e325]:
+                - /url: /app
+                - text: Launch App →
+          - article [ref=e268]:
+            - generic [ref=e270]:
+              - generic [ref=e272]:
+                - heading "HashVault Growth" [level=3] [ref=e328]
+                - paragraph [ref=e274]:
+                  - generic [ref=e333]: 15% APY
+                - paragraph [ref=e275]: Bitcoin upside, supported by mining yield.
+                - paragraph [ref=e276]: Spot BTC captures upside while mining cashflow cushions drawdowns. Dynamic allocation, daily USDC yield until 45% target or maturity. Min allocation $250,000 · 3-year lock · growth risk profile. For allocators seeking BTC exposure with a yield floor.
+                - link "Launch App →" [ref=e330]:
+                  - /url: /app
+              - generic "HashVault Growth — animated background" [ref=e331]
+        - button "Previous slide" [ref=e281]:
+          - img [ref=e282]
+        - button "Next slide" [ref=e284]:
+          - img [ref=e285]
+    - generic [ref=e289]:
+      - paragraph [ref=e290]:
+        - generic [ref=e291]: Real yield. Real infrastructure. On-chain.|
+      - link "Launch App →" [ref=e293]:
+        - /url: /app
+    - contentinfo [ref=e294]:
+      - generic [ref=e295]:
+        - img "Hearst Connect" [ref=e296]
+        - generic [ref=e313]:
+          - paragraph [ref=e314]: Join the next wave of institutional Bitcoin yield.
+          - generic [ref=e315]:
+            - textbox "Email address" [ref=e316]:
+              - /placeholder: your@email.com
+            - button "Get Early Access →" [ref=e317]
+      - generic [ref=e318]:
+        - generic [ref=e319]: © 2026 Hearst Corporation. All rights reserved.
+        - link "hello@hearst.app" [ref=e321]:
+          - /url: mailto:hello@hearst.app
+  - alert [ref=e323]
